@@ -1,0 +1,41 @@
+<?php
+
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\LogbookController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\AuditReportController;
+use App\Http\Controllers\DocumentController;
+use Illuminate\Support\Facades\Route;
+
+// ATTENDANCE - Semua role
+Route::middleware(['auth'])->group(function () {
+    Route::get('/attendances', [AttendanceController::class, 'index'])->name('attendances.index');
+    Route::post('/attendances/check-in', [AttendanceController::class, 'checkIn'])->name('attendances.check_in');
+    Route::post('/attendances/check-out', [AttendanceController::class, 'checkOut'])->name('attendances.check_out');
+    Route::get('/attendances/create', [AttendanceController::class, 'create'])->name('attendances.create');
+    Route::post('/attendances', [AttendanceController::class, 'store'])->name('attendances.store');
+    Route::get('/attendances/{attendance}/edit', [AttendanceController::class, 'edit'])->name('attendances.edit');
+    Route::put('/attendances/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
+    Route::delete('/attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
+});
+
+// LOGBOOK - Admin, Auditor, Pimpinan
+Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
+    Route::resource('logbooks', LogbookController::class);
+});
+
+// CLIENTS - Admin, Auditor, Pimpinan
+Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
+    Route::resource('clients', ClientController::class);
+});
+
+// AUDIT REPORTS - Admin, Auditor, Pimpinan
+Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
+    Route::resource('audit_reports', AuditReportController::class);
+});
+
+// DOCUMENTS - Admin, Auditor, Pimpinan
+Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
+    Route::resource('documents', DocumentController::class)->except(['show', 'edit', 'update']);
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+});
