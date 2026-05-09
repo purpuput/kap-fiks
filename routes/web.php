@@ -51,9 +51,8 @@ Route::middleware(['auth', 'role:pimpinan'])->group(function () {
     });
 });
 
+
 require __DIR__ . '/admin.php';
 require __DIR__ . '/auditor.php';
-require __DIR__ . '/kepala.php';
-require __DIR__ . '/karyawan.php';
 require __DIR__ . '/pimpinan.php';
 require __DIR__ . '/features.php';

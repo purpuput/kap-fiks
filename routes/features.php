@@ -5,6 +5,7 @@ use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\AuditReportController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ChatbotController;
 use Illuminate\Support\Facades\Route;
 
 // ATTENDANCE - Semua role
@@ -38,4 +39,11 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
 Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::resource('documents', DocumentController::class)->except(['show', 'edit', 'update']);
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+});
+
+//Chatbot - Semua role
+Route::middleware(['auth'])->group(function () {
+    Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot.index');
+    Route::post('/chatbot/send', [ChatbotController::class, 'chat'])->name('chatbot.send');
+    Route::post('/chatbot/clear', [ChatbotController::class, 'clearHistory'])->name('chatbot.clear');
 });

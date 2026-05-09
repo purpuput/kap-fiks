@@ -76,6 +76,24 @@
             </a>
             @endif
 
+            <!-- AI Audit Assistant -->
+            @if(in_array(auth()->user()->role, ['admin', 'auditor', 'pimpinan']))
+            <a href="{{ route('chatbot.index') }}"
+                class="flex items-center px-4 py-2 rounded-lg transition duration-200 {{ request()->routeIs('chatbot.*') ? 'bg-gray-700' : 'hover:bg-gray-700' }}">
+
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" />
+                </svg>
+
+                <span x-show="open" class="ml-4">
+                    AI Audit Assistant
+                </span>
+            </a>
+            @endif
+
             <!-- Admin Links -->
             @if(auth()->user()->role === 'admin')
             <div x-data="{ adminOpen: false }" class="space-y-2">
