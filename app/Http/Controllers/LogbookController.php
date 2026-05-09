@@ -3,77 +3,271 @@
 namespace App\Http\Controllers;
 
 use App\Models\Logbook;
-use App\Models\Client;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LogbookController extends Controller
 {
+    /**
+     * Menampilkan daftar logbook
+     */
     public function index(Request $request)
     {
-        $month = $request->input('month', now()->format('Y-m'));
+        $query = Logbook::with('user');
 
-        $query = Logbook::with('user', 'client');
-
-        if (Auth::check() && Auth::user()->role !== 'admin') {
+        /**
+         * Auditor hanya melihat logbook miliknya
+         */
+        if (Auth::user()->role === 'auditor') {
             $query->where('user_id', Auth::id());
         }
 
-        $logbooks = $query->whereYear('date', substr($month, 0, 4))
-            ->whereMonth('date', substr($month, 5, 2))
-            ->orderBy('date', 'desc')
-            ->paginate(15);
+        /**
+         * Filter tanggal
+         */
+        if ($request->filled('date')) {
+            $query->whereDate('date', $request->date);
+        }
 
-        return view('logbooks.index', compact('logbooks', 'month'));
+        /**
+         * Filter auditor
+         */
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        /**
+         * Data logbook
+         */
+        $logbooks = $query
+            ->latest('date')
+            ->paginate(10)
+            ->withQueryString();
+
+        /**
+         * Data auditor untuk filter
+         */
+        $users = User::where('role', 'auditor')
+            ->orderBy('name')
+            ->get();
+
+        return view('logbooks.index', compact(
+            'logbooks',
+            'users'
+        ));
     }
 
+    /**
+     * Form tambah logbook
+     */
     public function create()
     {
-        $clients = Client::where('status', 'aktif')->get();
-        return view('logbooks.create', compact('clients'));
+        /**
+         * Hanya auditor yang bisa tambah logbook
+         */
+        if (Auth::user()->role !== 'auditor') {
+            abort(403);
+        }
+
+        return view('logbooks.create');
     }
 
+    /**
+     * Simpan logbook
+     */
     public function store(Request $request)
     {
+        /**
+         * Validasi
+         */
         $validated = $request->validate([
-            'client_id' => 'nullable|exists:clients,id',
             'date' => 'required|date|before_or_equal:today',
-            'activity' => 'required|string|max:255',
-            'description' => 'required|string',
-            'hours' => 'required|numeric|min:0.5|max:12',
+            'activity' => 'required|string',
         ]);
 
-        $validated['user_id'] = Auth::id();
-        $validated['status'] = 'draft';
+        /**
+         * Simpan logbook
+         */
+        Logbook::create([
+            'user_id' => Auth::id(),
+            'date' => $validated['date'],
+            'activity' => $validated['activity'],
+            'status' => 'pending',
+        ]);
 
-        Logbook::create($validated);
-
-        return redirect()->route('logbooks.index')->with('success', 'Logbook berhasil ditambahkan');
+        return redirect()
+            ->route('logbooks.index')
+            ->with('success', 'Logbook berhasil ditambahkan');
     }
 
+    /**
+     * Form edit logbook
+     */
     public function edit(Logbook $logbook)
     {
-        $clients = Client::where('status', 'aktif')->get();
-        return view('logbooks.edit', compact('logbook', 'clients'));
+        /**
+         * Proteksi:
+         * - admin boleh edit semua
+         * - auditor hanya edit miliknya
+         */
+        if (
+            Auth::user()->role !== 'admin' &&
+            $logbook->user_id !== Auth::id()
+        ) {
+            abort(403);
+        }
+
+        /**
+         * Auditor tidak bisa edit jika sudah approved
+         */
+        if (
+            Auth::user()->role === 'auditor' &&
+            $logbook->status !== 'pending'
+        ) {
+            return redirect()
+                ->route('logbooks.index')
+                ->with('error', 'Logbook tidak dapat diedit');
+        }
+
+        return view('logbooks.edit', compact('logbook'));
     }
 
+    /**
+     * Update logbook
+     */
     public function update(Request $request, Logbook $logbook)
     {
+        /**
+         * Proteksi
+         */
+        if (
+            Auth::user()->role !== 'admin' &&
+            $logbook->user_id !== Auth::id()
+        ) {
+            abort(403);
+        }
+
+        /**
+         * Validasi
+         */
         $validated = $request->validate([
-            'client_id' => 'nullable|exists:clients,id',
-            'activity' => 'required|string|max:255',
-            'description' => 'required|string',
-            'hours' => 'required|numeric|min:0.5|max:12',
+            'date' => 'required|date',
+            'activity' => 'required|string',
         ]);
 
-        $logbook->update($validated);
+        /**
+         * Update data
+         */
+        $logbook->update([
+            'date' => $validated['date'],
+            'activity' => $validated['activity'],
 
-        return redirect()->route('logbooks.index')->with('success', 'Logbook berhasil diperbarui');
+            /**
+             * Jika direvisi lalu diedit auditor,
+             * status kembali pending
+             */
+            'status' => 'pending',
+        ]);
+
+        return redirect()
+            ->route('logbooks.index')
+            ->with('success', 'Logbook berhasil diperbarui');
     }
 
+    /**
+     * Hapus logbook
+     */
     public function destroy(Logbook $logbook)
     {
+        /**
+         * Proteksi:
+         * - admin boleh hapus semua
+         * - auditor hanya hapus miliknya
+         */
+        if (
+            Auth::user()->role !== 'admin' &&
+            $logbook->user_id !== Auth::id()
+        ) {
+            abort(403);
+        }
+
+        /**
+         * Auditor tidak bisa hapus jika sudah approved
+         */
+        if (
+            Auth::user()->role === 'auditor' &&
+            $logbook->status !== 'pending'
+        ) {
+            return redirect()
+                ->route('logbooks.index')
+                ->with('error', 'Logbook tidak dapat dihapus');
+        }
+
         $logbook->delete();
-        return redirect()->route('logbooks.index')->with('success', 'Logbook berhasil dihapus');
+
+        return redirect()
+            ->route('logbooks.index')
+            ->with('success', 'Logbook berhasil dihapus');
+    }
+
+    /**
+     * Approve logbook
+     */
+    public function approve(Logbook $logbook)
+    {
+        /**
+         * Hanya admin & pimpinan
+         */
+        if (
+            !in_array(Auth::user()->role, ['admin', 'pimpinan'])
+        ) {
+            abort(403);
+        }
+
+        $logbook->update([
+            'status' => 'approved',
+            'note' => null,
+        ]);
+
+        return back()->with(
+            'success',
+            'Logbook berhasil disetujui'
+        );
+    }
+
+    /**
+     * Revisi logbook
+     */
+    public function revision(Request $request, Logbook $logbook)
+    {
+        /**
+         * Hanya admin & pimpinan
+         */
+        if (
+            !in_array(Auth::user()->role, ['admin', 'pimpinan'])
+        ) {
+            abort(403);
+        }
+
+        /**
+         * Validasi
+         */
+        $request->validate([
+            'note' => 'required|string',
+        ]);
+
+        /**
+         * Update revisi
+         */
+        $logbook->update([
+            'status' => 'revision',
+            'note' => $request->note,
+        ]);
+
+        return back()->with(
+            'success',
+            'Revisi berhasil dikirim'
+        );
     }
 }

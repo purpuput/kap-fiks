@@ -23,6 +23,8 @@ Route::middleware(['auth'])->group(function () {
 // LOGBOOK - Admin, Auditor, Pimpinan
 Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::resource('logbooks', LogbookController::class);
+    Route::patch('/logbooks/{logbook}/approve', [LogbookController::class, 'approve'])->name('logbooks.approve');
+    Route::patch('/logbooks/{logbook}/revision', [LogbookController::class, 'revision'])->name('logbooks.revision');
 });
 
 // CLIENTS - Admin, Auditor, Pimpinan

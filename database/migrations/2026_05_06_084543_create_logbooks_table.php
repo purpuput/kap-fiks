@@ -12,15 +12,45 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('logbooks', function (Blueprint $table) {
+
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('client_id')->nullable()->constrained()->onDelete('set null');
+
+            /**
+             * Relasi user auditor
+             */
+            $table->foreignId('user_id')
+                ->constrained()
+                ->onDelete('cascade');
+
+            /**
+             * Tanggal logbook
+             */
             $table->date('date');
-            $table->string('activity');
-            $table->text('description');
-            $table->decimal('hours', 5, 2);
-            $table->enum('status', ['draft', 'submitted', 'approved'])->default('draft');
+
+            /**
+             * Aktivitas auditor
+             */
+            $table->text('activity');
+
+            /**
+             * Status approval
+             */
+            $table->enum('status', [
+                'pending',
+                'approved',
+                'revision'
+            ])->default('pending');
+
+            /**
+             * Catatan revisi pimpinan
+             */
+            $table->text('note')->nullable();
+
             $table->timestamps();
+
+            /**
+             * Index
+             */
             $table->index('date');
             $table->index('user_id');
         });

@@ -7,15 +7,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Logbook extends Model
 {
-    protected $fillable = ['user_id', 'client_id', 'date', 'activity', 'description', 'hours', 'status'];
+    protected $fillable = [
+        'user_id',
+        'date',
+        'activity',
+        'status',
+        'note',
+    ];
 
+    /**
+     * Cast tanggal
+     */
+    protected $casts = [
+        'date' => 'date',
+    ];
+
+    /**
+     * Relasi user
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
     }
 }

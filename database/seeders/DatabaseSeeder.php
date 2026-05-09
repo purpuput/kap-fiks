@@ -29,11 +29,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->pimpinan()->create([
-            'name' => 'Pimpinan',
+            'name' => 'Pimpinan ',
             'email' => 'pimpinan@example.com',
         ]);
 
         // Seeder attendance
         $this->call(AttendanceSeeder::class);
+
+        // Seeder logbook
+        $this->call(LogbookSeeder::class);
     }
 }
