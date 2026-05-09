@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\Route;
 // ATTENDANCE - Semua role
 Route::middleware(['auth'])->group(function () {
     Route::get('/attendances', [AttendanceController::class, 'index'])->name('attendances.index');
-    Route::post('/attendances/check-in', [AttendanceController::class, 'checkIn'])->name('attendances.check_in');
-    Route::post('/attendances/check-out', [AttendanceController::class, 'checkOut'])->name('attendances.check_out');
     Route::get('/attendances/create', [AttendanceController::class, 'create'])->name('attendances.create');
     Route::post('/attendances', [AttendanceController::class, 'store'])->name('attendances.store');
     Route::get('/attendances/{attendance}/edit', [AttendanceController::class, 'edit'])->name('attendances.edit');
     Route::put('/attendances/{attendance}', [AttendanceController::class, 'update'])->name('attendances.update');
     Route::delete('/attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
+    Route::get('/attendances/export/pdf', [AttendanceController::class, 'exportPdf'])->name('attendances.export.pdf');
+    Route::get('/attendances/export/excel', [AttendanceController::class, 'exportExcel'])->name('attendances.export.excel');
 });
 
 // LOGBOOK - Admin, Auditor, Pimpinan

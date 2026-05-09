@@ -19,18 +19,21 @@ class DatabaseSeeder extends Seeder
         // Password: password
 
         User::factory()->admin()->create([
-            'name' => 'Admin User',
+            'name' => 'Admin',
             'email' => 'admin@example.com',
         ]);
 
         User::factory()->auditor()->create([
-            'name' => 'Auditor User',
+            'name' => 'Auditor',
             'email' => 'auditor@example.com',
         ]);
 
         User::factory()->pimpinan()->create([
-            'name' => 'Pimpinan User',
+            'name' => 'Pimpinan',
             'email' => 'pimpinan@example.com',
         ]);
+
+        // Seeder attendance
+        $this->call(AttendanceSeeder::class);
     }
 }
