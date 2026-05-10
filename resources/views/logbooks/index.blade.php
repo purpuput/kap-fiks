@@ -237,7 +237,7 @@
 
                                             <a href="{{ route('logbooks.edit', $logbook) }}"
                                                 class="px-3 py-1 bg-blue-100 hover:bg-blue-200
-                                                        text-blue-700 rounded-lg text-xs font-medium transition">
+                                                text-blue-700 rounded-lg text-xs font-medium transition">
 
                                                 Edit
 
@@ -252,7 +252,7 @@
 
                                                 <button
                                                     class="px-3 py-1 bg-red-100 hover:bg-red-200
-                                                            text-red-700 rounded-lg text-xs font-medium transition">
+                    text-red-700 rounded-lg text-xs font-medium transition">
 
                                                     Hapus
 
@@ -265,6 +265,7 @@
                                         {{-- PIMPINAN --}}
                                         @elseif(auth()->user()->role === 'pimpinan')
 
+                                        {{-- STATUS PENDING --}}
                                         @if($logbook->status === 'pending')
 
                                         <div class="flex items-center justify-center gap-2">
@@ -278,7 +279,7 @@
 
                                                 <button
                                                     class="px-3 py-1 bg-green-100 hover:bg-green-200
-                                                                text-green-700 rounded-lg text-xs font-medium transition">
+                        text-green-700 rounded-lg text-xs font-medium transition">
 
                                                     Approve
 
@@ -291,7 +292,7 @@
                                                 type="button"
                                                 onclick="document.getElementById('revision-{{ $logbook->id }}').classList.toggle('hidden')"
                                                 class="px-3 py-1 bg-yellow-100 hover:bg-yellow-200
-                                                            text-yellow-700 rounded-lg text-xs font-medium transition">
+                    text-yellow-700 rounded-lg text-xs font-medium transition">
 
                                                 Revisi
 
@@ -318,7 +319,7 @@
 
                                                 <button type="submit"
                                                     class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700
-                                                                text-white rounded-lg text-xs transition">
+                        text-white rounded-lg text-xs transition">
 
                                                     Kirim Revisi
 
@@ -328,6 +329,53 @@
 
                                         </div>
 
+                                        {{-- STATUS REVISION --}}
+                                        @elseif($logbook->status === 'revision')
+
+                                        <div class="flex items-center justify-center">
+
+                                            {{-- Edit Revisi --}}
+                                            <button
+                                                type="button"
+                                                onclick="document.getElementById('edit-revision-{{ $logbook->id }}').classList.toggle('hidden')"
+                                                class="px-3 py-1 bg-blue-100 hover:bg-blue-200
+                    text-blue-700 rounded-lg text-xs font-medium transition">
+
+                                                Edit Revisi
+
+                                            </button>
+
+                                        </div>
+
+                                        <!-- Form Edit Revisi -->
+                                        <div id="edit-revision-{{ $logbook->id }}"
+                                            class="hidden mt-3">
+
+                                            <form action="{{ route('logbooks.revision', $logbook) }}"
+                                                method="POST">
+
+                                                @csrf
+                                                @method('PATCH')
+
+                                                <textarea
+                                                    name="note"
+                                                    rows="3"
+                                                    required
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ $logbook->note }}</textarea>
+
+                                                <button type="submit"
+                                                    class="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700
+                        text-white rounded-lg text-xs transition">
+
+                                                    Update Revisi
+
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
+                                        {{-- STATUS APPROVED --}}
                                         @else
 
                                         <span class="text-gray-400 text-sm">
@@ -339,34 +387,20 @@
                                         {{-- AUDITOR --}}
                                         @else
 
-                                        @if($logbook->status === 'pending')
+                                        @if(
+                                        $logbook->status === 'pending' &&
+                                        !$logbook->created_at->addDay()->isPast()
+                                        )
 
-                                        <div class="flex items-center justify-center gap-2">
+                                        <div class="flex items-center justify-center">
 
                                             <a href="{{ route('logbooks.edit', $logbook) }}"
                                                 class="px-3 py-1 bg-blue-100 hover:bg-blue-200
-                                                            text-blue-700 rounded-lg text-xs font-medium transition">
+                    text-blue-700 rounded-lg text-xs font-medium transition">
 
                                                 Edit
 
                                             </a>
-
-                                            <form action="{{ route('logbooks.destroy', $logbook) }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Hapus logbook ini?')">
-
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button
-                                                    class="px-3 py-1 bg-red-100 hover:bg-red-200
-                                                                text-red-700 rounded-lg text-xs font-medium transition">
-
-                                                    Hapus
-
-                                                </button>
-
-                                            </form>
 
                                         </div>
 

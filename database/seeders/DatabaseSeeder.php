@@ -19,17 +19,17 @@ class DatabaseSeeder extends Seeder
         // Password: password
 
         User::factory()->admin()->create([
-            'name' => 'Admin',
+            'name' => 'admin',
             'email' => 'admin@example.com',
         ]);
 
         User::factory()->auditor()->create([
-            'name' => 'Auditor',
+            'name' => 'auditor',
             'email' => 'auditor@example.com',
         ]);
 
         User::factory()->pimpinan()->create([
-            'name' => 'Pimpinan ',
+            'name' => 'pimpinan',
             'email' => 'pimpinan@example.com',
         ]);
 

@@ -32,7 +32,7 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::resource('clients', ClientController::class);
 });
 
-// AUDIT REPORTS - Admin, Auditor, Pimpinan
+// AUDIT REPORTS - Admin, Auditor, Pimpinan 
 Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::resource('audit_reports', AuditReportController::class);
 });

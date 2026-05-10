@@ -121,13 +121,23 @@ class LogbookController extends Controller
         /**
          * Auditor tidak bisa edit jika sudah approved
          */
-        if (
-            Auth::user()->role === 'auditor' &&
-            $logbook->status !== 'pending'
-        ) {
-            return redirect()
-                ->route('logbooks.index')
-                ->with('error', 'Logbook tidak dapat diedit');
+        if (Auth::user()->role === 'auditor') {
+
+            // Tidak bisa edit jika sudah approved/revision
+            if ($logbook->status !== 'pending') {
+
+                return redirect()
+                    ->route('logbooks.index')
+                    ->with('error', 'Logbook tidak dapat diedit');
+            }
+
+            // Batas 24 jam
+            if ($logbook->created_at->addDay()->isPast()) {
+
+                return redirect()
+                    ->route('logbooks.index')
+                    ->with('error', 'Batas edit logbook hanya 24 jam');
+            }
         }
 
         return view('logbooks.edit', compact('logbook'));
@@ -168,6 +178,7 @@ class LogbookController extends Controller
              * status kembali pending
              */
             'status' => 'pending',
+            'note' => null,
         ]);
 
         return redirect()
@@ -181,27 +192,10 @@ class LogbookController extends Controller
     public function destroy(Logbook $logbook)
     {
         /**
-         * Proteksi:
-         * - admin boleh hapus semua
-         * - auditor hanya hapus miliknya
+         * Hanya admin yang bisa hapus
          */
-        if (
-            Auth::user()->role !== 'admin' &&
-            $logbook->user_id !== Auth::id()
-        ) {
+        if (Auth::user()->role !== 'admin') {
             abort(403);
-        }
-
-        /**
-         * Auditor tidak bisa hapus jika sudah approved
-         */
-        if (
-            Auth::user()->role === 'auditor' &&
-            $logbook->status !== 'pending'
-        ) {
-            return redirect()
-                ->route('logbooks.index')
-                ->with('error', 'Logbook tidak dapat dihapus');
         }
 
         $logbook->delete();
