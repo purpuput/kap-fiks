@@ -3,24 +3,38 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
 {
-    protected $fillable = ['name', 'company_name', 'email', 'phone', 'address', 'city', 'province', 'postal_code', 'description', 'status'];
+    use SoftDeletes;
 
-    public function logbooks(): HasMany
+    protected $fillable = [
+        'user_id',
+        'institution_name',
+        'leader_name',
+        'address',
+        'city',
+        'province',
+        'postal_code',
+        'phone',
+        'email',
+        'npwp',
+        'status',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'revision_note',
+        'description',
+    ];
+
+    public function approver()
     {
-        return $this->hasMany(Logbook::class);
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
-    public function auditReports(): HasMany
+    public function user()
     {
-        return $this->hasMany(AuditReport::class);
-    }
-
-    public function documents(): HasMany
-    {
-        return $this->hasMany(Document::class);
+        return $this->belongsTo(User::class);
     }
 }

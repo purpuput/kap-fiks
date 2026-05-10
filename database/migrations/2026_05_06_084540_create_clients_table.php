@@ -12,19 +12,63 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('clients', function (Blueprint $table) {
+
             $table->id();
-            $table->string('name');
-            $table->string('company_name')->nullable();
-            $table->string('email');
-            $table->string('phone');
+
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+
+            $table->enum('institution_type', [
+                'Pemerintahan',
+                'Swasta'
+            ]);
+
+            $table->string('institution_name');
+
+            $table->string('leader_name');
+
             $table->text('address');
+
             $table->string('city');
+
             $table->string('province');
+
             $table->string('postal_code');
-            $table->text('description')->nullable();
-            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
+
+            $table->string('phone');
+
+            $table->string('email')->nullable();
+
+            $table->string('npwp')->nullable();
+
+            $table->enum('status', [
+                'aktif',
+                'nonaktif'
+            ])->default('aktif');
+
+            // approval
+            $table->enum('approval_status', [
+                'pending',
+                'disetujui',
+                'revisi'
+            ])->default('pending');
+
+            $table->foreignId('approved_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->timestamp('approved_at')
+                ->nullable();
+
+            $table->text('revision_note')
+                ->nullable();
+
+            $table->text('description')
+                ->nullable();
+
+            $table->softDeletes();
+
             $table->timestamps();
-            $table->index('status');
         });
     }
 

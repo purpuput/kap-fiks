@@ -38,5 +38,8 @@ class DatabaseSeeder extends Seeder
 
         // Seeder logbook
         $this->call(LogbookSeeder::class);
+
+        // Seeder client
+        $this->call(ClientSeeder::class);
     }
 }

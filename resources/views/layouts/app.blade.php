@@ -18,6 +18,8 @@
 
 <body class="font-sans antialiased">
     @include('layouts.sidebar')
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

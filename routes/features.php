@@ -30,6 +30,8 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
 // CLIENTS - Admin, Auditor, Pimpinan
 Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::resource('clients', ClientController::class);
+    Route::post('clients/{client}/approve', [ClientController::class, 'approve'])->name('clients.approve');
+    Route::post('clients/{client}/revision', [ClientController::class, 'revision'])->name('clients.revision');
 });
 
 // AUDIT REPORTS - Admin, Auditor, Pimpinan 
