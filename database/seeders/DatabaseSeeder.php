@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,31 +14,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Data dummy user untuk setiap role
-        // Password: password
+        // Seeder user HARUS pertama
+        $this->call(UserSeeder::class);
 
-        User::factory()->admin()->create([
-            'name' => 'admin',
-            'email' => 'admin@example.com',
-        ]);
-
-        User::factory()->auditor()->create([
-            'name' => 'auditor',
-            'email' => 'auditor@example.com',
-        ]);
-
-        User::factory()->pimpinan()->create([
-            'name' => 'pimpinan',
-            'email' => 'pimpinan@example.com',
-        ]);
-
-        // Seeder attendance
+        // Seeder lain setelah user tersedia
         $this->call(AttendanceSeeder::class);
 
-        // Seeder logbook
         $this->call(LogbookSeeder::class);
 
-        // Seeder client
         $this->call(ClientSeeder::class);
+
+        $this->call(AuditReportSeeder::class);
+
+        // Seeder file laporan (10 dokumen per laporan) + document managements
+        $this->call(AuditReportFileSeeder::class);
     }
 }

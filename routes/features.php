@@ -5,6 +5,7 @@ use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\AuditReportController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DocumentManagementController;
 use App\Http\Controllers\ChatbotController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,9 +35,18 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::post('clients/{client}/revision', [ClientController::class, 'revision'])->name('clients.revision');
 });
 
-// AUDIT REPORTS - Admin, Auditor, Pimpinan 
+// AUDIT REPORTS - Admin, Auditor, Pimpinan
 Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::resource('audit_reports', AuditReportController::class);
+    Route::put('/audit_reports/{id}/approve', [AuditReportController::class, 'approve'])->name('audit_reports.approve');
+    Route::put('/audit_reports/{id}/revisi', [AuditReportController::class, 'revisi'])->name('audit_reports.revisi');
+    Route::get('/audit_reports/files/{id}/download', [AuditReportController::class, 'download'])->name('audit_reports.download');
+});
+
+// DOCUMENT MANAGEMENT - Admin, Auditor, Pimpinan (otomatis dari approve laporan)
+Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
+    Route::get('/document-managements', [DocumentManagementController::class, 'index'])->name('document_managements.index');
+    Route::get('/document-managements/{documentManagement}/download', [DocumentManagementController::class, 'download'])->name('document_managements.download');
 });
 
 // DOCUMENTS - Admin, Auditor, Pimpinan
@@ -45,7 +55,7 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
 });
 
-//Chatbot - Semua role
+// CHATBOT - Semua role
 Route::middleware(['auth'])->group(function () {
     Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot.index');
     Route::post('/chatbot/send', [ChatbotController::class, 'chat'])->name('chatbot.send');

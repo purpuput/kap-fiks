@@ -1,11 +1,9 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:auditor'])->group(function () {
-    Route::get('/auditor/dashboard', function () {
-        return view('auditor.dashboard');
-    })->name('auditor.dashboard');
-    
-    // Tambahkan routes auditor lainnya di bawah ini
+    Route::get('/auditor/dashboard', [DashboardController::class, 'auditor'])
+        ->name('auditor.dashboard');
 });

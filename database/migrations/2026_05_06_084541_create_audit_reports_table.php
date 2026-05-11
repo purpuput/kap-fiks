@@ -12,19 +12,41 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('audit_reports', function (Blueprint $table) {
+
             $table->id();
-            $table->foreignId('client_id')->constrained()->onDelete('cascade');
-            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+
+            $table->foreignId('client_id')
+                ->constrained()
+                ->onDelete('cascade');
+
             $table->string('report_number')->unique();
+
             $table->string('title');
+
+            $table->enum('audit_type', [
+                'keuangan',
+                'kepatuhan'
+            ]);
+
             $table->date('audit_date');
+
             $table->text('findings');
+
             $table->text('recommendations')->nullable();
-            $table->enum('status', ['draft', 'in_review', 'completed'])->default('draft');
-            $table->string('file_path')->nullable();
+
+            $table->enum('status', [
+                'pending',
+                'approve',
+                'revisi'
+            ])->default('pending');
+
+            $table->text('revision_note')->nullable();
+
+            $table->foreignId('created_by')
+                ->constrained('users')
+                ->onDelete('cascade');
+
             $table->timestamps();
-            $table->index('client_id');
-            $table->index('status');
         });
     }
 

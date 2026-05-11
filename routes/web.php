@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -9,18 +10,13 @@ Route::get('/', function () {
 });
 
 Route::middleware('auth')->get('/dashboard', function () {
-
     return match (Auth::user()->role) {
-        'admin' => redirect()->route('admin.dashboard'),
-        'auditor' => redirect()->route('auditor.dashboard'),
+        'admin'    => redirect()->route('admin.dashboard'),
+        'auditor'  => redirect()->route('auditor.dashboard'),
         'pimpinan' => redirect()->route('pimpinan.dashboard'),
-        default => abort(403, 'Unauthorized action.'),
+        default    => abort(403, 'Unauthorized action.'),
     };
 })->name('dashboard');
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -30,27 +26,23 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__ . '/auth.php';
 
-//ADMIN
+// ADMIN
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    });
+    Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
+        ->name('admin.dashboard');
 });
 
-//AUDITOR
+// AUDITOR
 Route::middleware(['auth', 'role:auditor'])->group(function () {
-    Route::get('/auditor/dashboard', function () {
-        return view('auditor.dashboard');
-    });
+    Route::get('/auditor/dashboard', [DashboardController::class, 'auditor'])
+        ->name('auditor.dashboard');
 });
 
-//PIMPINAN KANTOR
+// PIMPINAN KANTOR
 Route::middleware(['auth', 'role:pimpinan'])->group(function () {
-    Route::get('/pimpinan/dashboard', function () {
-        return view('pimpinan.dashboard');
-    });
+    Route::get('/pimpinan/dashboard', [DashboardController::class, 'pimpinan'])
+        ->name('pimpinan.dashboard');
 });
-
 
 require __DIR__ . '/admin.php';
 require __DIR__ . '/auditor.php';

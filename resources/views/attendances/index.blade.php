@@ -1,20 +1,12 @@
 {{-- resources/views/attendances/index.blade.php --}}
 
-<x-app-layout>
+<x-app-layout title="Absensi">
 
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Daftar Absensi
-            <span class="text-red-600">
-                {{ auth()->user()->name }}
-            </span>
-        </h2>
-    </x-slot>
+    <div class="py-10">
 
-    <div class="py-12">
+        <div class="max-w-7xl mx-auto px-4">
 
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
+            {{-- Main Card --}}
             <div class="bg-white shadow rounded-2xl p-6">
 
                 @php
@@ -48,7 +40,7 @@
                         <a href="{{ route('attendances.create') }}"
                             class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
                                    bg-blue-600 hover:bg-blue-700
-                                   text-white font-semibold shadow transition">
+                                   text-white font-semibold shadow-sm transition">
 
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 class="w-5 h-5"
@@ -73,7 +65,7 @@
                             disabled
                             class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
                                    bg-gray-400 cursor-not-allowed
-                                   text-white font-semibold shadow">
+                                   text-white font-semibold shadow-sm">
 
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 class="w-5 h-5"
@@ -95,7 +87,7 @@
                         @endif
 
                         <p class="text-xs text-gray-500 text-right max-w-xs">
-                            Absensi hanya tersedia pukul
+                            Absensi tersedia pukul
                             {{ $attendanceWindow['check_in_start'] }}-{{ $attendanceWindow['check_in_end'] }}
                             dan
                             {{ $attendanceWindow['check_out_start'] }}-{{ $attendanceWindow['check_out_end'] }} WIB
@@ -108,18 +100,18 @@
                 </div>
 
                 {{-- Alert --}}
-                @if ($message = Session::get('success'))
+                @if(session('success'))
 
-                <div class="mb-4 p-4 bg-green-100 border border-green-300 rounded-xl text-green-700">
-                    {{ $message }}
+                <div class="mb-5 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700">
+                    {{ session('success') }}
                 </div>
 
                 @endif
 
-                @if ($message = Session::get('error'))
+                @if(session('error'))
 
-                <div class="mb-4 p-4 bg-red-100 border border-red-300 rounded-xl text-red-700">
-                    {{ $message }}
+                <div class="mb-5 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700">
+                    {{ session('error') }}
                 </div>
 
                 @endif
@@ -139,7 +131,7 @@
                             type="date"
                             name="date"
                             value="{{ $date ?? '' }}"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm
+                            class="w-full px-4 py-2 border border-gray-300 rounded-xl
                                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 
                     </div>
@@ -155,7 +147,7 @@
 
                         <select
                             name="user_id"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm
+                            class="w-full px-4 py-2 border border-gray-300 rounded-xl
                                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 
                             <option value="">Semua Auditor</option>
@@ -177,13 +169,13 @@
 
                     @endif
 
-                    {{-- Tombol --}}
+                    {{-- Button --}}
                     <div class="flex flex-wrap items-end gap-2">
 
                         <button
                             type="submit"
-                            class="px-4 py-2 bg-gray-800 hover:bg-gray-900
-                                   text-white rounded-xl transition shadow-sm">
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700
+                                   text-white rounded-xl transition text-sm font-semibold">
 
                             Filter
 
@@ -222,53 +214,54 @@
                 </form>
 
                 {{-- Table --}}
-                <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                <div class="border border-gray-200 rounded-2xl overflow-hidden">
 
                     <div class="overflow-x-auto">
 
-                        <table class="min-w-full text-sm text-left">
+                        <table class="min-w-full text-sm">
 
-                            <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
+                            {{-- Table Head --}}
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
 
                                 <tr>
 
                                     <th class="px-6 py-4 text-center">
-                                        No.
+                                        No
                                     </th>
 
                                     @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
 
-                                    <th class="px-6 py-4">
+                                    <th class="px-6 py-4 text-left">
                                         Auditor
                                     </th>
 
                                     @endif
 
-                                    <th class="px-6 py-4">
+                                    <th class="px-6 py-4 text-left">
                                         Tanggal
                                     </th>
 
-                                    <th class="px-6 py-4">
+                                    <th class="px-6 py-4 text-left">
                                         Masuk
                                     </th>
 
-                                    <th class="px-6 py-4">
+                                    <th class="px-6 py-4 text-center">
                                         Foto Masuk
                                     </th>
 
-                                    <th class="px-6 py-4">
+                                    <th class="px-6 py-4 text-left">
                                         Pulang
                                     </th>
 
-                                    <th class="px-6 py-4">
+                                    <th class="px-6 py-4 text-center">
                                         Foto Pulang
                                     </th>
 
-                                    <th class="px-6 py-4">
+                                    <th class="px-6 py-4 text-center">
                                         Status
                                     </th>
 
-                                    <th class="px-6 py-4">
+                                    <th class="px-6 py-4 text-left">
                                         Keterangan
                                     </th>
 
@@ -284,14 +277,15 @@
 
                             </thead>
 
-                            <tbody class="divide-y divide-gray-100">
+                            {{-- Table Body --}}
+                            <tbody class="divide-y divide-gray-100 bg-white">
 
                                 @forelse($attendances as $attendance)
 
                                 <tr class="hover:bg-gray-50 transition">
 
                                     {{-- No --}}
-                                    <td class="px-6 py-4 text-center font-medium text-gray-500">
+                                    <td class="px-6 py-4 text-center text-gray-500 font-medium">
 
                                         {{ $loop->iteration + ($attendances->currentPage() - 1) * $attendances->perPage() }}
 
@@ -300,28 +294,28 @@
                                     {{-- Auditor --}}
                                     @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
 
-                                    <td class="px-6 py-4 font-medium">
+                                    <td class="px-6 py-4 font-medium text-gray-700">
                                         {{ $attendance->user->name ?? '-' }}
                                     </td>
 
                                     @endif
 
                                     {{-- Tanggal --}}
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-gray-700">
 
                                         {{ \Carbon\Carbon::parse($attendance->date)->format('d M Y') }}
 
                                     </td>
 
-                                    {{-- Check In --}}
-                                    <td class="px-6 py-4">
+                                    {{-- Masuk --}}
+                                    <td class="px-6 py-4 text-gray-700">
 
                                         {{ $attendance->check_in ?? '-' }}
 
                                     </td>
 
                                     {{-- Foto Masuk --}}
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-center">
 
                                         @if($attendance->photo_check_in)
 
@@ -331,7 +325,8 @@
                                             <img
                                                 src="{{ asset('storage/' . $attendance->photo_check_in) }}"
                                                 alt="Foto masuk"
-                                                class="h-14 w-14 rounded-xl object-cover border border-gray-200 hover:scale-105 transition">
+                                                class="h-14 w-14 mx-auto rounded-xl object-cover
+                                                       border border-gray-200 hover:scale-105 transition">
 
                                         </a>
 
@@ -343,15 +338,15 @@
 
                                     </td>
 
-                                    {{-- Check Out --}}
-                                    <td class="px-6 py-4">
+                                    {{-- Pulang --}}
+                                    <td class="px-6 py-4 text-gray-700">
 
                                         {{ $attendance->check_out ?? '-' }}
 
                                     </td>
 
                                     {{-- Foto Pulang --}}
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-center">
 
                                         @if($attendance->photo_check_out)
 
@@ -361,7 +356,8 @@
                                             <img
                                                 src="{{ asset('storage/' . $attendance->photo_check_out) }}"
                                                 alt="Foto pulang"
-                                                class="h-14 w-14 rounded-xl object-cover border border-gray-200 hover:scale-105 transition">
+                                                class="h-14 w-14 mx-auto rounded-xl object-cover
+                                                       border border-gray-200 hover:scale-105 transition">
 
                                         </a>
 
@@ -374,13 +370,16 @@
                                     </td>
 
                                     {{-- Status --}}
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-center">
 
                                         <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                            {{ $attendance->status === 'hadir' ? 'bg-green-100 text-green-700' :
-                                               ($attendance->status === 'sakit' ? 'bg-yellow-100 text-yellow-700' :
-                                               ($attendance->status === 'izin' ? 'bg-blue-100 text-blue-700' :
-                                               'bg-red-100 text-red-700')) }}">
+                                            {{ $attendance->status === 'hadir'
+                                                ? 'bg-green-100 text-green-700'
+                                                : ($attendance->status === 'sakit'
+                                                ? 'bg-yellow-100 text-yellow-700'
+                                                : ($attendance->status === 'izin'
+                                                ? 'bg-blue-100 text-blue-700'
+                                                : 'bg-red-100 text-red-700')) }}">
 
                                             {{ ucfirst($attendance->status) }}
 
@@ -388,29 +387,31 @@
 
                                     </td>
 
-                                    {{-- Notes --}}
+                                    {{-- Keterangan --}}
                                     <td class="px-6 py-4 text-gray-600">
 
                                         {{ $attendance->notes ?? '-' }}
 
                                     </td>
 
-                                    {{-- Action --}}
+                                    {{-- Aksi --}}
                                     @if(auth()->user()->role === 'admin')
 
                                     <td class="px-6 py-4 text-center">
 
-                                        <div class="flex items-center justify-center gap-2">
+                                        <div class="flex justify-center gap-2">
 
                                             <a href="{{ route('attendances.edit', $attendance) }}"
-                                                class="px-3 py-1 bg-blue-100 hover:bg-blue-200
-                                                       text-blue-700 rounded-lg text-xs font-medium transition">
+                                                class="px-3 py-1 rounded-lg text-xs font-medium
+                                                       bg-blue-100 hover:bg-blue-200
+                                                       text-blue-700 transition">
 
                                                 Edit
 
                                             </a>
 
-                                            <form action="{{ route('attendances.destroy', $attendance) }}"
+                                            <form
+                                                action="{{ route('attendances.destroy', $attendance) }}"
                                                 method="POST"
                                                 onsubmit="return confirm('Hapus absensi ini?')">
 
@@ -418,8 +419,9 @@
                                                 @method('DELETE')
 
                                                 <button
-                                                    class="px-3 py-1 bg-red-100 hover:bg-red-200
-                                                           text-red-700 rounded-lg text-xs font-medium transition">
+                                                    class="px-3 py-1 rounded-lg text-xs font-medium
+                                                           bg-red-100 hover:bg-red-200
+                                                           text-red-700 transition">
 
                                                     Hapus
 
@@ -490,7 +492,7 @@
                 </div>
 
                 {{-- Pagination --}}
-                <div class="mt-4">
+                <div class="mt-5">
                     {{ $attendances->withQueryString()->links() }}
                 </div>
 

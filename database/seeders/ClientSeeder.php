@@ -12,30 +12,28 @@ class ClientSeeder extends Seeder
     {
         $admin = User::where('role', 'admin')->first();
 
-        $auditor = User::where('role', 'auditor')->first();
-
         Client::create([
             'user_id' => $admin->id,
 
-            'institution_type' => 'Pemerintahan',
+            'institution_type' => 'Swasta',
 
-            'institution_name' => 'Dinas Pendidikan Kota Jambi',
+            'institution_name' => 'PT Maju Jaya',
 
-            'leader_name' => 'Drs. Ahmad Fauzi',
+            'leader_name' => 'Budi Santoso',
 
-            'address' => 'Jl. Pattimura No. 10 Kota Jambi',
+            'address' => 'Jl. Sudirman No. 10',
 
             'city' => 'Jambi',
 
             'province' => 'Jambi',
 
-            'postal_code' => '36122',
+            'postal_code' => '36111',
 
-            'phone' => '0741123456',
+            'phone' => '081234567890',
 
-            'email' => 'disdik@jambi.go.id',
+            'email' => 'majujaya@gmail.com',
 
-            'npwp' => '01.234.567.8-123.000',
+            'npwp' => '01.234.567.8-999.000',
 
             'status' => 'aktif',
 
@@ -45,69 +43,71 @@ class ClientSeeder extends Seeder
 
             'approved_at' => now(),
 
-            'description' => 'Audit laporan keuangan tahunan.',
+            'description' => 'Klien audit keuangan'
         ]);
 
         Client::create([
-            'user_id' => $auditor->id,
+            'user_id' => $admin->id,
 
-            'institution_type' => 'Swasta',
+            'institution_type' => 'Pemerintahan',
 
-            'institution_name' => 'PT Maju Bersama',
+            'institution_name' => 'Dinas Pendidikan Kota Jambi',
 
-            'leader_name' => 'Budi Santoso',
+            'leader_name' => 'Ahmad Rizki',
 
-            'address' => 'Jl. Sudirman No. 20 Jakarta',
+            'address' => 'Jl. Pattimura No. 20',
 
-            'city' => 'Jakarta',
+            'city' => 'Jambi',
 
-            'province' => 'DKI Jakarta',
+            'province' => 'Jambi',
 
-            'postal_code' => '10220',
+            'postal_code' => '36122',
 
-            'phone' => '02199887766',
+            'phone' => '081234567891',
 
-            'email' => 'info@majubersama.com',
+            'email' => 'dinaspendidikan@gmail.com',
 
-            'npwp' => '02.987.654.3-456.000',
+            'npwp' => '02.111.222.3-444.000',
 
             'status' => 'aktif',
 
-            'approval_status' => 'pending',
+            'approval_status' => 'disetujui',
 
-            'description' => 'Audit operasional perusahaan.',
+            'approved_by' => $admin->id,
+
+            'approved_at' => now(),
+
+            'description' => 'Audit kepatuhan'
         ]);
 
         Client::create([
-            'user_id' => $auditor->id,
+            'user_id' => $admin->id,
 
             'institution_type' => 'Swasta',
 
-            'institution_name' => 'CV Sinar Teknologi',
+            'institution_name' => 'CV Teknologi Nusantara',
 
-            'leader_name' => 'Rina Amelia',
+            'leader_name' => 'Siti Aminah',
 
-            'address' => 'Jl. Gatot Subroto No. 88 Bandung',
+            'address' => 'Jl. Anggrek No. 5',
 
             'city' => 'Bandung',
 
             'province' => 'Jawa Barat',
 
-            'postal_code' => '40211',
+            'postal_code' => '40111',
 
-            'phone' => '022667788',
+            'phone' => '081234567892',
 
-            'email' => 'admin@sinartekno.id',
+            'email' => 'teknologi@gmail.com',
 
-            'npwp' => '03.111.222.3-789.000',
+            'npwp' => '03.555.666.7-888.000',
 
-            'status' => 'nonaktif',
+            'status' => 'aktif',
 
-            'approval_status' => 'revisi',
+            'approval_status' => 'pending',
 
-            'revision_note' => 'Mohon lengkapi dokumen NPWP perusahaan.',
-
-            'description' => 'Audit internal divisi IT.',
+            'description' => 'Klien baru'
         ]);
     }
 }
