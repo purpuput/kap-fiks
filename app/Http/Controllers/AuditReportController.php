@@ -41,6 +41,13 @@ class AuditReportController extends Controller
 
         $query = AuditReport::with(['client', 'createdBy', 'auditors', 'files']);
 
+        // Jika user adalah auditor, hanya tampilkan laporan di mana ia terlibat
+        if (Auth::user()->role === 'auditor') {
+            $query->whereHas('auditors', function ($q) {
+                $q->where('users.id', Auth::id());
+            });
+        }
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")

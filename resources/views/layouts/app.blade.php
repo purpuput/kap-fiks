@@ -42,9 +42,26 @@
                         </p>
                         @endisset
                     </div>
-                    <div class="text-xs text-gray-400">
-                        {{ now()->translatedFormat('l, d F Y') }}
-                    </div>
+                    <div id="realtime-clock" class="text-xs text-gray-400"></div>
+
+<div id="realtime-date" class="text-xs text-gray-400"></div>
+
+<script>
+    function updateDate() {
+        const now = new Date();
+
+        const tanggal = now.toLocaleDateString('id-ID', {
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        document.getElementById('realtime-date').innerHTML = tanggal;
+    }
+
+    updateDate();
+</script>
                 </div>
             </header>
 
@@ -83,6 +100,21 @@
             title: "{{ session('error') }}",
             showConfirmButton: false,
             timer: 3000,
+            timerProgressBar: true
+        });
+    </script>
+    @endif
+
+    @if($errors->any())
+    <script>
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: "Ada kesalahan pada input form!",
+            text: "{{ $errors->first() }}",
+            showConfirmButton: false,
+            timer: 4000,
             timerProgressBar: true
         });
     </script>
