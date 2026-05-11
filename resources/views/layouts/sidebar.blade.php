@@ -146,18 +146,18 @@
 
     <!-- Profile & Logout -->
     <div class="border-t border-slate-700/60 p-3 flex-shrink-0">
-        <div class="flex items-center gap-3 px-2 py-2 rounded-xl mb-1">
+        <a href="{{ route('profile.edit') }}" title="Pengaturan Profil & Password" class="flex items-center gap-3 px-2 py-2 rounded-xl mb-1 hover:bg-slate-700/50 transition-colors group cursor-pointer">
             <!-- Avatar -->
             <div class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm
-                {{ $role === 'admin' ? 'bg-blue-600' : ($role === 'pimpinan' ? 'bg-purple-600' : 'bg-teal-600') }}">
+                {{ $role === 'admin' ? 'bg-blue-600' : ($role === 'pimpinan' ? 'bg-purple-600' : 'bg-teal-600') }} group-hover:ring-2 ring-slate-500 transition-all">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
             <!-- Info -->
             <div x-show="open" class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-white truncate">{{ auth()->user()->name }}</p>
+                <p class="text-sm font-semibold text-white truncate group-hover:text-blue-400 transition-colors">{{ auth()->user()->name }}</p>
                 <p class="text-xs text-slate-400 capitalize">{{ auth()->user()->role }}</p>
             </div>
-        </div>
+        </a>
 
         <!-- Logout -->
         <form method="POST" action="{{ route('logout') }}">

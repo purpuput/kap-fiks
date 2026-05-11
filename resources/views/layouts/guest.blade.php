@@ -18,7 +18,12 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                    <h1 class="text-3xl font-extrabold text-blue-700 tracking-wider text-center">
+                        KAP SISTEM
+                    </h1>
+                    <p class="text-sm font-medium text-gray-500 tracking-widest text-center mt-1">
+                        MANAJEMEN AUDIT
+                    </p>
                 </a>
             </div>
 
