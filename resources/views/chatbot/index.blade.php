@@ -134,7 +134,7 @@
 
             {{-- API Settings Panel --}}
             @if(auth()->user()->role === 'admin')
-            <div id="api-settings-panel" class="hidden bg-blue-50 border-b border-blue-100 px-6 py-4 absolute w-full z-10 shadow-inner">
+            <div id="api-settings-panel" class="hidden bg-blue-50 border-b border-blue-100 px-6 py-4 absolute w-full z-30 shadow-md top-20">
                 <h3 class="text-sm font-bold text-blue-800 mb-2">Konfigurasi API Groq</h3>
                 <p class="text-xs text-blue-600 mb-3">Atur API Key untuk mengubah model AI. Buka file <code class="bg-white px-1 py-0.5 rounded border border-blue-200">.env</code> Anda dan pastikan nilai <code class="bg-white px-1 py-0.5 rounded border border-blue-200">GROQ_API_KEY</code> telah diset.</p>
                 <div class="flex gap-2 items-center">
