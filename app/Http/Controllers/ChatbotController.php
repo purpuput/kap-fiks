@@ -5,36 +5,36 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ChatSession;
+use App\Models\ChatMessage;
 
 class ChatbotController extends Controller
 {
-    // System prompt sebagai AI Audit Assistant KAP
-    private string $systemPrompt = <<<PROMPT
-Kamu adalah AI Audit Assistant untuk Kantor Akuntan Publik (KAP). Kamu membantu auditor, pimpinan KAP, dan staf administrasi dalam proses audit dengan pengetahuan mendalam tentang:
-
-1. **Standar Audit**: ISA (International Standards on Auditing), SPAP (Standar Profesional Akuntan Publik), SA (Standar Audit) yang berlaku di Indonesia
-2. **Standar Akuntansi**: PSAK (Pernyataan Standar Akuntansi Keuangan), IFRS, SAK ETAP
-3. **Prosedur Audit**: Perencanaan audit, prosedur substantif, uji pengendalian, sampling audit, dokumentasi audit
-4. **Risiko Audit**: Identifikasi risiko material, inherent risk, control risk, detection risk
-5. **Laporan Audit**: Opini audit (WTP, WDP, Disclaimer, Adverse), penyusunan laporan
-6. **Kepatuhan**: Regulasi OJK, BPK, BPKP, PMK, peraturan perpajakan Indonesia
-7. **Etika Profesi**: Kode etik akuntan publik, independensi, objektivitas
-
-Panduan menjawab:
-- Gunakan bahasa Indonesia yang formal namun mudah dipahami
-- Berikan jawaban yang terstruktur dengan poin-poin jelas
-- Jika menyebut standar, sebutkan nomor standar yang relevan
-- Berikan contoh praktis jika diperlukan
-- Jika pertanyaan di luar bidang audit/akuntansi, arahkan kembali ke topik audit
-- Gunakan emoji yang relevan untuk memperjelas poin penting (✅ ⚠️ 📋 🔍 dll)
-PROMPT;
-
     /**
      * Tampilkan halaman chatbot
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('chatbot.index');
+        $user = Auth::user();
+        
+        // Ambil semua sesi obrolan milik user ini, urutkan dari yang terbaru
+        $sessions = ChatSession::where('user_id', $user->id)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+            
+        // Jika ada parameter session_id, muat pesan dari sesi tersebut
+        $currentSession = null;
+        $messages = [];
+        
+        if ($request->has('session_id')) {
+            $currentSession = ChatSession::where('id', $request->session_id)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
+                
+            $messages = $currentSession->messages()->orderBy('created_at', 'asc')->get();
+        }
+
+        return view('chatbot.index', compact('sessions', 'currentSession', 'messages'));
     }
 
     /**
@@ -43,15 +43,20 @@ PROMPT;
     public function chat(Request $request)
     {
         $request->validate([
-            'message'  => 'required|string|max:2000',
-            'history'  => 'nullable|array',
-            'history.*.role'    => 'required|in:user,assistant',
-            'history.*.content' => 'required|string',
+            'message'    => 'required|string|max:2000',
+            'session_id' => 'nullable|exists:chat_sessions,id',
+            'history'    => 'nullable|array',
         ]);
 
+        $user = Auth::user();
         $apiKey  = config('services.groq.api_key');
         $baseUrl = config('services.groq.base_url');
         $model   = config('services.groq.model');
+        
+        // --- 1. TOKEN MANAGEMENT ---
+        // Jika admin minta aturkan token, kita bisa batasi input/output token di sini.
+        // Groq API memiliki limit max_tokens untuk output. Kita set 2048 agar jawaban bisa komprehensif.
+        $maxTokens = 2048; 
 
         if (empty($apiKey) || $apiKey === 'your_groq_api_key_here') {
             return response()->json([
@@ -59,35 +64,86 @@ PROMPT;
             ], 500);
         }
 
-        // Bangun riwayat percakapan
-        $messages = [
-            ['role' => 'system', 'content' => $this->systemPrompt],
+        // --- 2. PENYIAPAN SESI ---
+        $session_id = $request->session_id;
+        if (!$session_id) {
+            // Generate title dari pesan pertama (max 5 kata)
+            $words = explode(' ', trim($request->message));
+            $title = implode(' ', array_slice($words, 0, 5)) . (count($words) > 5 ? '...' : '');
+            
+            $session = ChatSession::create([
+                'user_id' => $user->id,
+                'title'   => $title ?: 'Percakapan Baru'
+            ]);
+            $session_id = $session->id;
+        } else {
+            $session = ChatSession::where('id', $session_id)->where('user_id', $user->id)->first();
+            if (!$session) {
+                return response()->json(['error' => 'Sesi tidak ditemukan.'], 404);
+            }
+            // Update updated_at
+            $session->touch();
+        }
+
+        // --- 3. ANALISIS DATA SISTEM (Konteks AI) ---
+        // Kita suntikkan data-data ringkasan ke dalam system prompt agar AI "tahu" konteks sistem saat ini.
+        $totalReports = \App\Models\AuditReport::count();
+        $pendingReports = \App\Models\AuditReport::where('status', 'pending')->count();
+        $totalClients = \App\Models\Client::count();
+        
+        // System prompt sebagai AI Audit Assistant KAP
+        $systemPrompt = <<<PROMPT
+Kamu adalah AI Audit Assistant untuk Kantor Akuntan Publik (KAP). Kamu membantu auditor, pimpinan KAP, dan staf administrasi dalam proses audit dengan pengetahuan mendalam.
+
+Konteks Sistem Saat Ini:
+- Pengguna yang sedang bertanya: {$user->name} (Role: {$user->role})
+- Total Laporan Audit di sistem: {$totalReports} (Pending: {$pendingReports})
+- Total Klien KAP: {$totalClients}
+Kamu dapat menggunakan data di atas jika pengguna bertanya tentang ringkasan atau status laporan/klien saat ini.
+
+Panduan menjawab:
+- Gunakan bahasa Indonesia yang formal namun mudah dipahami
+- Berikan jawaban terstruktur
+- Gunakan markdown formatting
+PROMPT;
+
+        // Bangun riwayat percakapan untuk API
+        $apiMessages = [
+            ['role' => 'system', 'content' => $systemPrompt],
         ];
 
-        // Tambahkan history dari frontend (max 10 pesan terakhir untuk efisiensi token)
+        // Tambahkan history dari frontend atau database
         if ($request->has('history') && is_array($request->history)) {
-            $history = array_slice($request->history, -10);
+            $history = array_slice($request->history, -10); // Ambil 10 terakhir agar token tidak bengkak
             foreach ($history as $msg) {
-                $messages[] = [
+                $apiMessages[] = [
                     'role'    => $msg['role'],
                     'content' => $msg['content'],
                 ];
             }
+        } else {
+            // Ambil dari DB jika tidak dipass dari frontend
+            $dbHistory = $session->messages()->orderBy('created_at', 'asc')->take(10)->get();
+            foreach ($dbHistory as $msg) {
+                $apiMessages[] = ['role' => 'user', 'content' => $msg->message];
+                $apiMessages[] = ['role' => 'assistant', 'content' => $msg->reply];
+            }
         }
 
-        // Tambahkan pesan terbaru user
-        $messages[] = [
+        // Tambahkan pesan terbaru
+        $apiMessages[] = [
             'role'    => 'user',
             'content' => $request->message,
         ];
 
+        // --- 4. KIRIM KE GROQ API ---
         try {
             $response = Http::withToken($apiKey)
                 ->timeout(30)
                 ->post("{$baseUrl}/chat/completions", [
                     'model'       => $model,
-                    'messages'    => $messages,
-                    'max_tokens'  => 1024,
+                    'messages'    => $apiMessages,
+                    'max_tokens'  => $maxTokens,
                     'temperature' => 0.7,
                     'stream'      => false,
                 ]);
@@ -101,10 +157,20 @@ PROMPT;
             $data  = $response->json();
             $reply = $data['choices'][0]['message']['content'] ?? 'Maaf, tidak ada respons dari AI.';
 
-            return response()->json([
-                'reply' => $reply,
-                'model' => $model,
+            // --- 5. SIMPAN KE DATABASE ---
+            ChatMessage::create([
+                'chat_session_id' => $session_id,
+                'message'         => $request->message,
+                'reply'           => $reply,
             ]);
+
+            return response()->json([
+                'reply'      => $reply,
+                'model'      => $model,
+                'session_id' => $session_id,
+                'title'      => $session->title
+            ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Terjadi kesalahan: ' . $e->getMessage()
@@ -113,10 +179,22 @@ PROMPT;
     }
 
     /**
-     * Reset riwayat percakapan (session-based, handled by frontend)
+     * Hapus satu sesi percakapan
+     */
+    public function destroySession($id)
+    {
+        $session = ChatSession::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $session->delete();
+        
+        return redirect()->route('chatbot.index')->with('success', 'Percakapan berhasil dihapus.');
+    }
+
+    /**
+     * Hapus semua riwayat percakapan user
      */
     public function clearHistory(Request $request)
     {
+        ChatSession::where('user_id', Auth::id())->delete();
         return response()->json(['status' => 'cleared']);
     }
 }
