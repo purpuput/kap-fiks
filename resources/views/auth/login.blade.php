@@ -115,7 +115,7 @@
             </a>
             @endif
 
-            <x-primary-button class="ms-3">
+            <x-primary-button class="ms-3 !bg-blue-600 hover:!bg-blue-700 focus:!bg-blue-700 active:!bg-blue-800 !text-white">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
