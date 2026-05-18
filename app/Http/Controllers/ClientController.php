@@ -3,19 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ClientController extends Controller
 {
+    // List client
     public function index(Request $request)
     {
         $search = $request->search;
         $status = $request->status;
 
-        $query = Client::query();
+        // Query berdasarkan role
+        if (Auth::check() && Auth::user()->role === 'auditor') {
 
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
+            $query = $user->clients()
+                ->where('approval_status', 'disetujui');
+        } else {
+
+            $query = Client::query();
+        }
+
+        // Search client
         if ($search) {
+
             $query->where(function ($q) use ($search) {
 
                 $q->where('institution_name', 'like', "%{$search}%")
@@ -25,7 +40,9 @@ class ClientController extends Controller
             });
         }
 
+        // Filter status
         if ($status) {
+
             $query->where('status', $status);
         }
 
@@ -40,24 +57,27 @@ class ClientController extends Controller
         ));
     }
 
+    // Form tambah client
     public function create()
     {
-        if (Auth::guest() || !in_array(Auth::user()->role, [
-            'admin',
-            'auditor'
-        ])) {
-
+        if (
+            Auth::guest() ||
+            Auth::user()->role !== 'admin'
+        ) {
             abort(403);
         }
 
-        return view('clients.create');
+        $auditors = User::where('role', 'auditor')->get();
+
+        return view('clients.create', compact('auditors'));
     }
 
+    // Simpan client
     public function store(Request $request)
     {
         if (
             Auth::guest() ||
-            !in_array(Auth::user()->role, ['admin', 'auditor'])
+            Auth::user()->role !== 'admin'
         ) {
             abort(403);
         }
@@ -86,47 +106,73 @@ class ClientController extends Controller
 
             'description' => 'nullable|string',
 
+            'contract_start' => 'nullable|date',
+
+            'contract_end' => 'nullable|date',
+
+            'auditors' => 'required|array',
+
+            'auditors.*' => 'exists:users,id',
+
+            'team_role' => 'required|array',
         ]);
 
-        // AUTO AMBIL USER LOGIN
-        $validated['user_id'] = Auth::id();
+        // Admin pembuat
+        $validated['created_by'] = Auth::id();
 
-        Client::create($validated);
+        // Create client
+        $client = Client::create($validated);
+
+        // Assign auditor
+        foreach ($request->auditors as $auditorId) {
+
+            $client->auditors()->attach($auditorId, [
+
+                'team_role' =>
+                $request->team_role[$auditorId] ?? 'anggota'
+
+            ]);
+        }
 
         return redirect()
             ->route('clients.index')
             ->with('success', 'Data klien berhasil ditambahkan');
     }
 
+    // Detail client
     public function show(Client $client)
     {
         return view('clients.show', compact('client'));
     }
 
+    // Form edit client
     public function edit(Client $client)
     {
-        if (Auth::guest() || !in_array(Auth::user()->role, [
-            'admin',
-            'auditor'
-        ])) {
-
-            abort(403);
-        }
-
-        return view('clients.edit', compact('client'));
-    }
-
-    public function update(Request $request, Client $client)
-    {
-        // ROLE
         if (
             Auth::guest() ||
-            !in_array(Auth::user()->role, ['admin', 'auditor'])
+            Auth::user()->role !== 'admin'
         ) {
             abort(403);
         }
 
-        // VALIDASI
+        $auditors = User::where('role', 'auditor')->get();
+
+        return view('clients.edit', compact(
+            'client',
+            'auditors'
+        ));
+    }
+
+    // Update client
+    public function update(Request $request, Client $client)
+    {
+        if (
+            Auth::guest() ||
+            Auth::user()->role !== 'admin'
+        ) {
+            abort(403);
+        }
+
         $validated = $request->validate([
 
             'institution_type' => 'required|in:Pemerintahan,Swasta',
@@ -153,9 +199,18 @@ class ClientController extends Controller
 
             'description' => 'nullable|string',
 
+            'contract_start' => 'nullable|date',
+
+            'contract_end' => 'nullable|date',
+
+            'auditors' => 'required|array',
+
+            'auditors.*' => 'exists:users,id',
+
+            'team_role' => 'required|array',
         ]);
 
-        // RESET APPROVAL SAAT DIEDIT
+        // Reset approval
         $validated['approval_status'] = 'pending';
 
         $validated['approved_by'] = null;
@@ -164,53 +219,35 @@ class ClientController extends Controller
 
         $validated['revision_note'] = null;
 
-        // UPDATE MANUAL
-        $client->institution_type = $validated['institution_type'];
+        // Update client
+        $client->update($validated);
 
-        $client->institution_name = $validated['institution_name'];
+        // Reset auditor
+        $client->auditors()->detach();
 
-        $client->leader_name = $validated['leader_name'];
+        // Assign ulang auditor
+        foreach ($request->auditors as $auditorId) {
 
-        $client->address = $validated['address'];
+            $client->auditors()->attach($auditorId, [
 
-        $client->city = $validated['city'];
+                'team_role' =>
+                $request->team_role[$auditorId] ?? 'anggota'
 
-        $client->province = $validated['province'];
-
-        $client->postal_code = $validated['postal_code'];
-
-        $client->phone = $validated['phone'];
-
-        $client->email = $validated['email'];
-
-        $client->npwp = $validated['npwp'];
-
-        $client->status = $validated['status'];
-
-        $client->description = $validated['description'];
-
-        $client->approval_status = 'pending';
-
-        $client->approved_by = null;
-
-        $client->approved_at = null;
-
-        $client->revision_note = null;
-
-        $client->save();
+            ]);
+        }
 
         return redirect()
             ->route('clients.index')
             ->with('success', 'Data klien berhasil diperbarui');
     }
 
+    // Hapus client
     public function destroy(Client $client)
     {
-        if (Auth::guest() || !in_array(Auth::user()->role, [
-            'admin',
-            'auditor'
-        ])) {
-
+        if (
+            Auth::guest() ||
+            Auth::user()->role !== 'admin'
+        ) {
             abort(403);
         }
 
@@ -221,47 +258,49 @@ class ClientController extends Controller
             ->with('success', 'Data klien berhasil dihapus');
     }
 
-    // APPROVE CLIENT
+    // Approve client
     public function approve(Client $client)
     {
-        if (Auth::guest() || Auth::user()->role !== 'pimpinan') {
-            abort(403);
-        }
-
         $client->update([
+
             'approval_status' => 'disetujui',
-            'approved_by' => Auth::id(),
+
+            'approved_by' => Auth::user()->id,
+
             'approved_at' => now(),
+
+            // hapus revisi lama
             'revision_note' => null,
         ]);
 
-        return back()->with(
-            'success',
-            'Data klien berhasil disetujui'
-        );
+        return redirect()
+            ->back()
+            ->with('success', 'Client berhasil disetujui.');
     }
 
-    // REVISI CLIENT
+    // Revisi client
     public function revision(Request $request, Client $client)
     {
-        if (Auth::guest() || Auth::user()->role !== 'pimpinan') {
-            abort(403);
-        }
-
+        // Validasi
         $request->validate([
             'revision_note' => 'required|string'
         ]);
 
+        // Update revisi
         $client->update([
+
             'approval_status' => 'revisi',
-            'approved_by' => Auth::id(),
-            'approved_at' => now(),
+
             'revision_note' => $request->revision_note,
+
+            // reset approval
+            'approved_by' => null,
+
+            'approved_at' => null,
         ]);
 
-        return back()->with(
-            'success',
-            'Revisi berhasil diberikan'
-        );
+        return redirect()
+            ->back()
+            ->with('success', 'Revisi berhasil dikirim.');
     }
 }

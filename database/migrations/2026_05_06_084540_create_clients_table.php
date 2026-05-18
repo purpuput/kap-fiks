@@ -15,7 +15,10 @@ return new class extends Migration
 
             $table->id();
 
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            // admin pembuat data
+            $table->foreignId('created_by')
+                ->constrained('users')
+                ->cascadeOnDelete();
 
             $table->enum('institution_type', [
                 'Pemerintahan',
@@ -40,31 +43,24 @@ return new class extends Migration
 
             $table->string('npwp')->nullable();
 
+            // masa kontrak audit
+            $table->date('contract_start')->nullable();
+
+            $table->date('contract_end')->nullable();
+
+            // status kontrak
+            $table->enum('contract_status', [
+                'aktif',
+                'hampir_habis',
+                'selesai'
+            ])->default('aktif');
+
             $table->enum('status', [
                 'aktif',
                 'nonaktif'
             ])->default('aktif');
 
-            // approval
-            $table->enum('approval_status', [
-                'pending',
-                'disetujui',
-                'revisi'
-            ])->default('pending');
-
-            $table->foreignId('approved_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
-            $table->timestamp('approved_at')
-                ->nullable();
-
-            $table->text('revision_note')
-                ->nullable();
-
-            $table->text('description')
-                ->nullable();
+            $table->text('description')->nullable();
 
             $table->softDeletes();
 

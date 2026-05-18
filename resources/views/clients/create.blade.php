@@ -1,11 +1,11 @@
-{{-- resources/views/clients/create.blade.php --}}
+{{-- Form tambah client --}}
 
 <x-app-layout title="Tambah Klien">
 
     <div class="py-10">
-        <div class="max-w-3xl mx-auto px-4">
+        <div class="max-w-4xl mx-auto px-4">
 
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-xl shadow p-6">
 
                 <h2 class="text-2xl font-bold mb-6">
                     Tambah Klien
@@ -13,10 +13,11 @@
 
                 <form action="{{ route('clients.store') }}"
                     method="POST"
-                    class="space-y-4">
+                    class="space-y-5">
 
                     @csrf
 
+                    {{-- Jenis instansi --}}
                     <div>
                         <label class="block mb-2 font-semibold">
                             Jenis Instansi
@@ -39,6 +40,7 @@
                         </select>
                     </div>
 
+                    {{-- Nama instansi --}}
                     <div>
                         <label class="block mb-2 font-semibold">
                             Nama Instansi
@@ -51,6 +53,7 @@
                             class="w-full border rounded-lg px-4 py-2">
                     </div>
 
+                    {{-- Pimpinan --}}
                     <div>
                         <label class="block mb-2 font-semibold">
                             Pimpinan Instansi
@@ -63,6 +66,7 @@
                             class="w-full border rounded-lg px-4 py-2">
                     </div>
 
+                    {{-- Telepon --}}
                     <div>
                         <label class="block mb-2 font-semibold">
                             Telepon
@@ -75,6 +79,7 @@
                             class="w-full border rounded-lg px-4 py-2">
                     </div>
 
+                    {{-- Email --}}
                     <div>
                         <label class="block mb-2 font-semibold">
                             Email
@@ -86,6 +91,7 @@
                             class="w-full border rounded-lg px-4 py-2">
                     </div>
 
+                    {{-- NPWP --}}
                     <div>
                         <label class="block mb-2 font-semibold">
                             NPWP
@@ -97,6 +103,7 @@
                             class="w-full border rounded-lg px-4 py-2">
                     </div>
 
+                    {{-- Alamat --}}
                     <div>
                         <label class="block mb-2 font-semibold">
                             Alamat
@@ -108,6 +115,7 @@
                             class="w-full border rounded-lg px-4 py-2">{{ old('address') }}</textarea>
                     </div>
 
+                    {{-- Lokasi --}}
                     <div class="grid md:grid-cols-3 gap-4">
 
                         <div>
@@ -148,6 +156,94 @@
 
                     </div>
 
+                    {{-- Kontrak audit --}}
+                    <div class="grid md:grid-cols-2 gap-4">
+
+                        <div>
+                            <label class="block mb-2 font-semibold">
+                                Kontrak Mulai
+                            </label>
+
+                            <input type="date"
+                                name="contract_start"
+                                value="{{ old('contract_start') }}"
+                                class="w-full border rounded-lg px-4 py-2">
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 font-semibold">
+                                Kontrak Selesai
+                            </label>
+
+                            <input type="date"
+                                name="contract_end"
+                                value="{{ old('contract_end') }}"
+                                class="w-full border rounded-lg px-4 py-2">
+                        </div>
+
+                    </div>
+
+                    {{-- Tim audit --}}
+                    <div>
+
+                        <label class="block mb-3 font-semibold">
+                            Tim Audit
+                        </label>
+
+                        <div class="space-y-3">
+
+                            @foreach ($auditors as $auditor)
+
+                            <div class="border rounded-lg p-4">
+
+                                <div class="flex items-center justify-between gap-4">
+
+                                    <div class="flex items-center gap-3">
+
+                                        <input type="checkbox"
+                                            name="auditors[]"
+                                            value="{{ $auditor->id }}"
+                                            class="rounded">
+
+                                        <div>
+
+                                            <p class="font-medium">
+                                                {{ $auditor->name }}
+                                            </p>
+
+                                            <p class="text-sm text-gray-500">
+                                                {{ $auditor->email }}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                    <select
+                                        name="team_role[{{ $auditor->id }}]"
+                                        class="border rounded-lg px-3 py-2">
+
+                                        <option value="anggota">
+                                            Anggota
+                                        </option>
+
+                                        <option value="ketua">
+                                            Ketua Tim
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                            @endforeach
+
+                        </div>
+
+                    </div>
+
+                    {{-- Deskripsi --}}
                     <div>
                         <label class="block mb-2 font-semibold">
                             Deskripsi
@@ -158,16 +254,21 @@
                             class="w-full border rounded-lg px-4 py-2">{{ old('description') }}</textarea>
                     </div>
 
-                    <div class="flex gap-2">
+                    {{-- Button --}}
+                    <div class="flex gap-2 pt-2">
 
                         <button
                             class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+
                             Simpan
+
                         </button>
 
                         <a href="{{ route('clients.index') }}"
                             class="flex-1 bg-gray-300 hover:bg-gray-400 text-center px-4 py-2 rounded-lg">
+
                             Batal
+
                         </a>
 
                     </div>

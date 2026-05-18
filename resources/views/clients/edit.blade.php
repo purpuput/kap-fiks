@@ -2,7 +2,7 @@
 
     <div class="py-10">
 
-        <div class="max-w-3xl mx-auto px-4">
+        <div class="max-w-4xl mx-auto px-4">
 
             <div class="bg-white rounded-2xl shadow p-6">
 
@@ -10,7 +10,7 @@
                     Edit Klien
                 </h2>
 
-                {{-- ERROR VALIDATION --}}
+                {{-- Error validation --}}
                 @if ($errors->any())
 
                 <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -36,7 +36,7 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- JENIS INSTANSI --}}
+                    {{-- Jenis instansi --}}
                     <div>
 
                         <label class="block text-sm font-semibold mb-2">
@@ -70,7 +70,7 @@
 
                     </div>
 
-                    {{-- NAMA INSTANSI --}}
+                    {{-- Nama instansi --}}
                     <div>
 
                         <label class="block text-sm font-semibold mb-2">
@@ -86,7 +86,7 @@
 
                     </div>
 
-                    {{-- PIMPINAN --}}
+                    {{-- Pimpinan --}}
                     <div>
 
                         <label class="block text-sm font-semibold mb-2">
@@ -102,22 +102,7 @@
 
                     </div>
 
-                    {{-- EMAIL --}}
-                    <div>
-
-                        <label class="block text-sm font-semibold mb-2">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            name="email"
-                            value="{{ old('email', $client->email) }}"
-                            class="w-full px-4 py-2 border rounded-xl">
-
-                    </div>
-
-                    {{-- TELEPON --}}
+                    {{-- Telepon --}}
                     <div>
 
                         <label class="block text-sm font-semibold mb-2">
@@ -129,6 +114,21 @@
                             name="phone"
                             value="{{ old('phone', $client->phone) }}"
                             required
+                            class="w-full px-4 py-2 border rounded-xl">
+
+                    </div>
+
+                    {{-- Email --}}
+                    <div>
+
+                        <label class="block text-sm font-semibold mb-2">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            name="email"
+                            value="{{ old('email', $client->email) }}"
                             class="w-full px-4 py-2 border rounded-xl">
 
                     </div>
@@ -148,7 +148,7 @@
 
                     </div>
 
-                    {{-- ALAMAT --}}
+                    {{-- Alamat --}}
                     <div>
 
                         <label class="block text-sm font-semibold mb-2">
@@ -163,7 +163,7 @@
 
                     </div>
 
-                    {{-- KOTA --}}
+                    {{-- Lokasi --}}
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                         <div>
@@ -213,7 +213,114 @@
 
                     </div>
 
-                    {{-- STATUS --}}
+                    {{-- Kontrak audit --}}
+                    <div class="grid md:grid-cols-2 gap-4">
+
+                        <div>
+
+                            <label class="block text-sm font-semibold mb-2">
+                                Kontrak Mulai
+                            </label>
+
+                            <input
+                                type="date"
+                                name="contract_start"
+                                value="{{ old('contract_start', $client->contract_start) }}"
+                                class="w-full px-4 py-2 border rounded-xl">
+
+                        </div>
+
+                        <div>
+
+                            <label class="block text-sm font-semibold mb-2">
+                                Kontrak Selesai
+                            </label>
+
+                            <input
+                                type="date"
+                                name="contract_end"
+                                value="{{ old('contract_end', $client->contract_end) }}"
+                                class="w-full px-4 py-2 border rounded-xl">
+
+                        </div>
+
+                    </div>
+
+                    {{-- Tim audit --}}
+                    <div>
+
+                        <label class="block text-sm font-semibold mb-3">
+                            Tim Audit
+                        </label>
+
+                        <div class="space-y-3">
+
+                            @foreach ($auditors as $auditor)
+
+                            @php
+                            $selectedAuditor = $client->auditors
+                            ->where('id', $auditor->id)
+                            ->first();
+                            @endphp
+
+                            <div class="border rounded-xl p-4">
+
+                                <div class="flex items-center justify-between gap-4">
+
+                                    <div class="flex items-center gap-3">
+
+                                        <input
+                                            type="checkbox"
+                                            name="auditors[]"
+                                            value="{{ $auditor->id }}"
+                                            class="rounded"
+                                            {{ $selectedAuditor ? 'checked' : '' }}>
+
+                                        <div>
+
+                                            <p class="font-medium">
+                                                {{ $auditor->name }}
+                                            </p>
+
+                                            <p class="text-sm text-gray-500">
+                                                {{ $auditor->email }}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                    <select
+                                        name="team_role[{{ $auditor->id }}]"
+                                        class="border rounded-lg px-3 py-2">
+
+                                        <option value="anggota"
+                                            {{ $selectedAuditor && $selectedAuditor->pivot->team_role == 'anggota' ? 'selected' : '' }}>
+
+                                            Anggota
+
+                                        </option>
+
+                                        <option value="ketua"
+                                            {{ $selectedAuditor && $selectedAuditor->pivot->team_role == 'ketua' ? 'selected' : '' }}>
+
+                                            Ketua Tim
+
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                            @endforeach
+
+                        </div>
+
+                    </div>
+
+                    {{-- Status --}}
                     <div>
 
                         <label class="block text-sm font-semibold mb-2">
@@ -243,7 +350,7 @@
 
                     </div>
 
-                    {{-- DESKRIPSI --}}
+                    {{-- Deskripsi --}}
                     <div>
 
                         <label class="block text-sm font-semibold mb-2">
@@ -257,7 +364,7 @@
 
                     </div>
 
-                    {{-- BUTTON --}}
+                    {{-- Button --}}
                     <div class="flex gap-3 pt-2">
 
                         <button
