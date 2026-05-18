@@ -37,4 +37,21 @@ class Client extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function auditReports()
+    {
+        return $this->hasMany(AuditReport::class);
+    }
+
+    public function documentManagements()
+    {
+        return $this->hasManyThrough(
+            \App\Models\DocumentManagement::class,
+            \App\Models\AuditReport::class,
+            'client_id',      // foreign key di audit_reports
+            'audit_report_id', // foreign key di document_managements
+            'id',
+            'id'
+        );
+    }
 }

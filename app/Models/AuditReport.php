@@ -56,4 +56,9 @@ class AuditReport extends Model
     {
         return $this->hasMany(DocumentManagement::class);
     }
+
+    public function documentManagements()
+    {
+        return $this->hasMany(DocumentManagement::class);
+    }
 }

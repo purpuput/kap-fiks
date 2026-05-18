@@ -6,118 +6,473 @@
 
         <div class="max-w-7xl mx-auto px-4">
 
-            {{-- Main Card --}}
-            <div class="bg-white shadow rounded-2xl p-6">
+            {{-- ===================================================== --}}
+            {{-- HEADER --}}
+            {{-- ===================================================== --}}
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
 
-                @php
-                $tipeAbsen = $attendanceWindow['type'];
-                @endphp
+                <div>
 
-                {{-- Header --}}
-                <div class="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">
+                        Absensi Auditor
+                    </h2>
 
-                    <div>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Monitoring dan riwayat absensi auditor.
+                    </p>
 
-                        <h2 class="text-2xl font-bold text-gray-800">
-                            Riwayat Absensi
+                </div>
+
+                {{-- User info --}}
+                <div class="text-left md:text-right">
+
+                    {{-- Jam realtime --}}
+                    <div class="flex items-center gap-1 text-sm text-gray-600">
+
+                        <span class="font-medium">
+                            Jam:
+                        </span>
+
+                        <span
+                            id="clock"
+                            class="text-blue-600 font-semibold">
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {{-- ===================================================== --}}
+            {{-- ALERT --}}
+            {{-- ===================================================== --}}
+            @if(session('success'))
+
+            <div class="mb-6 p-4 rounded-2xl border border-green-200 bg-green-50 text-green-700">
+
+                {{ session('success') }}
+
+            </div>
+
+            @endif
+
+            @if(session('error'))
+
+            <div class="mb-6 p-4 rounded-2xl border border-red-200 bg-red-50 text-red-700">
+
+                {{ session('error') }}
+
+            </div>
+
+            @endif
+
+            {{-- ===================================================== --}}
+            {{-- DASHBOARD AUDITOR --}}
+            {{-- ===================================================== --}}
+            @if(auth()->user()->role === 'auditor')
+
+            @php
+
+            // Absensi hari ini
+            $todayAttendance = \App\Models\Attendance::where('user_id', auth()->id())
+            ->where('date', now()->toDateString())
+            ->first();
+
+            // Default tipe
+            $attendanceType = 'Masuk';
+
+            // Jika sudah masuk
+            if ($todayAttendance && $todayAttendance->check_in) {
+            $attendanceType = 'Pulang';
+            }
+
+            // Jika selesai
+            $isCompleted =
+            $todayAttendance &&
+            $todayAttendance->check_in &&
+            $todayAttendance->check_out;
+
+            @endphp
+
+            <div class="mb-8">
+
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700
+                            rounded-3xl p-6 text-white shadow-lg">
+
+                    {{-- Header --}}
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+
+                        <div>
+
+                            <p class="text-blue-100 text-sm">
+                                Absensi Hari Ini
+                            </p>
+
+                            <h2 class="text-3xl font-bold mt-1">
+
+                                {{ now()->translatedFormat('l, d F Y') }}
+
+                            </h2>
+
+                            <p class="text-blue-100 mt-2 text-sm">
+
+                                @if(!$todayAttendance)
+
+                                Belum melakukan absensi.
+
+                                @elseif($todayAttendance->check_in && !$todayAttendance->check_out)
+
+                                Sudah absen masuk.
+
+                                @else
+
+                                Absensi hari ini selesai.
+
+                                @endif
+
+                            </p>
+
+                        </div>
+
+                        {{-- Tombol --}}
+                        <div>
+
+                            @if($isCompleted)
+
+                            <button
+                                disabled
+                                class="px-6 py-3 rounded-2xl bg-white/20
+                                       text-white font-semibold cursor-not-allowed">
+
+                                ✓ Absensi Selesai
+
+                            </button>
+
+                            @else
+
+                            <a href="{{ route('attendances.create') }}"
+                                class="inline-flex items-center gap-2 px-6 py-3
+                                       bg-white text-blue-700 rounded-2xl
+                                       font-bold hover:bg-blue-50 transition">
+
+                                {{-- Icon --}}
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor">
+
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
+
+                                </svg>
+
+                                Tambahkan Absen {{ $attendanceType }}
+
+                            </a>
+
+                            @endif
+
+                        </div>
+
+                    </div>
+
+                    {{-- Statistik --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+
+                        {{-- Masuk --}}
+                        <div class="bg-white/10 rounded-2xl p-4">
+
+                            <p class="text-sm text-blue-100">
+                                Jam Masuk
+                            </p>
+
+                            <h3 class="text-2xl font-bold mt-1">
+
+                                {{ $todayAttendance->check_in ?? '--:--' }}
+
+                            </h3>
+
+                        </div>
+
+                        {{-- Pulang --}}
+                        <div class="bg-white/10 rounded-2xl p-4">
+
+                            <p class="text-sm text-blue-100">
+                                Jam Pulang
+                            </p>
+
+                            <h3 class="text-2xl font-bold mt-1">
+
+                                {{ $todayAttendance->check_out ?? '--:--' }}
+
+                            </h3>
+
+                        </div>
+
+                        {{-- Status --}}
+                        <div class="bg-white/10 rounded-2xl p-4">
+
+                            <p class="text-sm text-blue-100">
+                                Status
+                            </p>
+
+                            <h3 class="text-2xl font-bold mt-1 capitalize">
+
+                                {{ $todayAttendance->status ?? 'Belum Absen' }}
+
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            @endif
+
+            {{-- ADMIN --}}
+            @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
+
+            @php
+
+            // Total auditor
+            $totalAuditor = \App\Models\User::where('role', 'auditor')->count();
+
+            // Hadir hari ini
+            $hadirToday = \App\Models\Attendance::whereDate('date', now())
+            ->where('status', 'hadir')
+            ->count();
+
+            // Sakit
+            $sakitToday = \App\Models\Attendance::whereDate('date', now())
+            ->where('status', 'sakit')
+            ->count();
+
+            // Izin
+            $izinToday = \App\Models\Attendance::whereDate('date', now())
+            ->where('status', 'izin')
+            ->count();
+
+            // Belum absen
+            $belumAbsen = $totalAuditor - ($hadirToday + $sakitToday + $izinToday);
+
+            // Auditor hadir hari ini
+            $attendanceToday = \App\Models\Attendance::with('user')
+            ->whereDate('date', now())
+            ->where('status', 'hadir')
+            ->get();
+
+            // Auditor yang belum absen
+            $notAttendance = \App\Models\User::where('role', 'auditor')
+            ->whereNotIn('id', function ($query) {
+
+            $query->select('user_id')
+            ->from('attendances')
+            ->whereDate('date', now());
+
+            })
+            ->get();
+
+            @endphp
+
+            <div class="mb-8">
+
+                <div class="bg-gradient-to-r from-blue-800 to-blue-900
+                            rounded-3xl p-6 text-white shadow-lg">
+
+                    {{-- Header --}}
+                    <div class="mb-6">
+
+                        <p class="text-slate-300 text-sm">
+                            Monitoring Hari Ini
+                        </p>
+
+                        <h2 class="text-3xl font-bold mt-1">
+
+                            {{ now()->translatedFormat('l, d F Y') }}
+
                         </h2>
 
-                        <p class="text-sm text-gray-500 mt-1">
-                            Jam WIB:
-                            Masuk {{ $attendanceWindow['check_in_start'] }} - {{ $attendanceWindow['check_in_end'] }},
-                            Pulang {{ $attendanceWindow['check_out_start'] }} - {{ $attendanceWindow['check_out_end'] }}
-                        </p>
+                    </div>
+
+                    {{-- Statistik --}}
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                        {{-- Hadir --}}
+                        <div class="bg-white/10 rounded-2xl p-5">
+
+                            <p class="text-sm text-slate-300">
+                                Hadir
+                            </p>
+
+                            <h3 class="text-3xl font-bold mt-2">
+
+                                {{ $hadirToday }}
+
+                            </h3>
+
+                        </div>
+
+                        {{-- Sakit --}}
+                        <div class="bg-white/10 rounded-2xl p-5">
+
+                            <p class="text-sm text-slate-300">
+                                Sakit
+                            </p>
+
+                            <h3 class="text-3xl font-bold mt-2">
+
+                                {{ $sakitToday }}
+
+                            </h3>
+
+                        </div>
+
+                        {{-- Izin --}}
+                        <div class="bg-white/10 rounded-2xl p-5">
+
+                            <p class="text-sm text-slate-300">
+                                Izin
+                            </p>
+
+                            <h3 class="text-3xl font-bold mt-2">
+
+                                {{ $izinToday }}
+
+                            </h3>
+
+                        </div>
+
+                        {{-- Belum --}}
+                        <div class="bg-white/10 rounded-2xl p-5">
+
+                            <p class="text-sm text-slate-300">
+                                Belum Absen
+                            </p>
+
+                            <h3 class="text-3xl font-bold mt-2">
+
+                                {{ $belumAbsen }}
+
+                            </h3>
+
+                        </div>
 
                     </div>
 
-                    {{-- Tombol Absensi --}}
-                    @if(auth()->user()->role === 'auditor')
+                    {{-- List absensi --}}
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
 
-                    <div class="flex flex-col items-end gap-2">
+                        {{-- Sudah absen --}}
+                        <div class="bg-white/10 rounded-2xl p-5">
 
-                        @if($attendanceWindow['can_attend'])
+                            <h3 class="font-semibold text-lg mb-4">
+                                Auditor Hadir Hari Ini
+                            </h3>
 
-                        <a href="{{ route('attendances.create') }}"
-                            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
-                                   bg-blue-600 hover:bg-blue-700
-                                   text-white font-semibold shadow-sm transition">
+                            @forelse($attendanceToday as $item)
 
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="w-5 h-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor">
+                            <div class="flex items-center justify-between py-2 border-b border-white/10">
 
-                                <path stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
+                                <div>
 
-                            </svg>
+                                    <p class="font-medium">
 
-                            Absensi {{ $tipeAbsen }}
+                                        {{ $item->user->name }}
 
-                        </a>
+                                    </p>
 
-                        @else
+                                    <p class="text-xs text-slate-300">
 
-                        <button
-                            disabled
-                            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
-                                   bg-gray-400 cursor-not-allowed
-                                   text-white font-semibold shadow-sm">
+                                        {{ $item->check_in ?? '-' }}
 
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="w-5 h-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor">
+                                    </p>
 
-                                <path stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M18.364 5.636L5.636 18.364" />
+                                </div>
 
-                            </svg>
+                                <span class="text-green-300 text-sm">
+                                    Hadir
+                                </span>
 
-                            Di Luar Jam Absensi
+                            </div>
 
-                        </button>
+                            @empty
 
-                        @endif
+                            <p class="text-slate-300 text-sm">
+                                Belum ada auditor yang hadir.
+                            </p>
 
-                        <p class="text-xs text-gray-500 text-right max-w-xs">
-                            Absensi tersedia pukul
-                            {{ $attendanceWindow['check_in_start'] }}-{{ $attendanceWindow['check_in_end'] }}
-                            dan
-                            {{ $attendanceWindow['check_out_start'] }}-{{ $attendanceWindow['check_out_end'] }} WIB
-                        </p>
+                            @endforelse
+
+                        </div>
+
+                        {{-- Belum absen --}}
+                        <div class="bg-white/10 rounded-2xl p-5">
+
+                            <h3 class="font-semibold text-lg mb-4">
+                                Belum Absen
+                            </h3>
+
+                            @forelse($notAttendance as $user)
+
+                            <div class="flex items-center justify-between py-2 border-b border-white/10">
+
+                                <p class="font-medium">
+
+                                    {{ $user->name }}
+
+                                </p>
+
+                                <span class="text-yellow-300 text-sm">
+                                    Belum Absen
+                                </span>
+
+                            </div>
+
+                            @empty
+
+                            <p class="text-slate-300 text-sm">
+                                Semua auditor sudah absen.
+                            </p>
+
+                            @endforelse
+
+                        </div>
 
                     </div>
 
-                    @endif
+                </div>
+
+            </div>
+
+            @endif
+
+            {{-- CARD RIWAYAT --}}
+            <div class="bg-white border border-gray-100 shadow rounded-3xl p-6">
+
+                {{-- Header --}}
+                <div class="mb-5">
+
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        Riwayat Absensi
+                    </h2>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        Menampilkan riwayat absensi auditor.
+                    </p>
 
                 </div>
 
-                {{-- Alert --}}
-                @if(session('success'))
-
-                <div class="mb-5 p-4 rounded-xl border border-green-200 bg-green-50 text-green-700">
-                    {{ session('success') }}
-                </div>
-
-                @endif
-
-                @if(session('error'))
-
-                <div class="mb-5 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700">
-                    {{ session('error') }}
-                </div>
-
-                @endif
-
-                {{-- Filter --}}
-                <form method="GET"
+                {{-- FILTER --}}
+                <form
+                    id="filterForm"
+                    method="GET"
                     class="mb-6 flex flex-wrap items-end gap-3">
 
                     {{-- Tanggal --}}
@@ -131,6 +486,7 @@
                             type="date"
                             name="date"
                             value="{{ $date ?? '' }}"
+                            onchange="document.getElementById('filterForm').submit()"
                             class="w-full px-4 py-2 border border-gray-300 rounded-xl
                                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 
@@ -147,10 +503,13 @@
 
                         <select
                             name="user_id"
+                            onchange="document.getElementById('filterForm').submit()"
                             class="w-full px-4 py-2 border border-gray-300 rounded-xl
                                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 
-                            <option value="">Semua Auditor</option>
+                            <option value="">
+                                Semua Auditor
+                            </option>
 
                             @foreach($users as $user)
 
@@ -169,59 +528,50 @@
 
                     @endif
 
-                    {{-- Button --}}
-                    <div class="flex flex-wrap items-end gap-2">
+                    {{-- Reset --}}
+                    <a href="{{ route('attendances.index') }}"
+                        class="px-4 py-2 bg-yellow-200 hover:bg-yellow-300
+                               text-yellow-700 font-semibold border border-yellow-300
+                               rounded-xl transition shadow-sm">
 
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700
-                                   text-white rounded-xl transition text-sm font-semibold">
+                        Reset
 
-                            Filter
+                    </a>
 
-                        </button>
+                    {{-- Export --}}
+                    @if(auth()->user()->role === 'admin')
 
-                        <a href="{{ route('attendances.index') }}"
-                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300
-                                   text-gray-700 rounded-xl transition shadow-sm">
+                    <a href="{{ route('attendances.export.pdf', request()->query()) }}"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700
+                               text-white rounded-xl transition shadow-sm">
 
-                            Reset
+                        Export PDF
 
-                        </a>
+                    </a>
 
-                        @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('attendances.export.excel', request()->query()) }}"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700
+                               text-white rounded-xl transition shadow-sm">
 
-                        <a href="{{ route('attendances.export.pdf', request()->query()) }}"
-                            class="px-4 py-2 bg-red-600 hover:bg-red-700
-                                   text-white rounded-xl transition shadow-sm">
+                        Export Excel
 
-                            Export PDF
+                    </a>
 
-                        </a>
-
-                        <a href="{{ route('attendances.export.excel', request()->query()) }}"
-                            class="px-4 py-2 bg-green-600 hover:bg-green-700
-                                   text-white rounded-xl transition shadow-sm">
-
-                            Export Excel
-
-                        </a>
-
-                        @endif
-
-                    </div>
+                    @endif
 
                 </form>
 
-                {{-- Table --}}
-                <div class="border border-gray-200 rounded-2xl overflow-hidden">
+                {{-- ===================================================== --}}
+                {{-- TABLE --}}
+                {{-- ===================================================== --}}
+                <div class="border border-gray-200 rounded-3xl overflow-hidden">
 
                     <div class="overflow-x-auto">
 
                         <table class="min-w-full text-sm">
 
-                            {{-- Table Head --}}
-                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                            {{-- Head --}}
+                            <thead class="bg-gray-50 text-bold uppercase text-l ">
 
                                 <tr>
 
@@ -242,19 +592,11 @@
                                     </th>
 
                                     <th class="px-6 py-4 text-left">
-                                        Masuk
-                                    </th>
-
-                                    <th class="px-6 py-4 text-center">
-                                        Foto Masuk
+                                        Jam Masuk
                                     </th>
 
                                     <th class="px-6 py-4 text-left">
-                                        Pulang
-                                    </th>
-
-                                    <th class="px-6 py-4 text-center">
-                                        Foto Pulang
+                                        Jam Pulang
                                     </th>
 
                                     <th class="px-6 py-4 text-center">
@@ -277,7 +619,7 @@
 
                             </thead>
 
-                            {{-- Table Body --}}
+                            {{-- Body --}}
                             <tbody class="divide-y divide-gray-100 bg-white">
 
                                 @forelse($attendances as $attendance)
@@ -285,7 +627,7 @@
                                 <tr class="hover:bg-gray-50 transition">
 
                                     {{-- No --}}
-                                    <td class="px-6 py-4 text-center text-gray-500 font-medium">
+                                    <td class="px-6 py-4 text-center text-gray-500">
 
                                         {{ $loop->iteration + ($attendances->currentPage() - 1) * $attendances->perPage() }}
 
@@ -295,7 +637,9 @@
                                     @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
 
                                     <td class="px-6 py-4 font-medium text-gray-700">
+
                                         {{ $attendance->user->name ?? '-' }}
+
                                     </td>
 
                                     @endif
@@ -314,58 +658,10 @@
 
                                     </td>
 
-                                    {{-- Foto Masuk --}}
-                                    <td class="px-6 py-4 text-center">
-
-                                        @if($attendance->photo_check_in)
-
-                                        <a href="{{ asset('storage/' . $attendance->photo_check_in) }}"
-                                            target="_blank">
-
-                                            <img
-                                                src="{{ asset('storage/' . $attendance->photo_check_in) }}"
-                                                alt="Foto masuk"
-                                                class="h-14 w-14 mx-auto rounded-xl object-cover
-                                                       border border-gray-200 hover:scale-105 transition">
-
-                                        </a>
-
-                                        @else
-
-                                        <span class="text-gray-400">-</span>
-
-                                        @endif
-
-                                    </td>
-
                                     {{-- Pulang --}}
                                     <td class="px-6 py-4 text-gray-700">
 
                                         {{ $attendance->check_out ?? '-' }}
-
-                                    </td>
-
-                                    {{-- Foto Pulang --}}
-                                    <td class="px-6 py-4 text-center">
-
-                                        @if($attendance->photo_check_out)
-
-                                        <a href="{{ asset('storage/' . $attendance->photo_check_out) }}"
-                                            target="_blank">
-
-                                            <img
-                                                src="{{ asset('storage/' . $attendance->photo_check_out) }}"
-                                                alt="Foto pulang"
-                                                class="h-14 w-14 mx-auto rounded-xl object-cover
-                                                       border border-gray-200 hover:scale-105 transition">
-
-                                        </a>
-
-                                        @else
-
-                                        <span class="text-gray-400">-</span>
-
-                                        @endif
 
                                     </td>
 
@@ -394,34 +690,41 @@
 
                                     </td>
 
-                                    {{-- Aksi --}}
+                                    {{-- Hapus --}}
                                     @if(auth()->user()->role === 'admin')
 
+                                    {{-- Aksi --}}
                                     <td class="px-6 py-4 text-center">
 
-                                        <div class="flex justify-center gap-2">
+                                        <div class="flex items-center justify-center gap-2">
 
-                                            <a href="{{ route('attendances.edit', $attendance) }}"
-                                                class="px-3 py-1 rounded-lg text-xs font-medium
-                                                       bg-blue-100 hover:bg-blue-200
-                                                       text-blue-700 transition">
+                                            {{-- Tombol edit --}}
+                                            <a
+                                                href="{{ route('attendances.edit', $attendance) }}"
+                                                class="inline-flex items-center px-3 py-1.5
+                                                rounded-lg text-xs font-semibold
+                                                bg-blue-100 hover:bg-blue-200
+                                                text-blue-700 transition">
 
                                                 Edit
 
                                             </a>
 
+                                            {{-- Tombol hapus --}}
                                             <form
                                                 action="{{ route('attendances.destroy', $attendance) }}"
                                                 method="POST"
-                                                onsubmit="return confirm('Hapus absensi ini?')">
+                                                onsubmit="return confirm('Hapus data ini?')">
 
                                                 @csrf
                                                 @method('DELETE')
 
                                                 <button
-                                                    class="px-3 py-1 rounded-lg text-xs font-medium
-                                                           bg-red-100 hover:bg-red-200
-                                                           text-red-700 transition">
+                                                    type="submit"
+                                                    class="inline-flex items-center px-3 py-1.5
+                                                    rounded-lg text-xs font-semibold
+                                                    bg-red-100 hover:bg-red-200
+                                                    text-red-700 transition">
 
                                                     Hapus
 
@@ -439,47 +742,48 @@
 
                                 @empty
 
+                                {{-- Data kosong --}}
                                 <tr>
 
-                                    <td colspan="{{ auth()->user()->role === 'admin' ? 10 : (auth()->user()->role === 'pimpinan' ? 9 : 8) }}"
+                                    <td colspan="{{ auth()->user()->role === 'admin' ? 8 : (auth()->user()->role === 'pimpinan' ? 7 : 6) }}"
                                         class="px-6 py-14 text-center">
 
                                         <div class="flex flex-col items-center">
 
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="w-16 h-16 text-gray-300 mb-3"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor">
+                                            {{-- Icon --}}
+                                            <div class="w-20 h-20 rounded-full bg-gray-100
+                                        flex items-center justify-center mb-4">
 
-                                                <path stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="1.5"
-                                                    d="M9.172 9.172a4 4 0 015.656 5.656M15 15l6 6m-6-6a6 6 0 10-8.485-8.485A6 6 0 0015 15z" />
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    class="w-10 h-10 text-gray-400"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor">
 
-                                            </svg>
+                                                    <path stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="1.5"
+                                                        d="M9 12h6m-6 4h6M7 4h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
 
+                                                </svg>
+
+                                            </div>
+
+                                            {{-- Judul --}}
                                             <h3 class="text-lg font-semibold text-gray-700">
-                                                Data absensi tidak ditemukan
+                                                Data tidak ditemukan
                                             </h3>
 
+                                            {{-- Deskripsi --}}
                                             <p class="text-sm text-gray-500 mt-1">
-                                                Tidak ada data absensi sesuai filter yang dipilih.
+                                                Tidak ada data absensi yang tersedia.
                                             </p>
-
-                                            <a href="{{ route('attendances.index') }}"
-                                                class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700
-                                                       text-white rounded-xl transition">
-
-                                                Reset Filter
-
-                                            </a>
 
                                         </div>
 
                                     </td>
 
-                                </tr>
+                                </tr>>
 
                                 @endforelse
 
@@ -492,8 +796,10 @@
                 </div>
 
                 {{-- Pagination --}}
-                <div class="mt-5">
+                <div class="mt-6">
+
                     {{ $attendances->withQueryString()->links() }}
+
                 </div>
 
             </div>
@@ -501,5 +807,30 @@
         </div>
 
     </div>
+
+    {{-- ===================================================== --}}
+    {{-- CLOCK --}}
+    {{-- ===================================================== --}}
+    <script>
+        // Update jam realtime
+        function updateClock() {
+
+            const now = new Date();
+
+            const time = now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            document.getElementById('clock').innerHTML = time + ' WIB';
+        }
+
+        // Update tiap detik
+        setInterval(updateClock, 1000);
+
+        // Jalankan pertama kali
+        updateClock();
+    </script>
 
 </x-app-layout>

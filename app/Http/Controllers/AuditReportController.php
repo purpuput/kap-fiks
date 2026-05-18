@@ -51,7 +51,7 @@ class AuditReportController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('report_number', 'like', "%{$search}%");
+                    ->orWhere('report_number', 'like', "%{$search}%");
             });
         }
 
@@ -173,7 +173,11 @@ class AuditReportController extends Controller
         $filesByType   = $auditReport->files->keyBy('document_type');
 
         return view('audit_reports.edit', compact(
-            'auditReport', 'clients', 'auditors', 'documentTypes', 'filesByType'
+            'auditReport',
+            'clients',
+            'auditors',
+            'documentTypes',
+            'filesByType'
         ));
     }
 
@@ -343,6 +347,9 @@ class AuditReportController extends Controller
     {
         $file = AuditReportFile::findOrFail($id);
 
-        return Storage::disk('public')->download($file->file, $file->document_name);
+        return Storage::download(
+            'public/' . $file->file,
+            $file->document_name
+        );
     }
 }

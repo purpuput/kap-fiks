@@ -109,5 +109,35 @@ class ClientSeeder extends Seeder
 
             'description' => 'Klien baru'
         ]);
+
+        Client::create([
+            'user_id' => $admin->id,
+
+            'institution_type' => 'Swasta',
+
+            'institution_name' => 'PT Sejahtera Abadi',
+
+            'leader_name' => 'Rina Wijaya',
+
+            'address' => 'Jl. Melati No. 15',
+
+            'city' => 'Surabaya',
+
+            'province' => 'Jawa Timur',
+
+            'postal_code' => '60111',
+
+            'phone' => '081234567893',
+
+            'email' => 'sejahtera@gmail.com',
+
+            'npwp' => '04.777.888.9-999.000',
+
+            'status' => 'aktif',
+
+            'approval_status' => 'pending',
+
+            'description' => 'Klien baru'
+        ]);
     }
 }

@@ -47,11 +47,27 @@ class AuditReportSeeder extends Seeder
             'created_by' => 1,
         ]);
 
+        $report4 = AuditReport::create([
+            'client_id' => 4,
+            'report_number' => 'AR/2026/004',
+            'title' => 'Audit Keuangan PT Sejahtera Abadi',
+            'audit_type' => 'keuangan',
+            'audit_date' => now(),
+            'findings' => 'Laporan keuangan sudah sesuai.',
+            'recommendations' => 'Tidak ada rekomendasi.',
+            'status' => 'approve',
+            'created_by' => 1,
+        ]);
+
+
+
         // Auditor
         $report1->auditors()->sync([3, 4]);
 
         $report2->auditors()->sync([4]);
 
         $report3->auditors()->sync([3, 5]);
+
+        $report4->auditors()->sync([4]);
     }
 }

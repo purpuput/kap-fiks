@@ -6,121 +6,143 @@ use App\Models\Attendance;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AttendanceExport;
 
 class AttendanceController extends Controller
 {
-    private const ATTENDANCE_TIMEZONE = 'Asia/Jakarta';
-    private const CHECK_IN_START = '07:30';
-    private const CHECK_IN_END = '08:30';
-    private const CHECK_OUT_START = '16:30';
-    private const CHECK_OUT_END = '17:30';
-
     /**
-     * Display a listing of the resource.
+     * Menampilkan halaman data absensi
      */
     public function index(Request $request)
     {
-        $attendanceWindow = $this->attendanceWindow();
-
+        // Mengambil filter tanggal dari request
         $date = $request->input('date');
+
+        // Mengambil filter user dari request
         $user_id = $request->input('user_id');
+
+        // Mengambil data user yang sedang login
         $user = Auth::user();
 
+        // Query awal attendance beserta relasi user
         $query = Attendance::with('user');
 
-        // Filter role
+        /**
+         * Filter berdasarkan role
+         * - Admin dan pimpinan dapat melihat semua data
+         * - Auditor hanya dapat melihat data dirinya sendiri
+         */
         if (in_array($user->role, ['admin', 'pimpinan']) && $user_id) {
+
             $query->where('user_id', $user_id);
         } elseif ($user->role === 'auditor') {
+
             $query->where('user_id', Auth::id());
         }
 
-        // Filter tanggal
+        /**
+         * Filter berdasarkan tanggal
+         */
         if ($date) {
             $query->whereDate('date', $date);
         }
 
+        // Mengambil data absensi dengan pagination
         $attendances = $query
             ->orderBy('date', 'desc')
             ->paginate(15);
 
+        // Mengambil daftar auditor
         $users = User::where('role', 'auditor')
             ->orderBy('name')
             ->get();
 
+        // Menampilkan halaman index
         return view('attendances.index', compact(
             'attendances',
             'date',
             'users',
-            'user_id',
-            'attendanceWindow'
+            'user_id'
         ));
     }
 
     /**
-     * Export PDF
+     * Export data absensi ke PDF
      */
     public function exportPdf(Request $request)
     {
+        // Hanya admin yang boleh export PDF
         abort_unless(Auth::user()->role === 'admin', 403);
 
+        // Query data attendance
         $query = Attendance::with('user');
 
+        // Filter tanggal
         if ($request->date) {
             $query->whereDate('date', $request->date);
         }
 
+        // Filter user
         if ($request->user_id) {
             $query->where('user_id', $request->user_id);
         }
 
+        // Mengambil data absensi
         $attendances = $query
             ->orderBy('date', 'desc')
             ->get();
 
+        // Load view PDF
         $pdf = Pdf::loadView(
             'attendances.pdf',
             compact('attendances')
         );
 
+        // Download PDF
         return $pdf->download('laporan-absensi.pdf');
     }
 
     /**
-     * Export Excel
+     * Export data absensi ke Excel
      */
     public function exportExcel(Request $request)
     {
+        // Hanya admin yang boleh export Excel
         abort_unless(Auth::user()->role === 'admin', 403);
 
+        // Query data attendance
         $query = Attendance::with('user');
 
+        // Filter tanggal
         if ($request->date) {
             $query->whereDate('date', $request->date);
         }
 
+        // Filter user
         if ($request->user_id) {
             $query->where('user_id', $request->user_id);
         }
 
+        /**
+         * Mapping data agar format Excel lebih rapi
+         */
         $attendances = collect(
             $query->get()->map(function ($item) {
+
                 return [
-                    'Auditor' => $item->user->name ?? '-',
-                    'Tanggal' => $item->date,
-                    'Check In' => $item->check_in,
-                    'Check Out' => $item->check_out,
-                    'Status' => ucfirst($item->status),
-                    'Keterangan' => $item->notes,
+                    'Auditor'     => $item->user->name ?? '-',
+                    'Tanggal'     => $item->date,
+                    'Check In'    => $item->check_in,
+                    'Check Out'   => $item->check_out,
+                    'Status'      => ucfirst($item->status),
+                    'Keterangan'  => $item->notes,
                 ];
             })
         );
 
+        // Download file Excel
         return Excel::download(
             new AttendanceExport($attendances),
             'laporan-absensi.xlsx'
@@ -128,83 +150,92 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form tambah absensi
      */
     public function create()
     {
+        // Hanya admin dan auditor yang boleh akses
         abort_unless(
             in_array(Auth::user()->role, ['admin', 'auditor']),
             403,
             'Akses ditolak!'
         );
 
-        $attendanceWindow = $this->attendanceWindow();
-        $today = $attendanceWindow['now']->toDateString();
+        // Tanggal hari ini
+        $today = now()->toDateString();
 
+        // Mengambil daftar auditor
         $users = User::where('role', 'auditor')
             ->orderBy('name')
             ->get();
 
+        /**
+         * Mengecek apakah user sudah absen hari ini
+         */
         $todayAttendance = Attendance::where('user_id', Auth::id())
             ->where('date', $today)
             ->first();
 
+        // Menampilkan halaman create
         return view('attendances.create', compact(
             'users',
-            'todayAttendance',
-            'attendanceWindow'
+            'todayAttendance'
         ));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data absensi
      */
     public function store(Request $request)
     {
+        // Validasi role
         abort_unless(
             in_array(Auth::user()->role, ['admin', 'auditor']),
             403,
             'Akses ditolak!'
         );
 
-        $attendanceWindow = $this->attendanceWindow();
-
+        /**
+         * Validasi input form
+         */
         $validated = $request->validate([
+
+            // User boleh kosong jika auditor login sendiri
             'user_id' => ['nullable', 'exists:users,id'],
-            'date' => 'required|date',
+
+            // Tipe absensi
             'tipe' => 'required|in:Masuk,Pulang',
+
+            // Status absensi
             'status' => 'required|in:hadir,izin,sakit,alpha',
+
+            // Catatan tambahan
             'notes' => 'nullable|string',
-            'photo_data' => 'nullable|string',
         ]);
 
+        /**
+         * Jika admin bisa memilih user
+         * Jika auditor otomatis menggunakan ID login
+         */
         $validated['user_id'] = Auth::user()->role === 'admin'
             ? ($validated['user_id'] ?? Auth::id())
             : Auth::id();
 
-        $validated['date'] = $attendanceWindow['now']->toDateString();
+        // Menggunakan tanggal hari ini otomatis
+        $validated['date'] = now()->toDateString();
 
-        if (!$attendanceWindow['can_attend']) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'tipe' => $attendanceWindow['message']
-                ]);
-        }
-
-        if ($validated['tipe'] !== $attendanceWindow['type']) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'tipe' => 'Tipe absensi tidak sesuai dengan jam WIB saat ini.'
-                ]);
-        }
-
+        /**
+         * Mengecek apakah user sudah memiliki data absensi hari ini
+         */
         $attendance = Attendance::where('user_id', $validated['user_id'])
             ->where('date', $validated['date'])
             ->first();
 
+        /**
+         * Jika absensi masuk dan pulang sudah lengkap
+         */
         if ($attendance && $attendance->check_in && $attendance->check_out) {
+
             return back()
                 ->withInput()
                 ->withErrors([
@@ -212,10 +243,15 @@ class AttendanceController extends Controller
                 ]);
         }
 
+        /**
+         * Validasi agar tidak bisa absen pulang
+         * sebelum melakukan absen masuk
+         */
         if (
             $validated['tipe'] === 'Pulang' &&
             (!$attendance || !$attendance->check_in)
         ) {
+
             return back()
                 ->withInput()
                 ->withErrors([
@@ -223,145 +259,74 @@ class AttendanceController extends Controller
                 ]);
         }
 
-        if (
-            $validated['status'] === 'hadir' &&
-            !$request->filled('photo_data')
-        ) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'photo_data' => 'Foto absensi wajib diambil.'
-                ]);
-        }
-
-        $photoPath = $validated['status'] === 'hadir'
-            ? $this->storeCapturedPhoto(
-                $validated['photo_data'],
-                $validated['user_id'],
-                $validated['tipe']
-            )
-            : null;
-
+        /**
+         * Data yang akan disimpan
+         */
         $data = [
             'user_id' => $validated['user_id'],
-            'date' => $validated['date'],
-            'status' => $validated['status'],
-            'notes' => $validated['notes'] ?? null,
+            'date'    => $validated['date'],
+            'status'  => $validated['status'],
+            'notes'   => $validated['notes'] ?? null,
         ];
 
+        /**
+         * Jika status hadir maka simpan jam absensi
+         */
         if ($validated['status'] === 'hadir') {
 
+            /**
+             * Absensi masuk
+             */
             if ($validated['tipe'] === 'Masuk') {
 
-                $data['check_in'] = $attendanceWindow['now']
-                    ->format('H:i:s');
-
-                $data['photo_check_in'] = $photoPath;
+                // Menyimpan jam masuk saat ini
+                $data['check_in'] = now()->format('H:i:s');
             } else {
 
-                $data['check_out'] = $attendanceWindow['now']
-                    ->format('H:i:s');
+                /**
+                 * Absensi pulang
+                 */
 
-                $data['photo_check_out'] = $photoPath;
+                // Menyimpan jam pulang saat ini
+                $data['check_out'] = now()->format('H:i:s');
             }
         }
 
+        /**
+         * Jika data attendance sudah ada
+         * maka update
+         */
         if ($attendance) {
+
             $attendance->update($data);
         } else {
+
+            /**
+             * Jika belum ada maka create baru
+             */
             Attendance::create($data);
         }
 
+        // Redirect kembali ke halaman index
         return redirect()
             ->route('attendances.index')
             ->with('success', 'Absensi berhasil dicatat');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus data absensi
      */
     public function destroy(Attendance $attendance)
     {
+        // Hanya admin yang boleh menghapus
         abort_unless(Auth::user()->role === 'admin', 403);
 
+        // Menghapus data
         $attendance->delete();
 
+        // Redirect kembali
         return redirect()
             ->route('attendances.index')
             ->with('success', 'Absensi berhasil dihapus');
-    }
-
-    /**
-     * Store captured photo
-     */
-    private function storeCapturedPhoto(
-        string $photoData,
-        int $userId,
-        string $type
-    ): string {
-
-        if (!preg_match(
-            '/^data:image\/(png|jpe?g);base64,/',
-            $photoData,
-            $matches
-        )) {
-            abort(422, 'Format foto tidak valid.');
-        }
-
-        $extension = $matches[1] === 'jpeg'
-            ? 'jpg'
-            : $matches[1];
-
-        $image = base64_decode(
-            substr($photoData, strpos($photoData, ',') + 1),
-            true
-        );
-
-        if ($image === false) {
-            abort(422, 'Foto tidak bisa diproses.');
-        }
-
-        $fileName =
-            'attendances/' .
-            $userId . '-' .
-            Str::slug($type) . '-' .
-            now(self::ATTENDANCE_TIMEZONE)->format('YmdHis') .
-            '.' . $extension;
-
-        Storage::disk('public')->put($fileName, $image);
-
-        return $fileName;
-    }
-
-    /**
-     * Attendance window
-     */
-    private function attendanceWindow(): array
-    {
-        $now = now(self::ATTENDANCE_TIMEZONE);
-        $time = $now->format('H:i');
-        $type = null;
-
-        if ($time >= self::CHECK_IN_START && $time <= self::CHECK_IN_END) {
-            $type = 'Masuk';
-        } elseif (
-            $time >= self::CHECK_OUT_START &&
-            $time <= self::CHECK_OUT_END
-        ) {
-            $type = 'Pulang';
-        }
-
-        return [
-            'now' => $now,
-            'type' => $type,
-            'can_attend' => $type !== null,
-            'timezone_label' => 'WIB',
-            'check_in_start' => self::CHECK_IN_START,
-            'check_in_end' => self::CHECK_IN_END,
-            'check_out_start' => self::CHECK_OUT_START,
-            'check_out_end' => self::CHECK_OUT_END,
-            'message' =>
-            'Absensi hanya bisa dilakukan pukul 07:30-08:30 WIB untuk masuk dan 16:30-17:30 WIB untuk pulang.',
-        ];
     }
 }

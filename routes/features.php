@@ -47,6 +47,8 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
 Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::get('/document-managements', [DocumentManagementController::class, 'index'])->name('document_managements.index');
     Route::get('/document-managements/{documentManagement}/download', [DocumentManagementController::class, 'download'])->name('document_managements.download');
+    Route::get('/document-managements/{client}', [DocumentManagementController::class, 'show'])->name('document_managements.show');
+    Route::get('/document-managements/preview/{documentManagement}', [DocumentManagementController::class, 'preview'])->name('document_managements.preview');
 });
 
 // DOCUMENTS - Admin, Auditor, Pimpinan

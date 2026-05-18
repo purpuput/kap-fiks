@@ -52,7 +52,7 @@
                 <a href="{{ route('audit_reports.create') }}"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     Tambah Laporan
                 </a>
@@ -187,7 +187,8 @@
                                             </button>
                                         </form>
                                         <button type="button"
-                                            onclick="openModalRevisi('{{ route('audit_reports.revisi', $report->id) }}')"
+                                            data-url="{{ route('audit_reports.revisi', $report->id) }}"
+                                            onclick="openModalRevisi(this.dataset.url)"
                                             class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">
                                             Revisi
                                         </button>
@@ -228,6 +229,7 @@
             document.getElementById('formRevisi').action = url;
             document.getElementById('modalRevisi').classList.remove('hidden');
         }
+
         function closeModalRevisi() {
             document.getElementById('modalRevisi').classList.add('hidden');
         }
