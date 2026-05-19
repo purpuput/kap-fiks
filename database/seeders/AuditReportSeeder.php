@@ -3,71 +3,55 @@
 namespace Database\Seeders;
 
 use App\Models\AuditReport;
-use App\Models\User;
+use App\Models\Client;
 use Illuminate\Database\Seeder;
 
 class AuditReportSeeder extends Seeder
 {
     public function run(): void
     {
-        $report1 = AuditReport::create([
-            'client_id' => 1,
-            'report_number' => 'AR/2026/001',
-            'title' => 'Audit Keuangan PT Maju Jaya',
-            'audit_type' => 'keuangan',
-            'audit_date' => now(),
-            'findings' => 'Ditemukan ketidaksesuaian laporan kas.',
-            'recommendations' => 'Perbaiki pencatatan kas harian.',
-            'status' => 'pending',
-            'created_by' => 1,
-        ]);
+        $clients = Client::with('auditors')->get();
 
-        $report2 = AuditReport::create([
-            'client_id' => 2,
-            'report_number' => 'AR/2026/002',
-            'title' => 'Audit Kepatuhan PT Sumber Rezeki',
-            'audit_type' => 'kepatuhan',
-            'audit_date' => now(),
-            'findings' => 'Dokumen SOP belum lengkap.',
-            'recommendations' => 'Lengkapi SOP operasional.',
-            'status' => 'approve',
-            'created_by' => 1,
-        ]);
+        // Pastikan 2 laporan pertama disetujui
+        $statuses = ['disetujui', 'disetujui', 'review', 'revisi'];
 
-        $report3 = AuditReport::create([
-            'client_id' => 3,
-            'report_number' => 'AR/2026/003',
-            'title' => 'Audit Internal CV Teknologi Nusantara',
-            'audit_type' => 'keuangan',
-            'audit_date' => now(),
-            'findings' => 'Pengeluaran tidak memiliki bukti.',
-            'recommendations' => 'Lampirkan bukti transaksi.',
-            'status' => 'revisi',
-            'revision_note' => 'Perbaiki detail transaksi.',
-            'created_by' => 1,
-        ]);
+        foreach ($clients as $index => $client) {
+            
+            // Pastikan klien memiliki setidaknya satu auditor
+            if ($client->auditors->count() > 0) {
+                
+                // Ambil auditor ketua tim, atau auditor pertama jika tidak ada
+                $auditor = $client->auditors->where('pivot.team_role', 'ketua')->first() ?? $client->auditors->first();
 
-        $report4 = AuditReport::create([
-            'client_id' => 4,
-            'report_number' => 'AR/2026/004',
-            'title' => 'Audit Keuangan PT Sejahtera Abadi',
-            'audit_type' => 'keuangan',
-            'audit_date' => now(),
-            'findings' => 'Laporan keuangan sudah sesuai.',
-            'recommendations' => 'Tidak ada rekomendasi.',
-            'status' => 'approve',
-            'created_by' => 1,
-        ]);
+                // Pilih status secara bergilir
+                $status = $statuses[$index % count($statuses)];
 
+                // Siapkan data dasar
+                $reportData = [
+                    'client_id' => $client->id,
+                    'report_number' => 'AR/2026/' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
+                    'title' => 'Laporan Audit - ' . $client->institution_name,
+                    'audit_type' => $client->audit_type,
+                    'audit_date' => now(),
+                    'findings' => 'Lihat pada dokumen lampiran.',
+                    'recommendations' => 'Lihat pada dokumen lampiran.',
+                    'status' => $status,
+                    'created_by' => $auditor->id,
+                ];
 
+                // Jika statusnya disetujui, tambahkan reviewer
+                if ($status === 'disetujui') {
+                    $reportData['reviewed_by'] = 2; // Asumsi ID 2 adalah pimpinan
+                    $reportData['reviewed_at'] = now();
+                }
 
-        // Auditor
-        $report1->auditors()->sync([3, 4]);
+                // Jika statusnya revisi, tambahkan catatan
+                if ($status === 'revisi') {
+                    $reportData['revision_note'] = 'Mohon lengkapi bagian lampiran sesuai dengan standar yang berlaku.';
+                }
 
-        $report2->auditors()->sync([4]);
-
-        $report3->auditors()->sync([3, 5]);
-
-        $report4->auditors()->sync([4]);
+                AuditReport::create($reportData);
+            }
+        }
     }
 }

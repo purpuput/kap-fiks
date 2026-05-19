@@ -7,58 +7,120 @@ use Illuminate\Database\Eloquent\Model;
 class AuditReport extends Model
 {
     protected $fillable = [
+
         'client_id',
+
         'report_number',
+
         'title',
+
         'audit_type',
+
         'audit_date',
+
         'findings',
+
         'recommendations',
+
         'status',
+
         'revision_note',
-        'created_by'
+
+        'created_by',
+
+        'reviewed_by',
+
+        'reviewed_at',
     ];
 
     protected $casts = [
+
         'audit_date' => 'date',
+
+        'reviewed_at' => 'datetime',
     ];
 
-    /**
-     * Relasi ke client
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Relasi client
+    |--------------------------------------------------------------------------
+    */
     public function client()
     {
         return $this->belongsTo(Client::class);
     }
 
-    /**
-     * Relasi pembuat laporan
-     */
-    public function createdBy()
+    /*
+    |--------------------------------------------------------------------------
+    | Auditor pembuat laporan
+    |--------------------------------------------------------------------------
+    */
+    public function creator()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(
+            User::class,
+            'created_by'
+        );
     }
 
-    /**
-     * Relasi auditor
-     */
-    public function auditors()
+    /*
+    |--------------------------------------------------------------------------
+    | Pimpinan reviewer
+    |--------------------------------------------------------------------------
+    */
+    public function reviewer()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsTo(
+            User::class,
+            'reviewed_by'
+        );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | File laporan audit
+    |--------------------------------------------------------------------------
+    */
     public function files()
     {
-        return $this->hasMany(AuditReportFile::class);
+        return $this->hasMany(
+            AuditReportFile::class
+        );
     }
 
-    public function documents()
-    {
-        return $this->hasMany(DocumentManagement::class);
-    }
-
+    /*
+    |--------------------------------------------------------------------------
+    | Arsip dokumen
+    |--------------------------------------------------------------------------
+    */
     public function documentManagements()
     {
-        return $this->hasMany(DocumentManagement::class);
+        return $this->hasMany(
+            DocumentManagement::class
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Status helper
+    |--------------------------------------------------------------------------
+    */
+
+    // Review
+    public function isReview(): bool
+    {
+        return $this->status === 'review';
+    }
+
+    // Revisi
+    public function isRevision(): bool
+    {
+        return $this->status === 'revisi';
+    }
+
+    // Approved
+    public function isApproved(): bool
+    {
+        return $this->status === 'disetujui';
     }
 }

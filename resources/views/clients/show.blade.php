@@ -231,6 +231,32 @@
 
                                 </div>
 
+                                {{-- Jenis audit --}}
+<div>
+
+    <p class="text-sm text-gray-500 mb-1">
+        Jenis Audit
+    </p>
+
+    @if($client->audit_type === 'keuangan')
+
+    <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">
+
+        Audit Keuangan
+
+    </span>
+
+    @else
+
+    <span class="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-medium">
+
+        Audit Kepatuhan
+
+    </span>
+
+    @endif
+
+</div>
                                 <div>
 
                                     <p class="text-sm text-gray-500 mb-1">
@@ -315,11 +341,11 @@
 
                                     @if($client->contract_start && $client->contract_end)
 
-                                    {{ \Carbon\Carbon::parse($client->contract_start)->format('d M Y') }}
+                                    {{ $client->contract_start->format('d M Y') }}
 
                                     -
 
-                                    {{ \Carbon\Carbon::parse($client->contract_end)->format('d M Y') }}
+                                    {{ $client->contract_end->format('d M Y') }}
 
                                     @else
 

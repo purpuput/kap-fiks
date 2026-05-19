@@ -10,18 +10,25 @@ class ClientSeeder extends Seeder
 {
     public function run(): void
     {
+        // User role
         $admin = User::where('role', 'admin')->first();
 
         $pimpinan = User::where('role', 'pimpinan')->first();
 
         $auditors = User::where('role', 'auditor')->get();
 
-        // PT Maju Jaya
+        /*
+        |--------------------------------------------------------------------------
+        | PT Maju Jaya
+        |--------------------------------------------------------------------------
+        */
         $client1 = Client::create([
 
             'created_by' => $admin->id,
 
             'institution_type' => 'Swasta',
+
+            'audit_type' => 'keuangan',
 
             'institution_name' => 'PT Maju Jaya',
 
@@ -55,27 +62,35 @@ class ClientSeeder extends Seeder
 
             'approved_at' => now(),
 
-            'description' => 'Klien audit keuangan'
+            'description' => 'Klien audit keuangan.',
         ]);
 
-        // Assign auditor
+        // Tim audit
         if ($auditors->count() >= 2) {
 
-            $client1->auditors()->attach($auditors[0]->id, [
-                'team_role' => 'ketua'
-            ]);
+            $client1->auditors()->attach(
+                $auditors[0]->id,
+                ['team_role' => 'ketua']
+            );
 
-            $client1->auditors()->attach($auditors[1]->id, [
-                'team_role' => 'anggota'
-            ]);
+            $client1->auditors()->attach(
+                $auditors[1]->id,
+                ['team_role' => 'anggota']
+            );
         }
 
-        // Dinas Pendidikan
+        /*
+        |--------------------------------------------------------------------------
+        | Dinas Pendidikan Kota Jambi
+        |--------------------------------------------------------------------------
+        */
         $client2 = Client::create([
 
             'created_by' => $admin->id,
 
             'institution_type' => 'Pemerintahan',
+
+            'audit_type' => 'kepatuhan',
 
             'institution_name' => 'Dinas Pendidikan Kota Jambi',
 
@@ -109,27 +124,35 @@ class ClientSeeder extends Seeder
 
             'approved_at' => now(),
 
-            'description' => 'Audit kepatuhan'
+            'description' => 'Audit kepatuhan instansi pemerintahan.',
         ]);
 
-        // Assign auditor
+        // Tim audit
         if ($auditors->count() >= 3) {
 
-            $client2->auditors()->attach($auditors[1]->id, [
-                'team_role' => 'ketua'
-            ]);
+            $client2->auditors()->attach(
+                $auditors[1]->id,
+                ['team_role' => 'ketua']
+            );
 
-            $client2->auditors()->attach($auditors[2]->id, [
-                'team_role' => 'anggota'
-            ]);
+            $client2->auditors()->attach(
+                $auditors[2]->id,
+                ['team_role' => 'anggota']
+            );
         }
 
-        // CV Teknologi Nusantara
+        /*
+        |--------------------------------------------------------------------------
+        | CV Teknologi Nusantara
+        |--------------------------------------------------------------------------
+        */
         $client3 = Client::create([
 
             'created_by' => $admin->id,
 
             'institution_type' => 'Swasta',
+
+            'audit_type' => 'keuangan',
 
             'institution_name' => 'CV Teknologi Nusantara',
 
@@ -159,23 +182,30 @@ class ClientSeeder extends Seeder
 
             'approval_status' => 'pending',
 
-            'description' => 'Klien baru'
+            'description' => 'Klien baru menunggu approval.',
         ]);
 
-        // Assign auditor
-        if ($auditors->count() >= 1) {
+        // Tim audit
+        if ($auditors->count() >= 3) {
 
-            $client3->auditors()->attach($auditors[0]->id, [
-                'team_role' => 'ketua'
-            ]);
+            $client3->auditors()->attach(
+                $auditors[2]->id,
+                ['team_role' => 'ketua']
+            );
         }
 
-        // PT Sejahtera Abadi
+        /*
+        |--------------------------------------------------------------------------
+        | PT Sejahtera Abadi
+        |--------------------------------------------------------------------------
+        */
         $client4 = Client::create([
 
             'created_by' => $admin->id,
 
             'institution_type' => 'Swasta',
+
+            'audit_type' => 'keuangan',
 
             'institution_name' => 'PT Sejahtera Abadi',
 
@@ -205,19 +235,21 @@ class ClientSeeder extends Seeder
 
             'approval_status' => 'pending',
 
-            'description' => 'Klien baru'
+            'description' => 'Klien audit baru.',
         ]);
 
-        // Assign auditor
+        // Tim audit
         if ($auditors->count() >= 2) {
 
-            $client4->auditors()->attach($auditors[0]->id, [
-                'team_role' => 'anggota'
-            ]);
+            $client4->auditors()->attach(
+                $auditors[1]->id,
+                ['team_role' => 'ketua']
+            );
 
-            $client4->auditors()->attach($auditors[1]->id, [
-                'team_role' => 'ketua'
-            ]);
+            $client4->auditors()->attach(
+                $auditors[0]->id,
+                ['team_role' => 'anggota']
+            );
         }
     }
 }

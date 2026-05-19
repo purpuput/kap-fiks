@@ -12,8 +12,8 @@ return new class extends Migration
 
             $table->enum('status', [
                 'pending',
-                'approve',
-                'revisi'
+                'lengkap',
+                'belum lengkap'
             ])->default('pending');
 
             $table->text('revision_note')

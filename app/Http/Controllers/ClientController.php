@@ -86,6 +86,8 @@ class ClientController extends Controller
 
             'institution_type' => 'required|in:Pemerintahan,Swasta',
 
+            'audit_type' => 'required|in:keuangan,kepatuhan',
+
             'institution_name' => 'required|string|max:255',
 
             'leader_name' => 'required|string|max:255',
@@ -176,6 +178,8 @@ class ClientController extends Controller
         $validated = $request->validate([
 
             'institution_type' => 'required|in:Pemerintahan,Swasta',
+
+            'audit_type' => 'required|in:keuangan,kepatuhan',
 
             'institution_name' => 'required|string|max:255',
 

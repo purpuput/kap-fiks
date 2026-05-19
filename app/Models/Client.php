@@ -14,6 +14,7 @@ class Client extends Model
     protected $fillable = [
         'created_by',
         'institution_type',
+        'audit_type',
         'institution_name',
         'leader_name',
         'address',
@@ -32,6 +33,12 @@ class Client extends Model
         'approved_at',
         'revision_note',
         'description',
+    ];
+
+    protected $casts = [
+        'contract_start' => 'date',
+        'contract_end' => 'date',
+        'approved_at' => 'datetime',
     ];
 
     /*

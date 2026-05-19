@@ -35,11 +35,13 @@ class DashboardController extends Controller
             // Absensi hari ini
             'absensiHariIni'      => Attendance::whereDate('date', today())->count(),
 
-            // Logbook pending
+            // Logbook
             'logbookPending'      => Logbook::where('status', 'pending')->count(),
+            'logbookApprove'      => Logbook::where('status', 'approved')->count(),
+            'logbookRevisi'       => Logbook::where('status', 'revision')->count(),
 
             // Laporan terbaru
-            'laporanTerbaru'      => AuditReport::with(['client', 'auditors'])
+            'laporanTerbaru'      => AuditReport::with(['client.auditors'])
                                         ->latest()
                                         ->take(5)
                                         ->get(),
@@ -97,7 +99,7 @@ class DashboardController extends Controller
     {
         // Laporan menunggu review
         $laporanMenunggu = AuditReport::where('status', 'pending')
-            ->with(['client', 'auditors'])
+            ->with(['client.auditors'])
             ->latest()
             ->get();
 
@@ -116,7 +118,7 @@ class DashboardController extends Controller
 
             // Laporan baru disetujui
             'laporanDisetujui'    => AuditReport::where('status', 'approve')
-                                        ->with(['client', 'auditors'])
+                                        ->with(['client.auditors'])
                                         ->latest('updated_at')
                                         ->take(5)
                                         ->get(),
@@ -127,8 +129,13 @@ class DashboardController extends Controller
                                         ->take(5)
                                         ->get(),
 
-            // Total logbook pending
+            // Absensi hari ini
+            'absensiHariIni'      => Attendance::whereDate('date', today())->count(),
+
+            // Logbook
             'logbookPending'      => Logbook::where('status', 'pending')->count(),
+            'logbookApprove'      => Logbook::where('status', 'approved')->count(),
+            'logbookRevisi'       => Logbook::where('status', 'revision')->count(),
         ];
 
         return view('pimpinan.dashboard', $data);

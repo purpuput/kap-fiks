@@ -20,8 +20,8 @@
                     <p class="font-semibold text-gray-800 text-sm truncate">{{ $laporan->title }}</p>
                     <p class="text-xs text-gray-400 mt-0.5">
                         {{ $laporan->report_number }} · {{ $laporan->client->institution_name ?? '-' }}
-                        @if($laporan->auditors->count())
-                        · oleh {{ $laporan->auditors->pluck('name')->join(', ') }}
+                        @if($laporan->client->auditors->count())
+                        · oleh {{ $laporan->client->auditors->pluck('name')->join(', ') }}
                         @endif
                     </p>
                 </div>
@@ -56,8 +56,8 @@
     @endif
 
     {{-- STAT CARDS --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl shadow p-5">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-2xl shadow p-5 col-span-2 lg:col-span-1">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-xs text-gray-400 uppercase tracking-wide">Total Laporan</p>
@@ -96,17 +96,33 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-2xl shadow p-5">
+        <div class="bg-white rounded-2xl shadow p-5 col-span-2 lg:col-span-1">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-xs text-gray-400 uppercase tracking-wide">Logbook Pending</p>
-                    <p class="text-3xl font-extrabold text-gray-800 mt-1">{{ $logbookPending }}</p>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Logbook Auditor</p>
+                    <p class="text-3xl font-extrabold text-gray-800 mt-1">{{ $logbookPending + $logbookApprove + $logbookRevisi }}</p>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
                     <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
             </div>
-            <a href="{{ route('logbooks.index') }}" class="text-xs text-orange-600 hover:underline mt-3 block font-semibold">Tinjau logbook →</a>
+            <div class="flex gap-1 mt-3 flex-wrap">
+                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-bold">{{ $logbookPending }} pending</span>
+                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">{{ $logbookApprove }} approve</span>
+                <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">{{ $logbookRevisi }} revisi</span>
+            </div>
+            <a href="{{ route('logbooks.index') }}" class="text-[10px] text-orange-600 hover:underline mt-2 block font-semibold text-right">Tinjau →</a>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-5 col-span-2 lg:col-span-1">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Absensi Hari Ini</p>
+                    <p class="text-3xl font-extrabold text-gray-800 mt-1">{{ $absensiHariIni }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+            </div>
         </div>
     </div>
 

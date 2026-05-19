@@ -15,52 +15,112 @@ return new class extends Migration
 
             $table->id();
 
-            // admin pembuat data
+            // Admin pembuat data
             $table->foreignId('created_by')
                 ->constrained('users')
                 ->cascadeOnDelete();
 
+            // Jenis instansi
             $table->enum('institution_type', [
+
                 'Pemerintahan',
+
                 'Swasta'
             ]);
 
+            // Jenis audit
+            $table->enum('audit_type', [
+
+                'keuangan',
+
+                'kepatuhan'
+            ]);
+
+            // Nama instansi
             $table->string('institution_name');
 
+            // Nama pimpinan
             $table->string('leader_name');
 
+            // Alamat
             $table->text('address');
 
+            // Kota
             $table->string('city');
 
+            // Provinsi
             $table->string('province');
 
+            // Kode pos
             $table->string('postal_code');
 
+            // Telepon
             $table->string('phone');
 
-            $table->string('email')->nullable();
+            // Email
+            $table->string('email')
+                ->nullable();
 
-            $table->string('npwp')->nullable();
+            // NPWP
+            $table->string('npwp')
+                ->nullable();
 
-            // masa kontrak audit
-            $table->date('contract_start')->nullable();
+            // Kontrak audit mulai
+            $table->date('contract_start')
+                ->nullable();
 
-            $table->date('contract_end')->nullable();
+            // Kontrak audit selesai
+            $table->date('contract_end')
+                ->nullable();
 
-            // status kontrak
+            // Status kontrak
             $table->enum('contract_status', [
+
                 'aktif',
+
                 'hampir_habis',
+
                 'selesai'
+
             ])->default('aktif');
 
+            // Status client
             $table->enum('status', [
+
                 'aktif',
+
                 'nonaktif'
+
             ])->default('aktif');
 
-            $table->text('description')->nullable();
+            // Approval pimpinan
+            $table->enum('approval_status', [
+
+                'pending',
+
+                'disetujui',
+
+                'revisi'
+
+            ])->default('pending');
+
+            // Pimpinan approval
+            $table->foreignId('approved_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            // Tanggal approval
+            $table->timestamp('approved_at')
+                ->nullable();
+
+            // Catatan revisi
+            $table->text('revision_note')
+                ->nullable();
+
+            // Deskripsi
+            $table->text('description')
+                ->nullable();
 
             $table->softDeletes();
 

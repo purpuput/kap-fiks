@@ -72,73 +72,14 @@
                             </select>
                         </div>
 
-                        {{-- Judul --}}
+                        {{-- Tanggal Audit --}}
                         <div class="md:col-span-2">
                             <label class="block text-sm font-semibold text-gray-700 mb-1">
-                                Judul Laporan <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" name="title"
-                                value="{{ old('title', $auditReport->title) }}" required
-                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-300 focus:outline-none text-sm">
-                        </div>
-
-                        {{-- Jenis Audit --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
-                                Jenis Audit <span class="text-red-500">*</span>
-                            </label>
-                            <select name="audit_type" required
-                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-300 focus:outline-none text-sm">
-                                <option value="keuangan" {{ $auditReport->audit_type == 'keuangan' ? 'selected' : '' }}>
-                                    Audit Keuangan
-                                </option>
-                                <option value="kepatuhan" {{ $auditReport->audit_type == 'kepatuhan' ? 'selected' : '' }}>
-                                    Audit Kepatuhan
-                                </option>
-                            </select>
-                        </div>
-
-                        {{-- Tanggal Audit --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
-                                Tanggal Audit <span class="text-red-500">*</span>
+                                Tanggal Pembuatan Laporan <span class="text-red-500">*</span>
                             </label>
                             <input type="date" name="audit_date"
                                 value="{{ old('audit_date', $auditReport->audit_date->toDateString()) }}" required
                                 class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-300 focus:outline-none text-sm">
-                        </div>
-
-                        {{-- Auditor --}}
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
-                                Auditor <span class="text-red-500">*</span>
-                            </label>
-                            <select name="auditors[]" multiple required
-                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-300 focus:outline-none text-sm h-28">
-                                @foreach($auditors as $auditor)
-                                <option value="{{ $auditor->id }}"
-                                    {{ $auditReport->auditors->contains($auditor->id) ? 'selected' : '' }}>
-                                    {{ $auditor->name }}
-                                </option>
-                                @endforeach
-                            </select>
-                            <p class="text-xs text-gray-400 mt-1">Tahan Ctrl/Cmd untuk memilih lebih dari satu</p>
-                        </div>
-
-                        {{-- Temuan --}}
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
-                                Temuan Audit <span class="text-red-500">*</span>
-                            </label>
-                            <textarea name="findings" rows="4" required
-                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-300 focus:outline-none text-sm resize-none">{{ old('findings', $auditReport->findings) }}</textarea>
-                        </div>
-
-                        {{-- Rekomendasi --}}
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Rekomendasi</label>
-                            <textarea name="recommendations" rows="3"
-                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-300 focus:outline-none text-sm resize-none">{{ old('recommendations', $auditReport->recommendations) }}</textarea>
                         </div>
 
                     </div>

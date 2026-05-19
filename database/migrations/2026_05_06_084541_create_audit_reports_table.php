@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Run migrations
      */
     public function up(): void
     {
@@ -15,43 +15,71 @@ return new class extends Migration
 
             $table->id();
 
+            // Client terkait
             $table->foreignId('client_id')
                 ->constrained()
-                ->onDelete('cascade');
+                ->cascadeOnDelete();
 
+            // Auditor pembuat laporan
+            $table->foreignId('created_by')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            // Pimpinan reviewer
+            $table->foreignId('reviewed_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            // Nomor laporan
             $table->string('report_number')->unique();
 
+            // Judul audit
             $table->string('title');
 
+            // Jenis audit
             $table->enum('audit_type', [
                 'keuangan',
                 'kepatuhan'
             ]);
 
+            // Tanggal audit
             $table->date('audit_date');
 
-            $table->text('findings');
+            // Temuan audit
+            $table->longText('findings');
 
-            $table->text('recommendations')->nullable();
+            // Rekomendasi
+            $table->longText('recommendations')
+                ->nullable();
 
+            // Upload laporan
+            $table->string('report_file')
+                ->nullable();
+
+            // Status workflow
             $table->enum('status', [
-                'pending',
-                'approve',
-                'revisi'
-            ])->default('pending');
 
-            $table->text('revision_note')->nullable();
+                'review',
+                'revisi',
+                'disetujui'
 
-            $table->foreignId('created_by')
-                ->constrained('users')
-                ->onDelete('cascade');
+            ])->default('review');
+
+            // Catatan revisi pimpinan
+            $table->text('revision_note')
+                ->nullable();
+
+            // Tanggal review
+            $table->timestamp('reviewed_at')
+                ->nullable();
 
             $table->timestamps();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Reverse migrations
      */
     public function down(): void
     {

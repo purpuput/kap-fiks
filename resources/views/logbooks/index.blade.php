@@ -70,7 +70,8 @@
                                 <th class="px-4 py-3.5 text-left">Auditor</th>
                                 @endif
                                 <th class="px-4 py-3.5 text-left">Tanggal</th>
-                                <th class="px-4 py-3.5 text-left">Aktivitas</th>
+                                <th class="px-4 py-3.5 text-left">Klien</th>
+                                <th class="px-4 py-3.5 text-left">Pekerjaan Utama</th>
                                 <th class="px-4 py-3.5 text-left">Status</th>
                                 <th class="px-4 py-3.5 text-left">Catatan Revisi</th>
                                 <th class="px-4 py-3.5 text-center">Aksi</th>
@@ -94,8 +95,12 @@
                                     {{ $logbook->date->format('d M Y') }}
                                 </td>
 
+                                <td class="px-4 py-4 text-gray-700">
+                                    {{ optional($logbook->client)->institution_name ?? '-' }}
+                                </td>
+
                                 <td class="px-4 py-4 text-gray-700 max-w-xs">
-                                    <p class="truncate">{{ $logbook->activity }}</p>
+                                    <p class="truncate">{{ $logbook->main_task }}</p>
                                 </td>
 
                                 <td class="px-4 py-4">
@@ -122,6 +127,8 @@
                                     {{-- ADMIN --}}
                                     @if(auth()->user()->role === 'admin')
                                     <div class="flex items-center justify-center gap-2">
+                                        <a href="{{ route('logbooks.show', $logbook) }}"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">Detail</a>
                                         <a href="{{ route('logbooks.edit', $logbook) }}"
                                             class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">Edit</a>
                                         <form action="{{ route('logbooks.destroy', $logbook) }}" method="POST"
@@ -135,6 +142,8 @@
                                     @elseif(auth()->user()->role === 'pimpinan')
                                     @if($logbook->status === 'pending')
                                     <div class="flex items-center justify-center gap-2">
+                                        <a href="{{ route('logbooks.show', $logbook) }}"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">Detail</a>
                                         <form action="{{ route('logbooks.approve', $logbook) }}" method="POST">
                                             @csrf @method('PATCH')
                                             <button class="bg-green-50 hover:bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">Approve</button>
@@ -157,11 +166,15 @@
                                         </form>
                                     </div>
                                     @elseif($logbook->status === 'revision')
-                                    <button type="button"
-                                        onclick="document.getElementById('edit-revision-{{ $logbook->id }}').classList.toggle('hidden')"
-                                        class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">
-                                        Edit Revisi
-                                    </button>
+                                    <div class="flex items-center justify-center gap-2 mt-2">
+                                        <a href="{{ route('logbooks.show', $logbook) }}"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">Detail</a>
+                                        <button type="button"
+                                            onclick="document.getElementById('edit-revision-{{ $logbook->id }}').classList.toggle('hidden')"
+                                            class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">
+                                            Edit Revisi
+                                        </button>
+                                    </div>
                                     <div id="edit-revision-{{ $logbook->id }}" class="hidden mt-2 text-left">
                                         <form action="{{ route('logbooks.revision', $logbook) }}" method="POST">
                                             @csrf @method('PATCH')
@@ -174,24 +187,30 @@
                                         </form>
                                     </div>
                                     @else
-                                    <span class="text-green-600 text-xs font-semibold">✓ Selesai</span>
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <span class="text-green-600 text-xs font-semibold">✓ Selesai</span>
+                                        <a href="{{ route('logbooks.show', $logbook) }}"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition mt-1">Detail</a>
+                                    </div>
                                     @endif
 
                                     {{-- AUDITOR --}}
                                     @else
-                                    @if($logbook->status === 'pending' && !$logbook->created_at->addDay()->isPast())
-                                    <a href="{{ route('logbooks.edit', $logbook) }}"
-                                        class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">Edit</a>
-                                    @else
-                                    <span class="text-gray-300 text-xs">—</span>
-                                    @endif
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a href="{{ route('logbooks.show', $logbook) }}"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">Detail</a>
+                                        @if($logbook->status === 'pending' && !$logbook->created_at->addDay()->isPast())
+                                        <a href="{{ route('logbooks.edit', $logbook) }}"
+                                            class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">Edit</a>
+                                        @endif
+                                    </div>
                                     @endif
                                 </td>
 
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="{{ in_array(auth()->user()->role, ['admin', 'pimpinan']) ? 7 : 6 }}"
+                                <td colspan="{{ in_array(auth()->user()->role, ['admin', 'pimpinan']) ? 8 : 7 }}"
                                     class="py-16 text-center">
                                     <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>

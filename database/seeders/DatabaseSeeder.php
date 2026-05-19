@@ -20,9 +20,9 @@ class DatabaseSeeder extends Seeder
         // Seeder lain setelah user tersedia
         $this->call(AttendanceSeeder::class);
 
-        $this->call(LogbookSeeder::class);
-
         $this->call(ClientSeeder::class);
+
+        $this->call(LogbookSeeder::class);
 
         $this->call(AuditReportSeeder::class);
 

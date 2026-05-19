@@ -6,7 +6,6 @@ use App\Models\AuditReport;
 use App\Models\AuditReportFile;
 use App\Models\Client;
 use App\Models\DocumentManagement;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -14,342 +13,794 @@ use Illuminate\Support\Facades\Storage;
 class AuditReportController extends Controller
 {
     /**
-     * 10 tipe dokumen wajib laporan audit
+     * Tipe dokumen audit
      */
     protected array $documentTypes = [
-        'spk'                      => 'SPK (Surat Perintah Kerja)',
+
+        'spk'                      => 'SPK',
+
         'surat_tugas'              => 'Surat Tugas',
+
         'invoice'                  => 'Invoice',
+
         'laporan_keuangan'         => 'Laporan Keuangan',
+
         'kertas_kerja'             => 'Kertas Kerja',
+
         'berita_acara_pemeriksaan' => 'Berita Acara Pemeriksaan',
-        'data_klien'               => 'Data yang Diterima dari Klien',
+
+        'data_klien'               => 'Data Klien',
+
         'surat_pernyataan_klien'   => 'Surat Pernyataan Klien',
-        'management_letter'        => 'Management Letter Temuan',
+
+        'management_letter'        => 'Management Letter',
+
         'laporan_audit'            => 'Laporan Audit',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * List laporan
+     */
     public function index(Request $request)
     {
-        $search = $request->input('search');
-        $status = $request->input('status');
+        $search = $request->search;
 
-        $query = AuditReport::with(['client', 'createdBy', 'auditors', 'files']);
+        $status = $request->status;
 
-        // Jika user adalah auditor, hanya tampilkan laporan di mana ia terlibat
+        $query = AuditReport::with([
+
+            'client',
+
+            'creator',
+
+            'reviewer',
+
+            'files'
+        ]);
+
+        // Auditor hanya melihat laporan miliknya
         if (Auth::user()->role === 'auditor') {
-            $query->whereHas('auditors', function ($q) {
-                $q->where('users.id', Auth::id());
-            });
+
+            $query->where(
+                'created_by',
+                Auth::id()
+            );
         }
 
+        // Search
         if ($search) {
+
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('report_number', 'like', "%{$search}%");
+
+                $q->where(
+                    'title',
+                    'like',
+                    "%{$search}%"
+                )
+
+                    ->orWhere(
+                        'report_number',
+                        'like',
+                        "%{$search}%"
+                    );
             });
         }
 
+        // Filter status
         if ($status) {
-            $query->where('status', $status);
+
+            $query->where(
+                'status',
+                $status
+            );
         }
 
-        $reports = $query->latest()->paginate(10);
+        $reports = $query
+            ->latest()
+            ->paginate(10);
 
-        return view('audit_reports.index', compact('reports', 'search', 'status'));
+        return view(
+            'audit_reports.index',
+            compact(
+
+                'reports',
+
+                'search',
+
+                'status'
+            )
+        );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SHOW
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Detail laporan
+     */
     public function show(AuditReport $auditReport)
     {
-        $auditReport->load(['client', 'createdBy', 'auditors', 'files.uploader']);
+        // Auditor hanya boleh melihat laporan miliknya
+        if (
 
-        $documentTypes = $this->documentTypes;
-        $filesByType   = $auditReport->files->keyBy('document_type');
+            Auth::user()->role === 'auditor' &&
 
-        return view('audit_reports.show', compact('auditReport', 'documentTypes', 'filesByType'));
-    }
+            $auditReport->created_by !== Auth::id()
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
-    public function create()
-    {
-        $clients       = Client::where('status', 'aktif')->get();
-        $auditors      = User::where('role', 'auditor')->get();
-        $documentTypes = $this->documentTypes;
+        ) {
 
-        return view('audit_reports.create', compact('clients', 'auditors', 'documentTypes'));
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | STORE
-    |--------------------------------------------------------------------------
-    */
-    public function store(Request $request)
-    {
-        // Build file validation — semua 10 file wajib
-        $fileRules = [];
-        foreach (array_keys($this->documentTypes) as $type) {
-            $mimes = ($type === 'data_klien')
-                ? 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx|max:102400'
-                : 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:51200';
-            $fileRules["files.{$type}"] = "required|file|{$mimes}";
+            abort(403);
         }
 
+        $auditReport->load([
+
+            'client',
+
+            'creator',
+
+            'reviewer',
+
+            'files'
+        ]);
+
+        $documentTypes = $this->documentTypes;
+
+        $filesByType = $auditReport->files
+            ->keyBy('document_type');
+
+        return view(
+            'audit_reports.show',
+            compact(
+
+                'auditReport',
+
+                'documentTypes',
+
+                'filesByType'
+            )
+        );
+    }
+
+    /**
+     * Form create
+     */
+    public function create()
+    {
+        // Hanya auditor
+        abort_if(
+
+            Auth::user()->role !== 'auditor',
+
+            403
+        );
+
+        // Client assigned
+        $clients = Auth::user()
+            ->clients()
+            ->with('auditors')
+            ->where(
+                'approval_status',
+                'disetujui'
+            )
+            ->where(
+                'status',
+                'aktif'
+            )
+            ->get();
+
+        $documentTypes = $this->documentTypes;
+
+        return view(
+            'audit_reports.create',
+            compact(
+
+                'clients',
+
+                'documentTypes'
+            )
+        );
+    }
+
+    /**
+     * Store laporan
+     */
+    public function store(Request $request)
+    {
+        // Hanya auditor
+        abort_if(
+
+            Auth::user()->role !== 'auditor',
+
+            403
+        );
+
+        $fileRules = [];
+
+        // Validasi file
+        foreach (
+            array_keys($this->documentTypes)
+            as $type
+        ) {
+
+            $mimes = ($type === 'data_klien')
+
+                ? 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx|max:102400'
+
+                : 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:51200';
+
+            $fileRules["files.{$type}"] =
+                "required|file|{$mimes}";
+        }
+
+        // Validasi form
         $request->validate(array_merge([
-            'client_id'       => 'required|exists:clients,id',
-            'report_number'   => 'required|string|unique:audit_reports,report_number',
-            'title'           => 'required|string|max:255',
-            'audit_type'      => 'required|in:keuangan,kepatuhan',
-            'audit_date'      => 'required|date',
-            'findings'        => 'required|string',
-            'recommendations' => 'nullable|string',
-            'auditors'        => 'required|array',
+
+            'client_id' => 'required|exists:clients,id',
+
+            'audit_date' => 'required|date',
+
         ], $fileRules));
+
+        // Client
+        $client = Client::findOrFail(
+            $request->client_id
+        );
+
+        // Hanya bisa membuat laporan untuk klien yang di-assign ke mereka
+        abort_if(
+            !$client->auditors()->where('users.id', Auth::id())->exists(),
+            403
+        );
+
+        // Generate nomor laporan
+        $lastReport = AuditReport::latest()->first();
+
+        $number = $lastReport
+
+            ? ((int) substr(
+                $lastReport->report_number,
+                -4
+            )) + 1
+
+            : 1;
+
+        $reportNumber = 'LAP-' .
+            date('Y') . '-' .
+            str_pad(
+                $number,
+                4,
+                '0',
+                STR_PAD_LEFT
+            );
 
         // Simpan laporan
         $report = AuditReport::create([
-            'client_id'       => $request->client_id,
-            'report_number'   => $request->report_number,
-            'title'           => $request->title,
-            'audit_type'      => $request->audit_type,
-            'audit_date'      => $request->audit_date,
-            'findings'        => $request->findings,
-            'recommendations' => $request->recommendations,
-            'status'          => 'pending',
-            'created_by'      => Auth::id(),
+
+            'client_id' => $request->client_id,
+
+            'report_number' => $reportNumber,
+
+            'title' => 'Laporan Audit - ' .
+                $client->institution_name,
+
+            // Otomatis dari client
+            'audit_type' => $client->audit_type,
+
+            'audit_date' => $request->audit_date,
+
+            'findings' => 'Lihat pada dokumen lampiran.',
+            'recommendations' => 'Lihat pada dokumen lampiran.',
+
+            'status' => 'review',
+
+            'created_by' => Auth::id(),
         ]);
 
-        $report->auditors()->sync($request->auditors);
+        // Upload file
+        foreach (
+            array_keys($this->documentTypes)
+            as $type
+        ) {
 
-        // Upload 10 file
-        foreach (array_keys($this->documentTypes) as $type) {
-            if ($request->hasFile("files.{$type}")) {
-                $file = $request->file("files.{$type}");
-                $path = $file->store("audit_reports/{$report->id}", 'public');
+            if (
+                $request->hasFile("files.{$type}")
+            ) {
+
+                $file = $request->file(
+                    "files.{$type}"
+                );
+
+                $path = $file->store(
+
+                    "audit_reports/{$report->id}",
+
+                    'public'
+                );
 
                 AuditReportFile::create([
+
                     'audit_report_id' => $report->id,
-                    'document_name'   => $file->getClientOriginalName(),
-                    'document_type'   => $type,
-                    'file'            => $path,
-                    'uploaded_by'     => Auth::id(),
+
+                    'document_name' =>
+                    $file->getClientOriginalName(),
+
+                    'document_type' => $type,
+
+                    'file' => $path,
+
+                    'version' => 1,
+
+                    'is_active' => true,
+
+                    'uploaded_by' => Auth::id(),
                 ]);
             }
         }
 
         return redirect()
             ->route('audit_reports.index')
-            ->with('success', 'Laporan audit berhasil dibuat');
+            ->with(
+                'success',
+                'Laporan audit berhasil dibuat.'
+            );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | EDIT
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Form edit
+     */
     public function edit(AuditReport $auditReport)
     {
-        if ($auditReport->status === 'approve') {
-            return back()->with('error', 'Laporan yang sudah di-approve tidak dapat diedit');
+        // Hanya auditor
+        abort_if(
+
+            Auth::user()->role !== 'auditor',
+
+            403
+        );
+
+        // Hanya laporan sendiri
+        abort_if(
+
+            $auditReport->created_by !== Auth::id(),
+
+            403
+        );
+
+        // Final tidak bisa edit
+        if (
+            $auditReport->status === 'disetujui'
+        ) {
+
+            return back()->with(
+
+                'error',
+
+                'Laporan tidak dapat diedit.'
+            );
         }
 
-        $clients       = Client::where('status', 'aktif')->get();
-        $auditors      = User::where('role', 'auditor')->get();
-        $documentTypes = $this->documentTypes;
-        $filesByType   = $auditReport->files->keyBy('document_type');
+        $clients = Auth::user()
+            ->clients()
+            ->with('auditors')
+            ->where(
+                'approval_status',
+                'disetujui'
+            )
+            ->where(
+                'status',
+                'aktif'
+            )
+            ->get();
 
-        return view('audit_reports.edit', compact(
-            'auditReport',
-            'clients',
-            'auditors',
-            'documentTypes',
-            'filesByType'
-        ));
+        $documentTypes = $this->documentTypes;
+
+        $filesByType = $auditReport->files
+            ->keyBy('document_type');
+
+        return view(
+            'audit_reports.edit',
+            compact(
+
+                'auditReport',
+
+                'clients',
+
+                'documentTypes',
+
+                'filesByType'
+            )
+        );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE
-    |--------------------------------------------------------------------------
-    */
-    public function update(Request $request, AuditReport $auditReport)
-    {
-        if ($auditReport->status === 'approve') {
-            return back()->with('error', 'Laporan yang sudah di-approve tidak dapat diedit');
+    /**
+     * Update laporan
+     */
+    public function update(
+        Request $request,
+        AuditReport $auditReport
+    ) {
+        // Hanya auditor
+        abort_if(
+
+            Auth::user()->role !== 'auditor',
+
+            403
+        );
+
+        // Hanya laporan sendiri
+        abort_if(
+
+            $auditReport->created_by !== Auth::id(),
+
+            403
+        );
+
+        // Final tidak bisa edit
+        if (
+            $auditReport->status === 'disetujui'
+        ) {
+
+            return back()->with(
+
+                'error',
+
+                'Laporan tidak dapat diedit.'
+            );
         }
 
-        // File rules: required hanya jika belum ada file untuk tipe itu
         $fileRules = [];
-        $existingFiles = $auditReport->files->keyBy('document_type');
-        foreach (array_keys($this->documentTypes) as $type) {
-            $required = isset($existingFiles[$type]) ? 'nullable' : 'required';
-            $mimes    = ($type === 'data_klien')
+
+        $existingFiles = $auditReport->files
+            ->keyBy('document_type');
+
+        // Validasi file
+        foreach (
+            array_keys($this->documentTypes)
+            as $type
+        ) {
+
+            $required = isset(
+                $existingFiles[$type]
+            )
+                ? 'nullable'
+                : 'required';
+
+            $mimes = ($type === 'data_klien')
+
                 ? 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx|max:102400'
+
                 : 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:51200';
-            $fileRules["files.{$type}"] = "{$required}|file|{$mimes}";
+
+            $fileRules["files.{$type}"] =
+                "{$required}|file|{$mimes}";
         }
 
+        // Validasi form
         $request->validate(array_merge([
-            'client_id'       => 'required|exists:clients,id',
-            'title'           => 'required|string|max:255',
-            'audit_type'      => 'required|in:keuangan,kepatuhan',
-            'audit_date'      => 'required|date',
-            'findings'        => 'required|string',
-            'recommendations' => 'nullable|string',
-            'auditors'        => 'required|array',
+
+            'client_id' => 'required|exists:clients,id',
+
+            'audit_date' => 'required|date',
+
         ], $fileRules));
 
+        // Client
+        $client = Client::findOrFail(
+            $request->client_id
+        );
+
+        // Update laporan
         $auditReport->update([
-            'client_id'       => $request->client_id,
-            'title'           => $request->title,
-            'audit_type'      => $request->audit_type,
-            'audit_date'      => $request->audit_date,
-            'findings'        => $request->findings,
-            'recommendations' => $request->recommendations,
+
+            'client_id' => $request->client_id,
+
+            'title' => 'Laporan Audit - ' .
+                $client->institution_name,
+
+            'audit_type' => $client->audit_type,
+
+            'audit_date' => $request->audit_date,
         ]);
 
-        $auditReport->auditors()->sync($request->auditors);
+        // Update file
+        foreach (
+            array_keys($this->documentTypes)
+            as $type
+        ) {
 
-        // Replace file jika ada yang baru diupload
-        foreach (array_keys($this->documentTypes) as $type) {
-            if ($request->hasFile("files.{$type}")) {
-                $file = $request->file("files.{$type}");
+            if (
+                $request->hasFile("files.{$type}")
+            ) {
+
+                $file = $request->file(
+                    "files.{$type}"
+                );
+
+                $existing =
+                    $existingFiles[$type] ?? null;
 
                 // Hapus file lama
-                $existing = $existingFiles[$type] ?? null;
                 if ($existing) {
-                    Storage::disk('public')->delete($existing->file);
+
+                    Storage::disk('public')
+                        ->delete($existing->file);
+
                     $existing->delete();
+
+                    // Hapus archive lama
+                    DocumentManagement::where(
+
+                        'audit_report_id',
+                        $auditReport->id
+
+                    )
+                        ->where(
+                            'document_type',
+                            $type
+                        )
+                        ->delete();
                 }
 
-                // Simpan file baru
-                $path = $file->store("audit_reports/{$auditReport->id}", 'public');
+                // Upload file baru
+                $path = $file->store(
+
+                    "audit_reports/{$auditReport->id}",
+
+                    'public'
+                );
+
                 AuditReportFile::create([
-                    'audit_report_id' => $auditReport->id,
-                    'document_name'   => $file->getClientOriginalName(),
-                    'document_type'   => $type,
-                    'file'            => $path,
-                    'uploaded_by'     => Auth::id(),
+
+                    'audit_report_id' =>
+                    $auditReport->id,
+
+                    'document_name' =>
+                    $file->getClientOriginalName(),
+
+                    'document_type' => $type,
+
+                    'file' => $path,
+
+                    'version' => $existing
+                        ? $existing->version + 1
+                        : 1,
+
+                    'is_active' => true,
+
+                    'uploaded_by' => Auth::id(),
                 ]);
             }
         }
 
-        // Reset ke pending jika sebelumnya revisi agar pimpinan bisa review ulang
-        if ($auditReport->fresh()->status === 'revisi') {
+        // Submit ulang setelah revisi
+        if (
+            $auditReport->fresh()->status === 'revisi'
+        ) {
+
             $auditReport->update([
-                'status'        => 'pending',
+
+                'status' => 'review',
+
                 'revision_note' => null,
             ]);
         }
 
         return redirect()
             ->route('audit_reports.index')
-            ->with('success', 'Laporan audit berhasil diperbarui');
+            ->with(
+                'success',
+                'Laporan berhasil diperbarui.'
+            );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DESTROY
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Hapus laporan
+     */
     public function destroy(AuditReport $auditReport)
     {
-        if ($auditReport->status === 'approve') {
-            return back()->with('error', 'Laporan yang sudah di-approve tidak dapat dihapus');
+        // Hanya auditor
+        abort_if(
+
+            Auth::user()->role !== 'auditor',
+
+            403
+        );
+
+        // Hanya laporan sendiri
+        abort_if(
+
+            $auditReport->created_by !== Auth::id(),
+
+            403
+        );
+
+        // Final tidak bisa dihapus
+        if (
+            $auditReport->status === 'disetujui'
+        ) {
+
+            return back()->with(
+
+                'error',
+
+                'Laporan tidak dapat dihapus.'
+            );
         }
 
-        // Hapus semua file dari storage
-        foreach ($auditReport->files as $file) {
-            Storage::disk('public')->delete($file->file);
+        // Hapus storage
+        foreach (
+            $auditReport->files
+            as $file
+        ) {
+
+            Storage::disk('public')
+                ->delete($file->file);
         }
 
         $auditReport->delete();
 
         return redirect()
             ->route('audit_reports.index')
-            ->with('success', 'Laporan audit berhasil dihapus');
+            ->with(
+                'success',
+                'Laporan berhasil dihapus.'
+            );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | APPROVE — Hanya Pimpinan
-    |--------------------------------------------------------------------------
-    */
-    public function approve(int $id)
+    /**
+     * Approve file (dokumen audit per item)
+     */
+    public function approveFile(Request $request, AuditReportFile $file)
     {
-        $report = AuditReport::with('files')->findOrFail($id);
+        // Hanya pimpinan
+        abort_if(Auth::user()->role !== 'pimpinan', 403);
 
-        $report->update(['status' => 'approve']);
+        $request->validate([
+            'status' => 'required|in:lengkap,belum lengkap',
+            'revision_note' => 'required_if:status,belum lengkap|nullable|string',
+        ]);
 
-        // Auto-archive semua file ke document_managements
-        foreach ($report->files as $file) {
+        $file->update([
+            'status' => $request->status,
+            'revision_note' => $request->status === 'belum lengkap' ? $request->revision_note : null,
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'Status dokumen berhasil diperbarui.');
+    }
+
+    /**
+     * Approve laporan
+     */
+    public function approve(AuditReport $auditReport)
+    {
+        // Hanya pimpinan
+        abort_if(
+
+            Auth::user()->role !== 'pimpinan',
+
+            403
+        );
+
+        $auditReport->load('files');
+
+        // Approve
+        $auditReport->update([
+
+            'status' => 'disetujui',
+
+            'reviewed_by' => Auth::id(),
+
+            'reviewed_at' => now(),
+
+            'revision_note' => null,
+        ]);
+
+        // Auto archive
+        foreach (
+            $auditReport->files
+            as $file
+        ) {
+
             DocumentManagement::updateOrCreate(
+
                 [
-                    'audit_report_id' => $report->id,
-                    'document_type'   => $file->document_type,
+                    'audit_report_id' =>
+                    $auditReport->id,
+
+                    'document_type' =>
+                    $file->document_type,
                 ],
+
                 [
-                    'document_name' => $file->document_name,
-                    'file'          => $file->file,
-                    'archived_by'   => Auth::id(),
-                    'archived_at'   => now(),
+                    'document_name' =>
+                    $file->document_name,
+
+                    'file' =>
+                    $file->file,
+
+                    'archived_by' =>
+                    Auth::id(),
+
+                    'archived_at' =>
+                    now(),
                 ]
             );
         }
 
-        return back()->with('success', 'Laporan berhasil di-approve dan dokumen tersimpan ke Manajemen Dokumen');
+        return back()->with(
+
+            'success',
+
+            'Laporan berhasil disetujui.'
+        );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | REVISI — Hanya Pimpinan
-    |--------------------------------------------------------------------------
-    */
-    public function revisi(Request $request, int $id)
-    {
+    /**
+     * Revisi laporan
+     */
+    public function revisi(
+        Request $request,
+        AuditReport $auditReport
+    ) {
+        // Hanya pimpinan
+        abort_if(
+
+            Auth::user()->role !== 'pimpinan',
+
+            403
+        );
+
         $request->validate([
-            'revision_note' => 'required|string|min:10',
-        ], [
-            'revision_note.required' => 'Catatan revisi wajib diisi',
-            'revision_note.min'      => 'Catatan revisi minimal 10 karakter',
+
+            'revision_note' =>
+            'required|string|min:10',
         ]);
 
-        $report = AuditReport::findOrFail($id);
+        // Revisi laporan
+        $auditReport->update([
 
-        $report->update([
-            'status'        => 'revisi',
-            'revision_note' => $request->revision_note,
+            'status' => 'revisi',
+
+            'revision_note' =>
+            $request->revision_note,
+
+            'reviewed_by' => Auth::id(),
+
+            'reviewed_at' => null,
         ]);
 
-        return back()->with('success', 'Laporan dikembalikan untuk revisi');
+        return back()->with(
+
+            'success',
+
+            'Laporan dikembalikan untuk revisi.'
+        );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DOWNLOAD file individual
-    |--------------------------------------------------------------------------
-    */
-    public function download(int $id)
+    /**
+     * Download file
+     */
+    public function download(AuditReportFile $file)
     {
-        $file = AuditReportFile::findOrFail($id);
+        if (empty($file->file) || !Storage::disk('public')->exists($file->file)) {
+            return back()->with('error', 'File tidak ditemukan di server (Data dummy/hilang).');
+        }
 
-        return Storage::download(
-            'public/' . $file->file,
+        return Storage::disk('public')->download(
+            $file->file,
             $file->document_name
         );
+    }
+
+    /**
+     * Preview file
+     */
+    public function preview(AuditReportFile $file)
+    {
+        if (empty($file->file) || !Storage::disk('public')->exists($file->file)) {
+            return response('<div style="text-align:center; padding: 50px; font-family: sans-serif; color: #666;"><h3>File Tidak Ditemukan</h3><p>File fisik tidak ada di server karena ini adalah data dummy atau file telah dihapus.</p></div>', 404);
+        }
+
+        $path = storage_path('app/public/' . $file->file);
+        return response()->file($path);
     }
 }

@@ -84,8 +84,12 @@ class DocumentManagementController extends Controller
      */
     public function download(DocumentManagement $documentManagement)
     {
-        return Storage::download(
-            'public/' . $documentManagement->file,
+        if (empty($documentManagement->file) || !Storage::disk('public')->exists($documentManagement->file)) {
+            return back()->with('error', 'File tidak ditemukan di server (Data dummy/hilang).');
+        }
+
+        return Storage::disk('public')->download(
+            $documentManagement->file,
             $documentManagement->document_name
         );
     }
@@ -95,12 +99,11 @@ class DocumentManagementController extends Controller
      */
     public function preview(DocumentManagement $documentManagement)
     {
-        $path = storage_path('app/public/' . $documentManagement->file);
-
-        if (!file_exists($path)) {
-            abort(404);
+        if (empty($documentManagement->file) || !Storage::disk('public')->exists($documentManagement->file)) {
+            return response('<div style="text-align:center; padding: 50px; font-family: sans-serif; color: #666;"><h3>File Tidak Ditemukan</h3><p>File fisik tidak ada di server karena ini adalah data dummy atau file telah dihapus.</p></div>', 404);
         }
 
+        $path = storage_path('app/public/' . $documentManagement->file);
         return response()->file($path);
     }
 }

@@ -33,12 +33,21 @@
             <p class="text-xs text-gray-400 uppercase tracking-wide">Dok. Terarsip</p>
             <p class="text-3xl font-extrabold text-gray-800">{{ $totalDokumen }}</p>
         </div>
-        <div class="bg-white rounded-2xl shadow p-5 flex flex-col gap-1">
-            <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center mb-1">
-                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <div class="bg-white rounded-2xl shadow p-5 col-span-2 lg:col-span-1">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide">Logbook Auditor</p>
+                    <p class="text-3xl font-extrabold text-gray-800">{{ $logbookPending + $logbookApprove + $logbookRevisi }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
             </div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide">Logbook Pending</p>
-            <p class="text-3xl font-extrabold text-gray-800">{{ $logbookPending }}</p>
+            <div class="flex gap-1 mt-2 flex-wrap">
+                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-bold">{{ $logbookPending }} pending</span>
+                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">{{ $logbookApprove }} approve</span>
+                <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">{{ $logbookRevisi }} revisi</span>
+            </div>
         </div>
     </div>
 
@@ -166,7 +175,7 @@
                         <td class="px-4 py-3 text-gray-600">{{ $laporan->client->institution_name ?? '-' }}</td>
                         <td class="px-4 py-3">
                             <div class="flex flex-wrap gap-1">
-                                @foreach($laporan->auditors as $a)
+                                @foreach($laporan->client->auditors as $a)
                                 <span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">{{ $a->name }}</span>
                                 @endforeach
                             </div>

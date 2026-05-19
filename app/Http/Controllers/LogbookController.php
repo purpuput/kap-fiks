@@ -14,7 +14,7 @@ class LogbookController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Logbook::with('user');
+        $query = Logbook::with(['user', 'client']);
 
         /**
          * Auditor hanya melihat logbook miliknya
@@ -59,6 +59,28 @@ class LogbookController extends Controller
     }
 
     /**
+     * Detail logbook
+     */
+    public function show(Logbook $logbook)
+    {
+        /**
+         * Proteksi:
+         * - admin dan pimpinan boleh melihat semua
+         * - auditor hanya bisa melihat miliknya
+         */
+        if (
+            Auth::user()->role === 'auditor' &&
+            $logbook->user_id !== Auth::id()
+        ) {
+            abort(403);
+        }
+
+        $logbook->load(['user', 'client']);
+
+        return view('logbooks.show', compact('logbook'));
+    }
+
+    /**
      * Form tambah logbook
      */
     public function create()
@@ -70,7 +92,21 @@ class LogbookController extends Controller
             abort(403);
         }
 
-        return view('logbooks.create');
+        /**
+         * Klien yang di-handle oleh auditor beserta perannya
+         */
+        $clients = Auth::user()
+            ->clients()
+            ->where('approval_status', 'disetujui')
+            ->where('status', 'aktif')
+            ->get();
+
+        $clientRoles = $clients->mapWithKeys(function ($client) {
+            $role = $client->pivot->team_role ?? 'anggota';
+            return [$client->id => $role === 'ketua' ? 'ketua tim' : 'anggota tim'];
+        });
+
+        return view('logbooks.create', compact('clients', 'clientRoles'));
     }
 
     /**
@@ -82,17 +118,55 @@ class LogbookController extends Controller
          * Validasi
          */
         $validated = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'team_role' => 'required|in:ketua tim,anggota tim',
             'date' => 'required|date|before_or_equal:today',
-            'activity' => 'required|string',
+            'audit_stage' => 'required|string',
+            'audit_area' => 'required|string',
+            'cumulative_progress' => 'required|integer|min:1|max:100',
+            'main_task' => 'required|string',
+            'has_obstacle' => 'required|in:0,1',
+            'obstacle_type' => 'nullable|required_if:has_obstacle,1|string',
+            'other_obstacle_type' => 'nullable|required_if:obstacle_type,Lainnya|string',
+            'obstacle_description' => 'nullable|string',
+            'help_needed' => 'nullable|required_if:has_obstacle,1|string',
+            'next_plan' => 'required|string',
         ]);
+
+        /**
+         * Pastikan klien memang di-handle oleh user
+         */
+        $isAssigned = Auth::user()->clients()->where('clients.id', $request->client_id)->exists();
+        if (!$isAssigned) {
+            return back()->withInput()->with('error', 'Anda tidak ditugaskan pada klien ini.');
+        }
+
+        $finalObstacleType = null;
+        if ($validated['has_obstacle'] == 1) {
+            if ($validated['obstacle_type'] === 'Lainnya') {
+                $finalObstacleType = $validated['other_obstacle_type'];
+            } else {
+                $finalObstacleType = $validated['obstacle_type'];
+            }
+        }
 
         /**
          * Simpan logbook
          */
         Logbook::create([
             'user_id' => Auth::id(),
+            'client_id' => $validated['client_id'],
+            'team_role' => $validated['team_role'],
             'date' => $validated['date'],
-            'activity' => $validated['activity'],
+            'audit_stage' => $validated['audit_stage'],
+            'audit_area' => $validated['audit_area'],
+            'cumulative_progress' => $validated['cumulative_progress'],
+            'main_task' => $validated['main_task'],
+            'has_obstacle' => $validated['has_obstacle'] == 1,
+            'obstacle_type' => $finalObstacleType,
+            'obstacle_description' => $validated['has_obstacle'] == 1 ? $validated['obstacle_description'] : null,
+            'help_needed' => $validated['has_obstacle'] == 1 ? $validated['help_needed'] : null,
+            'next_plan' => $validated['next_plan'],
             'status' => 'pending',
         ]);
 
@@ -140,7 +214,21 @@ class LogbookController extends Controller
             }
         }
 
-        return view('logbooks.edit', compact('logbook'));
+        /**
+         * Klien yang di-handle oleh auditor
+         */
+        $clients = User::find($logbook->user_id)
+            ->clients()
+            ->where('approval_status', 'disetujui')
+            ->where('status', 'aktif')
+            ->get();
+
+        $clientRoles = $clients->mapWithKeys(function ($client) {
+            $role = $client->pivot->team_role ?? 'anggota';
+            return [$client->id => $role === 'ketua' ? 'ketua tim' : 'anggota tim'];
+        });
+
+        return view('logbooks.edit', compact('logbook', 'clients', 'clientRoles'));
     }
 
     /**
@@ -162,16 +250,46 @@ class LogbookController extends Controller
          * Validasi
          */
         $validated = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'team_role' => 'required|in:ketua tim,anggota tim',
             'date' => 'required|date',
-            'activity' => 'required|string',
+            'audit_stage' => 'required|string',
+            'audit_area' => 'required|string',
+            'cumulative_progress' => 'required|integer|min:1|max:100',
+            'main_task' => 'required|string',
+            'has_obstacle' => 'required|in:0,1',
+            'obstacle_type' => 'nullable|required_if:has_obstacle,1|string',
+            'other_obstacle_type' => 'nullable|required_if:obstacle_type,Lainnya|string',
+            'obstacle_description' => 'nullable|string',
+            'help_needed' => 'nullable|required_if:has_obstacle,1|string',
+            'next_plan' => 'required|string',
         ]);
+
+        $finalObstacleType = null;
+        if ($validated['has_obstacle'] == 1) {
+            if ($validated['obstacle_type'] === 'Lainnya') {
+                $finalObstacleType = $validated['other_obstacle_type'];
+            } else {
+                $finalObstacleType = $validated['obstacle_type'];
+            }
+        }
 
         /**
          * Update data
          */
         $logbook->update([
+            'client_id' => $validated['client_id'],
+            'team_role' => $validated['team_role'],
             'date' => $validated['date'],
-            'activity' => $validated['activity'],
+            'audit_stage' => $validated['audit_stage'],
+            'audit_area' => $validated['audit_area'],
+            'cumulative_progress' => $validated['cumulative_progress'],
+            'main_task' => $validated['main_task'],
+            'has_obstacle' => $validated['has_obstacle'] == 1,
+            'obstacle_type' => $finalObstacleType,
+            'obstacle_description' => $validated['has_obstacle'] == 1 ? $validated['obstacle_description'] : null,
+            'help_needed' => $validated['has_obstacle'] == 1 ? $validated['help_needed'] : null,
+            'next_plan' => $validated['next_plan'],
 
             /**
              * Jika direvisi lalu diedit auditor,
