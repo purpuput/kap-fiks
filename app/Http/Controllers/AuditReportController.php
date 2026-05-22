@@ -39,6 +39,31 @@ class AuditReportController extends Controller
     ];
 
     /**
+     * Tipe dokumen berdasarkan role
+     */
+    public function getDocumentTypesForRole($role)
+    {
+        if ($role === 'admin') {
+            return [
+                'spk' => 'SPK',
+                'surat_tugas' => 'Surat Tugas',
+                'invoice' => 'Invoice',
+            ];
+        } elseif ($role === 'auditor') {
+            return [
+                'laporan_keuangan' => 'Laporan Keuangan',
+                'kertas_kerja' => 'Kertas Kerja',
+                'berita_acara_pemeriksaan' => 'Berita Acara Pemeriksaan',
+                'data_klien' => 'Data Klien',
+                'surat_pernyataan_klien' => 'Surat Pernyataan Klien',
+                'management_letter' => 'Management Letter',
+                'laporan_audit' => 'Laporan Audit',
+            ];
+        }
+        return $this->documentTypes;
+    }
+
+    /**
      * List laporan
      */
     public function index(Request $request)
@@ -58,13 +83,12 @@ class AuditReportController extends Controller
             'files'
         ]);
 
-        // Auditor hanya melihat laporan miliknya
+        // Auditor hanya melihat laporan untuk klien yang diassign kepadanya
         if (Auth::user()->role === 'auditor') {
 
-            $query->where(
-                'created_by',
-                Auth::id()
-            );
+            $query->whereHas('client.auditors', function ($q) {
+                $q->where('users.id', Auth::id());
+            });
         }
 
         // Search
@@ -117,15 +141,11 @@ class AuditReportController extends Controller
      */
     public function show(AuditReport $auditReport)
     {
-        // Auditor hanya boleh melihat laporan miliknya
+        // Auditor hanya boleh melihat laporan jika diassign ke klien tersebut
         if (
-
             Auth::user()->role === 'auditor' &&
-
-            $auditReport->created_by !== Auth::id()
-
+            !$auditReport->client->auditors()->where('users.id', Auth::id())->exists()
         ) {
-
             abort(403);
         }
 
@@ -163,29 +183,16 @@ class AuditReportController extends Controller
      */
     public function create()
     {
-        // Hanya auditor
+        // Hanya admin
         abort_if(
-
-            Auth::user()->role !== 'auditor',
-
+            Auth::user()->role !== 'admin',
             403
         );
 
-        // Client assigned
-        $clients = Auth::user()
-            ->clients()
-            ->with('auditors')
-            ->where(
-                'approval_status',
-                'disetujui'
-            )
-            ->where(
-                'status',
-                'aktif'
-            )
-            ->get();
+        // Semua klien
+        $clients = Client::with('auditors')->get();
 
-        $documentTypes = $this->documentTypes;
+        $documentTypes = $this->getDocumentTypesForRole('admin');
 
         return view(
             'audit_reports.create',
@@ -203,21 +210,17 @@ class AuditReportController extends Controller
      */
     public function store(Request $request)
     {
-        // Hanya auditor
+        // Hanya admin
         abort_if(
-
-            Auth::user()->role !== 'auditor',
-
+            Auth::user()->role !== 'admin',
             403
         );
 
         $fileRules = [];
+        $allowedTypes = $this->getDocumentTypesForRole('admin');
 
         // Validasi file
-        foreach (
-            array_keys($this->documentTypes)
-            as $type
-        ) {
+        foreach (array_keys($allowedTypes) as $type) {
 
             $mimes = ($type === 'data_klien')
 
@@ -231,23 +234,12 @@ class AuditReportController extends Controller
 
         // Validasi form
         $request->validate(array_merge([
-
             'client_id' => 'required|exists:clients,id',
-
             'audit_date' => 'required|date',
-
         ], $fileRules));
 
         // Client
-        $client = Client::findOrFail(
-            $request->client_id
-        );
-
-        // Hanya bisa membuat laporan untuk klien yang di-assign ke mereka
-        abort_if(
-            !$client->auditors()->where('users.id', Auth::id())->exists(),
-            403
-        );
+        $client = Client::findOrFail($request->client_id);
 
         // Generate nomor laporan
         $lastReport = AuditReport::latest()->first();
@@ -294,10 +286,7 @@ class AuditReportController extends Controller
         ]);
 
         // Upload file
-        foreach (
-            array_keys($this->documentTypes)
-            as $type
-        ) {
+        foreach (array_keys($allowedTypes) as $type) {
 
             if (
                 $request->hasFile("files.{$type}")
@@ -347,21 +336,13 @@ class AuditReportController extends Controller
      */
     public function edit(AuditReport $auditReport)
     {
-        // Hanya auditor
-        abort_if(
+        // Hanya admin dan auditor
+        abort_if(!in_array(Auth::user()->role, ['admin', 'auditor']), 403);
 
-            Auth::user()->role !== 'auditor',
-
-            403
-        );
-
-        // Hanya laporan sendiri
-        abort_if(
-
-            $auditReport->created_by !== Auth::id(),
-
-            403
-        );
+        // Jika auditor, pastikan di-assign ke klien
+        if (Auth::user()->role === 'auditor') {
+            abort_if(!$auditReport->client->auditors()->where('users.id', Auth::id())->exists(), 403);
+        }
 
         // Final tidak bisa edit
         if (
@@ -376,20 +357,10 @@ class AuditReportController extends Controller
             );
         }
 
-        $clients = Auth::user()
-            ->clients()
-            ->with('auditors')
-            ->where(
-                'approval_status',
-                'disetujui'
-            )
-            ->where(
-                'status',
-                'aktif'
-            )
-            ->get();
+        $clients = Client::with('auditors')->get();
 
         $documentTypes = $this->documentTypes;
+        $allowedDocumentTypes = $this->getDocumentTypesForRole(Auth::user()->role);
 
         $filesByType = $auditReport->files
             ->keyBy('document_type');
@@ -401,9 +372,8 @@ class AuditReportController extends Controller
                 'auditReport',
 
                 'clients',
-
                 'documentTypes',
-
+                'allowedDocumentTypes',
                 'filesByType'
             )
         );
@@ -416,21 +386,13 @@ class AuditReportController extends Controller
         Request $request,
         AuditReport $auditReport
     ) {
-        // Hanya auditor
-        abort_if(
+        // Hanya admin dan auditor
+        abort_if(!in_array(Auth::user()->role, ['admin', 'auditor']), 403);
 
-            Auth::user()->role !== 'auditor',
-
-            403
-        );
-
-        // Hanya laporan sendiri
-        abort_if(
-
-            $auditReport->created_by !== Auth::id(),
-
-            403
-        );
+        // Jika auditor, pastikan di-assign ke klien
+        if (Auth::user()->role === 'auditor') {
+            abort_if(!$auditReport->client->auditors()->where('users.id', Auth::id())->exists(), 403);
+        }
 
         // Final tidak bisa edit
         if (
@@ -450,11 +412,10 @@ class AuditReportController extends Controller
         $existingFiles = $auditReport->files
             ->keyBy('document_type');
 
+        $allowedTypes = $this->getDocumentTypesForRole(Auth::user()->role);
+
         // Validasi file
-        foreach (
-            array_keys($this->documentTypes)
-            as $type
-        ) {
+        foreach (array_keys($allowedTypes) as $type) {
 
             $required = isset(
                 $existingFiles[$type]
@@ -472,38 +433,28 @@ class AuditReportController extends Controller
                 "{$required}|file|{$mimes}";
         }
 
-        // Validasi form
-        $request->validate(array_merge([
-
-            'client_id' => 'required|exists:clients,id',
-
+        // Validasi form (Client id dan audit date hanya bisa diubah admin)
+        $validationRules = [
             'audit_date' => 'required|date',
-
-        ], $fileRules));
-
-        // Client
-        $client = Client::findOrFail(
-            $request->client_id
-        );
+        ];
+        if (Auth::user()->role === 'admin') {
+            $validationRules['client_id'] = 'required|exists:clients,id';
+        }
+        $request->validate(array_merge($validationRules, $fileRules));
 
         // Update laporan
-        $auditReport->update([
+        $updateData = ['audit_date' => $request->audit_date];
+        if (Auth::user()->role === 'admin') {
+            $client = Client::findOrFail($request->client_id);
+            $updateData['client_id'] = $request->client_id;
+            $updateData['title'] = 'Laporan Audit - ' . $client->institution_name;
+            $updateData['audit_type'] = $client->audit_type;
+        }
 
-            'client_id' => $request->client_id,
-
-            'title' => 'Laporan Audit - ' .
-                $client->institution_name,
-
-            'audit_type' => $client->audit_type,
-
-            'audit_date' => $request->audit_date,
-        ]);
+        $auditReport->update($updateData);
 
         // Update file
-        foreach (
-            array_keys($this->documentTypes)
-            as $type
-        ) {
+        foreach (array_keys($allowedTypes) as $type) {
 
             if (
                 $request->hasFile("files.{$type}")
@@ -595,21 +546,8 @@ class AuditReportController extends Controller
      */
     public function destroy(AuditReport $auditReport)
     {
-        // Hanya auditor
-        abort_if(
-
-            Auth::user()->role !== 'auditor',
-
-            403
-        );
-
-        // Hanya laporan sendiri
-        abort_if(
-
-            $auditReport->created_by !== Auth::id(),
-
-            403
-        );
+        // Hanya admin yang bisa hapus
+        abort_if(Auth::user()->role !== 'admin', 403);
 
         // Final tidak bisa dihapus
         if (

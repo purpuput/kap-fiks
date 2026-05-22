@@ -106,8 +106,6 @@ class ClientController extends Controller
 
             'npwp' => 'nullable|string|max:50',
 
-            'description' => 'nullable|string',
-
             'contract_start' => 'nullable|date',
 
             'contract_end' => 'nullable|date',
@@ -200,8 +198,6 @@ class ClientController extends Controller
             'npwp' => 'nullable|string|max:50',
 
             'status' => 'required|in:aktif,nonaktif',
-
-            'description' => 'nullable|string',
 
             'contract_start' => 'nullable|date',
 

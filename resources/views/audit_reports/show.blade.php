@@ -272,7 +272,7 @@
                         class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition">
                         ← Kembali ke Daftar
                     </a>
-                    @if(auth()->user()->role === 'auditor' && $auditReport->status !== 'disetujui')
+                    @if(in_array(auth()->user()->role, ['admin', 'auditor']) && $auditReport->status !== 'disetujui')
                     <a href="{{ route('audit_reports.edit', $auditReport) }}"
                         class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition">
                         Edit Laporan

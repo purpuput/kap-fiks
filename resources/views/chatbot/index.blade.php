@@ -393,16 +393,8 @@
         const chatEndpoint = "{{ route('chatbot.send') }}";
 
         // Pass current session ID if it exists
-        let currentSessionId = {
-            {
-                $currentSession ? $currentSession - > id : 'null'
-            }
-        };
-        let isNewSession = {
-            {
-                $currentSession ? 'false' : 'true'
-            }
-        };
+        let currentSessionId = {{ $currentSession ? $currentSession->id : 'null' }};
+        let isNewSession = {{ $currentSession ? 'false' : 'true' }};
 
         // Scroll to bottom on load
         function scrollToBottom() {

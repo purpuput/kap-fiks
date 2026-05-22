@@ -372,20 +372,7 @@
 
                             </div>
 
-                            {{-- Deskripsi --}}
-                            <div>
 
-                                <p class="text-sm text-gray-500 mb-1">
-                                    Deskripsi
-                                </p>
-
-                                <div class="bg-gray-50 border border-gray-100 rounded-xl p-4 text-gray-700 leading-relaxed">
-
-                                    {{ $client->description ?? '-' }}
-
-                                </div>
-
-                            </div>
 
                         </div>
 

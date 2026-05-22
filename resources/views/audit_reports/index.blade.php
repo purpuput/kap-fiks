@@ -48,7 +48,7 @@
                     <h2 class="text-2xl font-bold text-gray-800">Laporan Audit</h2>
                     <p class="text-gray-500 text-sm mt-1">Kelola dan pantau laporan audit</p>
                 </div>
-                @if(auth()->user()->role === 'auditor')
+                @if(auth()->user()->role === 'admin')
                 <a href="{{ route('audit_reports.create') }}"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,8 +156,8 @@
                                             Detail
                                         </a>
 
-                                        {{-- Auditor: Edit --}}
-                                        @if(auth()->user()->role === 'auditor' && $report->status !== 'disetujui')
+                                        {{-- Admin & Auditor: Edit --}}
+                                        @if(in_array(auth()->user()->role, ['admin', 'auditor']) && $report->status !== 'disetujui')
                                         <a href="{{ route('audit_reports.edit', $report) }}"
                                             class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition">
                                             Edit

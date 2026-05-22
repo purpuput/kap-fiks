@@ -1,5 +1,24 @@
 <x-app-layout title="Edit Laporan Audit">
 
+    {{-- MODAL PREVIEW FILE --}}
+    <div id="modalPreview" class="fixed inset-0 z-50 hidden bg-black/70 flex items-center justify-center p-4 lg:p-10 transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full h-full flex flex-col overflow-hidden relative">
+            <div class="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-800" id="previewTitle">Preview Dokumen</h3>
+                <button type="button" onclick="closeModalPreview()" class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-200 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="flex-1 bg-gray-100 overflow-hidden relative" id="previewContainerBox">
+                <iframe id="previewIframe" class="w-full h-full border-none hidden" src=""></iframe>
+                <img id="previewImage" class="w-full h-full object-contain hidden" src="" alt="Preview">
+                <div id="previewLoading" class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="py-10">
         <div class="max-w-5xl mx-auto px-4">
 
@@ -62,7 +81,8 @@
                                 Klien <span class="text-red-500">*</span>
                             </label>
                             <select name="client_id" required
-                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-300 focus:outline-none text-sm">
+                                {{ auth()->user()->role !== 'admin' ? 'disabled' : '' }}
+                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-300 focus:outline-none text-sm {{ auth()->user()->role !== 'admin' ? 'bg-gray-100 cursor-not-allowed text-gray-500' : '' }}">
                                 @foreach($clients as $client)
                                 <option value="{{ $client->id }}"
                                     {{ $auditReport->client_id == $client->id ? 'selected' : '' }}>
@@ -119,26 +139,48 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
                                 <span class="text-xs text-gray-600 truncate flex-1">{{ $existingFile->document_name }}</span>
+                                
+                                @php
+                                $ext = strtolower(pathinfo($existingFile->file, PATHINFO_EXTENSION));
+                                $isImage = in_array($ext, ['jpg', 'jpeg', 'png']);
+                                $isPdf = $ext === 'pdf';
+                                @endphp
+
+                                @if($isImage || $isPdf)
+                                <button type="button" 
+                                    onclick="openModalPreview('{{ route('audit_reports.preview', $existingFile->id) }}', '{{ $existingFile->document_name }}', {{ $isImage ? 'true' : 'false' }})"
+                                    class="text-xs text-gray-600 hover:text-gray-900 hover:underline flex-shrink-0 mr-2">
+                                    Preview
+                                </button>
+                                @endif
+
                                 <a href="{{ route('audit_reports.download', $existingFile->id) }}"
                                     class="text-xs text-blue-600 hover:underline flex-shrink-0">Download</a>
                             </div>
                             @endif
 
-                            <input type="file" name="files[{{ $type }}]"
-                                @if($type === 'data_klien')
-                                    accept=".zip,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx"
-                                @else
-                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                            @if(array_key_exists($type, $allowedDocumentTypes))
+                                <input type="file" name="files[{{ $type }}]"
+                                    @if($type === 'data_klien')
+                                        accept=".zip,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx"
+                                    @else
+                                        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                                    @endif
+                                    class="w-full text-xs text-gray-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+
+                                @if(!$existingFile)
+                                <p class="text-xs text-red-500 mt-1">Wajib diisi</p>
                                 @endif
-                                class="w-full text-xs text-gray-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
 
-                            @if(!$existingFile)
-                            <p class="text-xs text-red-500 mt-1">Wajib diisi</p>
+                                @error("files.$type")
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            @else
+                                <p class="text-xs text-gray-400 mt-2 italic flex items-center gap-1">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    Akses upload ditutup (Bukan tanggung jawab {{ ucfirst(auth()->user()->role) }})
+                                </p>
                             @endif
-
-                            @error("files.$type")
-                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                            @enderror
                         </div>
                         @endforeach
                     </div>
@@ -160,4 +202,43 @@
         </div>
     </div>
 
+    <script>
+        function openModalPreview(url, title, isImage) {
+            const modal = document.getElementById('modalPreview');
+            const iframe = document.getElementById('previewIframe');
+            const img = document.getElementById('previewImage');
+            const loading = document.getElementById('previewLoading');
+            
+            document.getElementById('previewTitle').innerText = title || 'Preview Dokumen';
+            
+            modal.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            iframe.classList.add('hidden');
+            img.classList.add('hidden');
+            
+            if (isImage) {
+                img.src = url;
+                img.onload = function() {
+                    loading.classList.add('hidden');
+                    img.classList.remove('hidden');
+                };
+            } else {
+                iframe.src = url;
+                iframe.onload = function() {
+                    loading.classList.add('hidden');
+                    iframe.classList.remove('hidden');
+                };
+            }
+        }
+
+        function closeModalPreview() {
+            const modal = document.getElementById('modalPreview');
+            const iframe = document.getElementById('previewIframe');
+            const img = document.getElementById('previewImage');
+            
+            modal.classList.add('hidden');
+            iframe.src = '';
+            img.src = '';
+        }
+    </script>
 </x-app-layout>

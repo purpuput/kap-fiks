@@ -380,18 +380,7 @@
 
                     </div>
 
-                    {{-- Deskripsi --}}
-                    <div>
 
-                        <label class="block mb-2 font-semibold">
-                            Deskripsi
-                        </label>
-
-                        <textarea name="description"
-                            rows="3"
-                            class="w-full border rounded-xl px-4 py-2">{{ old('description', $client->description) }}</textarea>
-
-                    </div>
 
                     {{-- Button --}}
                     <div class="flex gap-3 pt-2">

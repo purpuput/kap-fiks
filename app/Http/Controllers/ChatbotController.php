@@ -91,6 +91,20 @@ class ChatbotController extends Controller
         $pendingReports = \App\Models\AuditReport::where('status', 'pending')->count();
         $totalClients = \App\Models\Client::count();
         
+        $clientsData = \App\Models\Client::get()->toArray();
+        $reportsData = \App\Models\AuditReport::with('client:id,institution_name')->get()->toArray();
+        $usersData = \App\Models\User::get()->toArray();
+        $logbooksData = \App\Models\Logbook::with('user:id,name')->orderBy('date', 'desc')->take(50)->get()->toArray();
+        $documentsData = \App\Models\Document::with('user:id,name')->get()->toArray();
+        $documentManagementsData = \App\Models\DocumentManagement::with('auditReport:id,report_number')->get()->toArray();
+        
+        $clientsJson = json_encode($clientsData);
+        $reportsJson = json_encode($reportsData);
+        $usersJson = json_encode($usersData);
+        $logbooksJson = json_encode($logbooksData);
+        $documentsJson = json_encode($documentsData);
+        $documentManagementsJson = json_encode($documentManagementsData);
+        
         // System prompt sebagai AI Audit Assistant KAP
         $systemPrompt = <<<PROMPT
 Kamu adalah AI Audit Assistant untuk Kantor Akuntan Publik (KAP). Kamu membantu auditor, pimpinan KAP, dan staf administrasi dalam proses audit dengan pengetahuan mendalam.
@@ -99,11 +113,32 @@ Konteks Sistem Saat Ini:
 - Pengguna yang sedang bertanya: {$user->name} (Role: {$user->role})
 - Total Laporan Audit di sistem: {$totalReports} (Pending: {$pendingReports})
 - Total Klien KAP: {$totalClients}
-Kamu dapat menggunakan data di atas jika pengguna bertanya tentang ringkasan atau status laporan/klien saat ini.
+
+Berikut adalah data lengkap yang ada di sistem (dalam format JSON) agar kamu bisa menjawab pertanyaan secara spesifik:
+
+Data Klien:
+{$clientsJson}
+
+Data Laporan Audit:
+{$reportsJson}
+
+Data Pengguna (Auditor/Pimpinan/Admin):
+{$usersJson}
+
+Data Logbook (Aktivitas Terbaru):
+{$logbooksJson}
+
+Data Dokumen Umum (termasuk Dokumen Invoice dll):
+{$documentsJson}
+
+Data Manajemen Dokumen (Arsip Laporan):
+{$documentManagementsJson}
+
+Kamu dapat menggunakan data di atas jika pengguna bertanya tentang data klien, status laporan, nama pengguna, aktivitas logbook, manajemen dokumen, atau invoice. Analisis data tersebut untuk memberikan jawaban yang akurat, detail, dan sesuai dengan pertanyaan. Jika ditanya mengenai "semua data", berikan ringkasan yang komprehensif berdasarkan data JSON di atas. Jika ditanya mengenai "invoice" atau dokumen lainnya, silakan periksa di bagian Data Dokumen Umum atau Data Manajemen Dokumen.
 
 Panduan menjawab:
-- Gunakan bahasa Indonesia yang formal namun mudah dipahami
-- Berikan jawaban terstruktur
+- Gunakan bahasa Indonesia yang formal namun ramah dan mudah dipahami
+- Berikan jawaban terstruktur (gunakan poin-poin atau tabel jika menjelaskan banyak data)
 - Gunakan markdown formatting
 PROMPT;
 

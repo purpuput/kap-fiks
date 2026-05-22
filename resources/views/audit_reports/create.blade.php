@@ -220,7 +220,7 @@
 
                             <label class="block text-sm font-semibold text-gray-700 mb-1">
 
-                                Auditor
+                                Pembuat Laporan
 
                             </label>
 

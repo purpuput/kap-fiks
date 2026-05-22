@@ -40,7 +40,7 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::resource('audit_reports', AuditReportController::class);
     Route::put('/audit_reports/{id}/approve', [AuditReportController::class, 'approve'])->name('audit_reports.approve');
     Route::put('/audit_reports/{id}/revisi', [AuditReportController::class, 'revisi'])->name('audit_reports.revisi');
-    Route::get('/audit_reports/files/{id}/download', [AuditReportController::class, 'download'])->name('audit_reports.download');
+    Route::get('/audit_reports/files/{file}/download', [AuditReportController::class, 'download'])->name('audit_reports.download');
     Route::get('/audit_reports/files/{file}/preview', [AuditReportController::class, 'preview'])->name('audit_reports.preview');
     Route::patch('/audit_reports/files/{file}/approve', [AuditReportController::class, 'approveFile'])->name('audit_reports.files.approve');
 });
