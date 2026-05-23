@@ -33,7 +33,9 @@
             <div class="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
                 <h3 class="text-lg font-bold text-gray-800" id="previewTitle">Preview Dokumen</h3>
                 <button type="button" onclick="closeModalPreview()" class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-200 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
             </div>
             <div class="flex-1 bg-gray-100 overflow-hidden relative" id="previewContainer">
@@ -165,24 +167,24 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         @if($file)
-                                            @if($file->status === 'lengkap')
-                                            <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">Lengkap</span>
-                                            @elseif($file->status === 'belum lengkap')
-                                            <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">Belum Lengkap</span>
-                                            <p class="text-[10px] text-red-500 mt-1 max-w-xs">{{ $file->revision_note }}</p>
-                                            @else
-                                            <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">Menunggu Review</span>
-                                            @endif
+                                        @if($file->status === 'lengkap')
+                                        <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">Lengkap</span>
+                                        @elseif($file->status === 'belum lengkap')
+                                        <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">Belum Lengkap</span>
+                                        <p class="text-[10px] text-red-500 mt-1 max-w-xs">{{ $file->revision_note }}</p>
                                         @else
-                                            <span class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">Belum Diupload</span>
+                                        <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">Menunggu Review</span>
+                                        @endif
+                                        @else
+                                        <span class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">Belum Diupload</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         @if($file)
                                         <div class="flex flex-col items-center justify-center gap-2">
                                             <div class="flex gap-2">
-                                                <button type="button" 
-                                                    onclick="openModalPreview('{{ route('audit_reports.preview', $file->id) }}', '{{ $file->document_name }}'); markFileAsViewed('{{ $file->id }}')"
+                                                <button type="button"
+                                                    onclick="openModalPreview(`{{ route('audit_reports.preview', $file->id) }}`, `{{ $file->document_name }}`); markFileAsViewed(`{{ $file->id }}`)"
                                                     class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 text-xs px-3 py-1.5 rounded-lg font-semibold transition">
                                                     Lihat
                                                 </button>
@@ -193,11 +195,11 @@
                                                 </a>
                                             </div>
                                             @if(auth()->user()->role === 'pimpinan' && $auditReport->status !== 'disetujui')
-                                                <button type="button" id="btnApproveFile_{{ $file->id }}" disabled
-                                                    onclick="openModalApproveFile('{{ route('audit_reports.files.approve', $file->id) }}')"
-                                                    class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-[10px] px-2 py-1 rounded-md font-semibold transition">
-                                                    🔒 Validasi (Lihat file dulu)
-                                                </button>
+                                            <button type="button" id="btnApproveFile_{{ $file->id }}" disabled
+                                                onclick="openModalApproveFile(`{{ route('audit_reports.files.approve', $file->id) }}`)"
+                                                class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-[10px] px-2 py-1 rounded-md font-semibold transition">
+                                                🔒 Validasi (Lihat file dulu)
+                                            </button>
                                             @endif
                                         </div>
                                         @else
@@ -242,7 +244,7 @@
 
                         {{-- REVISI --}}
                         <button type="button"
-                            onclick="openModalRevisi('{{ route('audit_reports.revisi', $auditReport->id) }}')"
+                            onclick="openModalRevisi(`{{ route('audit_reports.revisi', $auditReport->id) }}`)"
                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -293,7 +295,7 @@
                 <form id="formApproveFile" method="POST" action="">
                     @csrf
                     @method('PATCH')
-                    
+
                     <div class="mb-4">
                         <label class="block text-sm font-semibold mb-2">Status Dokumen</label>
                         <select name="status" id="fileStatusSelect" onchange="toggleFileRevisionNote()" class="w-full px-4 py-3 border border-gray-300 rounded-xl" required>
@@ -362,7 +364,7 @@
             const select = document.getElementById('fileStatusSelect').value;
             const container = document.getElementById('fileRevisionNoteContainer');
             const input = document.getElementById('fileRevisionNoteInput');
-            
+
             if (select === 'belum lengkap') {
                 container.classList.remove('hidden');
                 input.required = true;
@@ -374,7 +376,7 @@
 
         function markFileAsViewed(id) {
             const btn = document.getElementById('btnApproveFile_' + id);
-            if(btn) {
+            if (btn) {
                 btn.disabled = false;
                 btn.classList.remove('disabled:bg-gray-300', 'disabled:cursor-not-allowed');
                 btn.innerText = 'Validasi Dokumen';
@@ -386,15 +388,15 @@
             const modal = document.getElementById('modalPreview');
             const iframe = document.getElementById('previewIframe');
             const loading = document.getElementById('previewLoading');
-            
+
             document.getElementById('previewTitle').innerText = title || 'Preview Dokumen';
-            
+
             modal.classList.remove('hidden');
             loading.classList.remove('hidden');
             iframe.classList.add('hidden');
-            
+
             iframe.src = url;
-            
+
             iframe.onload = function() {
                 loading.classList.add('hidden');
                 iframe.classList.remove('hidden');
@@ -404,7 +406,7 @@
         function closeModalPreview() {
             const modal = document.getElementById('modalPreview');
             const iframe = document.getElementById('previewIframe');
-            
+
             modal.classList.add('hidden');
             iframe.src = '';
         }

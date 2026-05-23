@@ -20,6 +20,7 @@
                         <input type="text" value="{{ $logbook->user->name }}" disabled class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 text-gray-600">
                     </div>
 
+                    @if($logbook->user->role === 'auditor')
                     <!-- Peran Tim -->
                     <div>
                         <label class="block text-sm font-semibold mb-2">Peran dalam Tim</label>
@@ -40,6 +41,7 @@
                         </select>
                         @error('client_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
+                    @endif
 
                     <!-- Tanggal -->
                     <div>
@@ -48,6 +50,7 @@
                         @error('date')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
 
+                    @if($logbook->user->role === 'auditor')
                     <!-- Tahapan Audit -->
                     <div>
                         <label class="block text-sm font-semibold mb-2">Tahapan Audit</label>
@@ -84,6 +87,7 @@
                         <input type="number" name="cumulative_progress" min="1" max="100" value="{{ old('cumulative_progress', $logbook->cumulative_progress) }}" required class="w-full px-4 py-3 border border-gray-300 rounded-xl">
                         @error('cumulative_progress')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
+                    @endif
 
                     <!-- Pekerjaan Utama -->
                     <div>
@@ -189,6 +193,7 @@
 
             // Set otomatis team_role berdasarkan klien yang dipilih
             function updateTeamRole() {
+                if (!clientSelect || !teamRoleInput) return;
                 const selectedClientId = clientSelect.value;
                 if (selectedClientId && clientRoles[selectedClientId]) {
                     teamRoleInput.value = clientRoles[selectedClientId];
@@ -216,13 +221,13 @@
             }
 
             // Event Listeners
-            clientSelect.addEventListener('change', updateTeamRole);
-            hasObstacleSelect.addEventListener('change', toggleObstacleSection);
-            obstacleTypeSelect.addEventListener('change', toggleOtherObstacle);
+            if (clientSelect) clientSelect.addEventListener('change', updateTeamRole);
+            if (hasObstacleSelect) hasObstacleSelect.addEventListener('change', toggleObstacleSection);
+            if (obstacleTypeSelect) obstacleTypeSelect.addEventListener('change', toggleOtherObstacle);
             
             // Cek status saat pertama kali load
             // Jika team_role kosong (karena load dari old value mungkin beda), kita update
-            if (!teamRoleInput.value) {
+            if (teamRoleInput && !teamRoleInput.value) {
                 updateTeamRole();
             }
             toggleObstacleSection();

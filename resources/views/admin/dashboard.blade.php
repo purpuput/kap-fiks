@@ -51,6 +51,65 @@
         </div>
     </div>
 
+    {{-- STATUS PRIBADI ADMIN --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{-- Absensi Hari Ini --}}
+        <div class="bg-white rounded-2xl shadow p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-700">Absensi Saya Hari Ini</p>
+            </div>
+            @if($absensiSayaHariIni)
+                @if($absensiSayaHariIni->check_in && $absensiSayaHariIni->check_out)
+                <span class="bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-semibold">✓ Lengkap</span>
+                <p class="text-xs text-gray-400 mt-2">Masuk: {{ $absensiSayaHariIni->check_in }} · Pulang: {{ $absensiSayaHariIni->check_out }}</p>
+                @elseif($absensiSayaHariIni->check_in)
+                <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-semibold">⏳ Belum Pulang</span>
+                <p class="text-xs text-gray-400 mt-2">Masuk: {{ $absensiSayaHariIni->check_in }}</p>
+                @endif
+            @else
+                <span class="bg-red-100 text-red-600 text-xs px-3 py-1.5 rounded-full font-semibold">✗ Belum Absen</span>
+                <div class="mt-3">
+                    <a href="{{ route('attendances.create') }}"
+                        class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-semibold transition inline-block">
+                        Absen Sekarang
+                    </a>
+                </div>
+            @endif
+        </div>
+
+        {{-- Logbook Hari Ini --}}
+        <div class="bg-white rounded-2xl shadow p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-700">Logbook Saya Hari Ini</p>
+            </div>
+            @if($logbookSayaHariIni)
+                @if($logbookSayaHariIni->status === 'approved')
+                <span class="bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-semibold">✓ Disetujui</span>
+                @elseif($logbookSayaHariIni->status === 'revision')
+                <span class="bg-red-100 text-red-700 text-xs px-3 py-1.5 rounded-full font-semibold">↩ Perlu Revisi</span>
+                <p class="text-xs text-red-500 mt-1 truncate">{{ $logbookSayaHariIni->note }}</p>
+                @else
+                <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-semibold">⏳ Menunggu</span>
+                @endif
+                <p class="text-xs text-gray-400 mt-2 truncate">{{ Str::limit($logbookSayaHariIni->main_task ?? $logbookSayaHariIni->activity, 60) }}</p>
+            @else
+                <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1.5 rounded-full font-semibold">Belum diisi</span>
+                <div class="mt-3">
+                    <a href="{{ route('logbooks.create') }}"
+                        class="text-xs bg-orange-500 hover:bg-orange-600 text-white px-4 py-1.5 rounded-lg font-semibold transition inline-block">
+                        Isi Logbook
+                    </a>
+                </div>
+            @endif
+        </div>
+    </div>
+
     {{-- ROW 2: Status Chart + Jenis + Absensi --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
@@ -181,8 +240,8 @@
                             </div>
                         </td>
                         <td class="px-4 py-3">
-                            @if($laporan->status === 'pending') <span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-medium">Pending</span>
-                            @elseif($laporan->status === 'approve') <span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-medium">Approve</span>
+                            @if($laporan->status === 'review') <span class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-medium">Review</span>
+                            @elseif($laporan->status === 'disetujui') <span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-medium">Disetujui</span>
                             @else <span class="bg-red-100 text-red-700 text-xs px-2.5 py-1 rounded-full font-medium">Revisi</span>
                             @endif
                         </td>

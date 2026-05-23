@@ -15,7 +15,17 @@ class DashboardController extends Controller
 {
     public function admin()
     {
+        $user = Auth::user();
+
         $data = [
+            // Status Pribadi Admin
+            'absensiSayaHariIni'  => Attendance::where('user_id', $user->id)
+                                        ->whereDate('date', today())
+                                        ->first(),
+            'logbookSayaHariIni'  => Logbook::where('user_id', $user->id)
+                                        ->whereDate('date', today())
+                                        ->first(),
+
             // Stat utama
             'totalUsers'          => User::count(),
             'totalAuditor'        => User::where('role', 'auditor')->count(),
@@ -24,8 +34,8 @@ class DashboardController extends Controller
             'totalDokumen'        => DocumentManagement::count(),
 
             // Laporan per status
-            'laporanPending'      => AuditReport::where('status', 'pending')->count(),
-            'laporanApprove'      => AuditReport::where('status', 'approve')->count(),
+            'laporanPending'      => AuditReport::where('status', 'review')->count(),
+            'laporanApprove'      => AuditReport::where('status', 'disetujui')->count(),
             'laporanRevisi'       => AuditReport::where('status', 'revisi')->count(),
 
             // Laporan per jenis
@@ -83,8 +93,8 @@ class DashboardController extends Controller
         $data = [
             'myReports'          => $myReports,
             'totalMyReports'     => $myReports->count(),
-            'myPending'          => $myReports->where('status', 'pending')->count(),
-            'myApprove'          => $myReports->where('status', 'approve')->count(),
+            'myPending'          => $myReports->where('status', 'review')->count(),
+            'myApprove'          => $myReports->where('status', 'disetujui')->count(),
             'myRevisi'           => $myReports->where('status', 'revisi')->count(),
             'absensiHariIni'     => $absensiHariIni,
             'logbookHariIni'     => $logbookHariIni,
@@ -98,7 +108,7 @@ class DashboardController extends Controller
     public function pimpinan()
     {
         // Laporan menunggu review
-        $laporanMenunggu = AuditReport::where('status', 'pending')
+        $laporanMenunggu = AuditReport::where('status', 'review')
             ->with(['client.auditors'])
             ->latest()
             ->get();
@@ -106,8 +116,8 @@ class DashboardController extends Controller
         // Semua stats
         $data = [
             'totalLaporan'        => AuditReport::count(),
-            'laporanPending'      => AuditReport::where('status', 'pending')->count(),
-            'laporanApprove'      => AuditReport::where('status', 'approve')->count(),
+            'laporanPending'      => AuditReport::where('status', 'review')->count(),
+            'laporanApprove'      => AuditReport::where('status', 'disetujui')->count(),
             'laporanRevisi'       => AuditReport::where('status', 'revisi')->count(),
             'totalDokumen'        => DocumentManagement::count(),
             'totalKlien'          => Client::count(),
@@ -117,7 +127,7 @@ class DashboardController extends Controller
             'laporanMenunggu'     => $laporanMenunggu,
 
             // Laporan baru disetujui
-            'laporanDisetujui'    => AuditReport::where('status', 'approve')
+            'laporanDisetujui'    => AuditReport::where('status', 'disetujui')
                                         ->with(['client.auditors'])
                                         ->latest('updated_at')
                                         ->take(5)

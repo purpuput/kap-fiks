@@ -41,7 +41,7 @@
             </div>
             @endforeach
             @if($laporanMenunggu->count() > 3)
-            <a href="{{ route('audit_reports.index', ['status' => 'pending']) }}"
+            <a href="{{ route('audit_reports.index', ['status' => 'review']) }}"
                 class="block text-center text-yellow-700 text-xs font-semibold hover:underline mt-1">
                 + {{ $laporanMenunggu->count() - 3 }} laporan lainnya →
             </a>
@@ -68,8 +68,8 @@
                 </div>
             </div>
             <div class="flex gap-2 mt-3 flex-wrap">
-                <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">{{ $laporanPending }} pending</span>
-                <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{{ $laporanApprove }} approve</span>
+                <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">{{ $laporanPending }} review</span>
+                <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{{ $laporanApprove }} disetujui</span>
                 <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{{ $laporanRevisi }} revisi</span>
             </div>
         </div>
@@ -83,7 +83,7 @@
                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                 </div>
             </div>
-            <p class="text-xs text-gray-400 mt-3">Dari {{ $laporanApprove }} laporan approved</p>
+            <p class="text-xs text-gray-400 mt-3">Dari {{ $laporanApprove }} laporan disetujui</p>
         </div>
         <div class="bg-white rounded-2xl shadow p-5">
             <div class="flex justify-between items-start">

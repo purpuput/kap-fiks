@@ -723,8 +723,8 @@ class AuditReportController extends Controller
             return back()->with('error', 'File tidak ditemukan di server (Data dummy/hilang).');
         }
 
-        return Storage::disk('public')->download(
-            $file->file,
+        return response()->download(
+            storage_path('app/public/' . $file->file),
             $file->document_name
         );
     }

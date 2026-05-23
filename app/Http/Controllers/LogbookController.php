@@ -86,25 +86,30 @@ class LogbookController extends Controller
     public function create()
     {
         /**
-         * Hanya auditor yang bisa tambah logbook
+         * Admin dan auditor bisa tambah logbook
          */
-        if (Auth::user()->role !== 'auditor') {
+        if (!in_array(Auth::user()->role, ['admin', 'auditor'])) {
             abort(403);
         }
 
-        /**
-         * Klien yang di-handle oleh auditor beserta perannya
-         */
-        $clients = Auth::user()
-            ->clients()
-            ->where('approval_status', 'disetujui')
-            ->where('status', 'aktif')
-            ->get();
+        if (Auth::user()->role === 'admin') {
+            $clients = collect(); // Admin tidak butuh klien
+            $clientRoles = collect();
+        } else {
+            /**
+             * Klien yang di-handle oleh auditor beserta perannya
+             */
+            $clients = Auth::user()
+                ->clients()
+                ->where('approval_status', 'disetujui')
+                ->where('status', 'aktif')
+                ->get();
 
-        $clientRoles = $clients->mapWithKeys(function ($client) {
-            $role = $client->pivot->team_role ?? 'anggota';
-            return [$client->id => $role === 'ketua' ? 'ketua tim' : 'anggota tim'];
-        });
+            $clientRoles = $clients->mapWithKeys(function ($client) {
+                $role = $client->pivot->team_role ?? 'anggota';
+                return [$client->id => $role === 'ketua' ? 'ketua tim' : 'anggota tim'];
+            });
+        }
 
         return view('logbooks.create', compact('clients', 'clientRoles'));
     }
@@ -117,13 +122,10 @@ class LogbookController extends Controller
         /**
          * Validasi
          */
-        $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'team_role' => 'required|in:ketua tim,anggota tim',
+        $isAdmin = Auth::user()->role === 'admin';
+
+        $rules = [
             'date' => 'required|date|before_or_equal:today',
-            'audit_stage' => 'required|string',
-            'audit_area' => 'required|string',
-            'cumulative_progress' => 'required|integer|min:1|max:100',
             'main_task' => 'required|string',
             'has_obstacle' => 'required|in:0,1',
             'obstacle_type' => 'nullable|required_if:has_obstacle,1|string',
@@ -131,14 +133,26 @@ class LogbookController extends Controller
             'obstacle_description' => 'nullable|string',
             'help_needed' => 'nullable|required_if:has_obstacle,1|string',
             'next_plan' => 'required|string',
-        ]);
+        ];
+
+        if (!$isAdmin) {
+            $rules['client_id'] = 'required|exists:clients,id';
+            $rules['team_role'] = 'required|in:ketua tim,anggota tim';
+            $rules['audit_stage'] = 'required|string';
+            $rules['audit_area'] = 'required|string';
+            $rules['cumulative_progress'] = 'required|integer|min:1|max:100';
+        }
+
+        $validated = $request->validate($rules);
 
         /**
-         * Pastikan klien memang di-handle oleh user
+         * Pastikan klien memang di-handle oleh user (untuk auditor)
          */
-        $isAssigned = Auth::user()->clients()->where('clients.id', $request->client_id)->exists();
-        if (!$isAssigned) {
-            return back()->withInput()->with('error', 'Anda tidak ditugaskan pada klien ini.');
+        if (!$isAdmin) {
+            $isAssigned = Auth::user()->clients()->where('clients.id', $request->client_id)->exists();
+            if (!$isAssigned) {
+                return back()->withInput()->with('error', 'Anda tidak ditugaskan pada klien ini.');
+            }
         }
 
         $finalObstacleType = null;
@@ -153,26 +167,33 @@ class LogbookController extends Controller
         /**
          * Simpan logbook
          */
-        Logbook::create([
-            'user_id' => Auth::id(),
-            'client_id' => $validated['client_id'],
-            'team_role' => $validated['team_role'],
-            'date' => $validated['date'],
-            'audit_stage' => $validated['audit_stage'],
-            'audit_area' => $validated['audit_area'],
-            'cumulative_progress' => $validated['cumulative_progress'],
-            'main_task' => $validated['main_task'],
-            'has_obstacle' => $validated['has_obstacle'] == 1,
-            'obstacle_type' => $finalObstacleType,
-            'obstacle_description' => $validated['has_obstacle'] == 1 ? $validated['obstacle_description'] : null,
-            'help_needed' => $validated['has_obstacle'] == 1 ? $validated['help_needed'] : null,
-            'next_plan' => $validated['next_plan'],
-            'status' => 'pending',
-        ]);
+        try {
+            Logbook::create([
+                'user_id' => Auth::id(),
+                'client_id' => $isAdmin ? null : $validated['client_id'],
+                'team_role' => $isAdmin ? null : $validated['team_role'],
+                'date' => $validated['date'],
+                'audit_stage' => $isAdmin ? null : $validated['audit_stage'],
+                'audit_area' => $isAdmin ? null : $validated['audit_area'],
+                'cumulative_progress' => $isAdmin ? null : $validated['cumulative_progress'],
+                'main_task' => $validated['main_task'],
+                'has_obstacle' => $validated['has_obstacle'] == 1,
+                'obstacle_type' => $finalObstacleType,
+                'obstacle_description' => $validated['has_obstacle'] == 1 ? $validated['obstacle_description'] : null,
+                'help_needed' => $validated['has_obstacle'] == 1 ? $validated['help_needed'] : null,
+                'next_plan' => $validated['next_plan'],
+                'status' => 'pending',
+            ]);
 
-        return redirect()
-            ->route('logbooks.index')
-            ->with('success', 'Logbook berhasil ditambahkan');
+            return redirect()
+                ->route('logbooks.index')
+                ->with('success', 'Logbook berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan logbook: Terjadi kesalahan sistem.');
+        }
     }
 
     /**
@@ -217,16 +238,21 @@ class LogbookController extends Controller
         /**
          * Klien yang di-handle oleh auditor
          */
-        $clients = User::find($logbook->user_id)
-            ->clients()
-            ->where('approval_status', 'disetujui')
-            ->where('status', 'aktif')
-            ->get();
+        if ($logbook->user->role === 'admin') {
+            $clients = collect();
+            $clientRoles = collect();
+        } else {
+            $clients = User::find($logbook->user_id)
+                ->clients()
+                ->where('approval_status', 'disetujui')
+                ->where('status', 'aktif')
+                ->get();
 
-        $clientRoles = $clients->mapWithKeys(function ($client) {
-            $role = $client->pivot->team_role ?? 'anggota';
-            return [$client->id => $role === 'ketua' ? 'ketua tim' : 'anggota tim'];
-        });
+            $clientRoles = $clients->mapWithKeys(function ($client) {
+                $role = $client->pivot->team_role ?? 'anggota';
+                return [$client->id => $role === 'ketua' ? 'ketua tim' : 'anggota tim'];
+            });
+        }
 
         return view('logbooks.edit', compact('logbook', 'clients', 'clientRoles'));
     }
@@ -249,13 +275,10 @@ class LogbookController extends Controller
         /**
          * Validasi
          */
-        $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'team_role' => 'required|in:ketua tim,anggota tim',
+        $isAdminLogbook = $logbook->user->role === 'admin';
+
+        $rules = [
             'date' => 'required|date',
-            'audit_stage' => 'required|string',
-            'audit_area' => 'required|string',
-            'cumulative_progress' => 'required|integer|min:1|max:100',
             'main_task' => 'required|string',
             'has_obstacle' => 'required|in:0,1',
             'obstacle_type' => 'nullable|required_if:has_obstacle,1|string',
@@ -263,7 +286,17 @@ class LogbookController extends Controller
             'obstacle_description' => 'nullable|string',
             'help_needed' => 'nullable|required_if:has_obstacle,1|string',
             'next_plan' => 'required|string',
-        ]);
+        ];
+
+        if (!$isAdminLogbook) {
+            $rules['client_id'] = 'required|exists:clients,id';
+            $rules['team_role'] = 'required|in:ketua tim,anggota tim';
+            $rules['audit_stage'] = 'required|string';
+            $rules['audit_area'] = 'required|string';
+            $rules['cumulative_progress'] = 'required|integer|min:1|max:100';
+        }
+
+        $validated = $request->validate($rules);
 
         $finalObstacleType = null;
         if ($validated['has_obstacle'] == 1) {
@@ -277,31 +310,38 @@ class LogbookController extends Controller
         /**
          * Update data
          */
-        $logbook->update([
-            'client_id' => $validated['client_id'],
-            'team_role' => $validated['team_role'],
-            'date' => $validated['date'],
-            'audit_stage' => $validated['audit_stage'],
-            'audit_area' => $validated['audit_area'],
-            'cumulative_progress' => $validated['cumulative_progress'],
-            'main_task' => $validated['main_task'],
-            'has_obstacle' => $validated['has_obstacle'] == 1,
-            'obstacle_type' => $finalObstacleType,
-            'obstacle_description' => $validated['has_obstacle'] == 1 ? $validated['obstacle_description'] : null,
-            'help_needed' => $validated['has_obstacle'] == 1 ? $validated['help_needed'] : null,
-            'next_plan' => $validated['next_plan'],
+        try {
+            $logbook->update([
+                'client_id' => $isAdminLogbook ? null : $validated['client_id'],
+                'team_role' => $isAdminLogbook ? null : $validated['team_role'],
+                'date' => $validated['date'],
+                'audit_stage' => $isAdminLogbook ? null : $validated['audit_stage'],
+                'audit_area' => $isAdminLogbook ? null : $validated['audit_area'],
+                'cumulative_progress' => $isAdminLogbook ? null : $validated['cumulative_progress'],
+                'main_task' => $validated['main_task'],
+                'has_obstacle' => $validated['has_obstacle'] == 1,
+                'obstacle_type' => $finalObstacleType,
+                'obstacle_description' => $validated['has_obstacle'] == 1 ? $validated['obstacle_description'] : null,
+                'help_needed' => $validated['has_obstacle'] == 1 ? $validated['help_needed'] : null,
+                'next_plan' => $validated['next_plan'],
 
-            /**
-             * Jika direvisi lalu diedit auditor,
-             * status kembali pending
-             */
-            'status' => 'pending',
-            'note' => null,
-        ]);
+                /**
+                 * Jika direvisi lalu diedit auditor,
+                 * status kembali pending
+                 */
+                'status' => 'pending',
+                'note' => null,
+            ]);
 
-        return redirect()
-            ->route('logbooks.index')
-            ->with('success', 'Logbook berhasil diperbarui');
+            return redirect()
+                ->route('logbooks.index')
+                ->with('success', 'Logbook berhasil diperbarui');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui logbook: Terjadi kesalahan sistem.');
+        }
     }
 
     /**
@@ -316,11 +356,17 @@ class LogbookController extends Controller
             abort(403);
         }
 
-        $logbook->delete();
+        try {
+            $logbook->delete();
 
-        return redirect()
-            ->route('logbooks.index')
-            ->with('success', 'Logbook berhasil dihapus');
+            return redirect()
+                ->route('logbooks.index')
+                ->with('success', 'Logbook berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal menghapus logbook karena data sedang digunakan.');
+        }
     }
 
     /**

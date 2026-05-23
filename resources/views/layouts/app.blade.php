@@ -122,7 +122,6 @@
 
     <script>
         function confirmLogout(form) {
-
             Swal.fire({
                 title: 'Yakin ingin logout?',
                 text: 'Sesi login akan berakhir',
@@ -133,13 +132,27 @@
                 confirmButtonText: 'Ya, logout!',
                 cancelButtonText: 'Batal'
             }).then((result) => {
-
                 if (result.isConfirmed) {
                     form.submit();
                 }
-
             });
+        }
 
+        function confirmDelete(form, message = 'Data yang dihapus tidak dapat dikembalikan!') {
+            Swal.fire({
+                title: 'Yakin ingin menghapus?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         }
     </script>
 

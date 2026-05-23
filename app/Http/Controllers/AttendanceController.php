@@ -54,8 +54,8 @@ class AttendanceController extends Controller
             ->orderBy('date', 'desc')
             ->paginate(15);
 
-        // Mengambil daftar auditor
-        $users = User::where('role', 'auditor')
+        // Mengambil daftar auditor dan admin
+        $users = User::whereIn('role', ['admin', 'auditor'])
             ->orderBy('name')
             ->get();
 
@@ -164,8 +164,8 @@ class AttendanceController extends Controller
         // Tanggal hari ini
         $today = now()->toDateString();
 
-        // Mengambil daftar auditor
-        $users = User::where('role', 'auditor')
+        // Mengambil daftar auditor dan admin
+        $users = User::whereIn('role', ['admin', 'auditor'])
             ->orderBy('name')
             ->get();
 

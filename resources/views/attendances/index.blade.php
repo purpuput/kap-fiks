@@ -287,17 +287,32 @@
                             rounded-3xl p-6 text-white shadow-lg">
 
                     {{-- Header --}}
-                    <div class="mb-6">
+                    <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
-                        <p class="text-slate-300 text-sm">
-                            Monitoring Hari Ini
-                        </p>
+                        <div>
 
-                        <h2 class="text-3xl font-bold mt-1">
+                            <p class="text-slate-300 text-sm">
+                                Monitoring Hari Ini
+                            </p>
 
-                            {{ now()->translatedFormat('l, d F Y') }}
+                            <h2 class="text-3xl font-bold mt-1">
 
-                        </h2>
+                                {{ now()->translatedFormat('l, d F Y') }}
+
+                            </h2>
+
+                        </div>
+
+                        @if(auth()->user()->role === 'admin')
+                        <div>
+                            <a href="{{ route('attendances.create') }}"
+                                class="inline-flex items-center gap-2 px-6 py-3
+                                       bg-white text-blue-800 rounded-2xl
+                                       font-bold hover:bg-blue-50 transition">
+                                Tambahkan Absen Admin
+                            </a>
+                        </div>
+                        @endif
 
                     </div>
 

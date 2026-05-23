@@ -102,7 +102,7 @@
                         <div>
 
                             <label class="block text-sm font-semibold mb-2">
-                                Auditor
+                                Pilih Akun
                             </label>
 
                             <select
@@ -112,9 +112,9 @@
 
                                 @foreach($users as $user)
 
-                                <option value="{{ $user->id }}">
+                                <option value="{{ $user->id }}" {{ $user->id === auth()->id() ? 'selected' : '' }}>
 
-                                    {{ $user->name }}
+                                    {{ $user->name }} {{ $user->id === auth()->id() ? '(Saya)' : '' }}
 
                                 </option>
 

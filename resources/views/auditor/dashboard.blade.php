@@ -98,11 +98,11 @@
             <div class="grid grid-cols-3 gap-2 text-center">
                 <div class="bg-yellow-50 rounded-xl p-2">
                     <p class="text-xl font-extrabold text-yellow-600">{{ $myPending }}</p>
-                    <p class="text-xs text-gray-400">Pending</p>
+                    <p class="text-xs text-gray-400">Review</p>
                 </div>
                 <div class="bg-green-50 rounded-xl p-2">
                     <p class="text-xl font-extrabold text-green-600">{{ $myApprove }}</p>
-                    <p class="text-xs text-gray-400">Approve</p>
+                    <p class="text-xs text-gray-400">Disetujui</p>
                 </div>
                 <div class="bg-red-50 rounded-xl p-2">
                     <p class="text-xl font-extrabold text-red-500">{{ $myRevisi }}</p>
@@ -157,8 +157,8 @@
                     <p class="text-xs text-gray-400 mt-0.5">{{ $laporan->report_number }} · {{ $laporan->client->institution_name ?? '-' }} · {{ $laporan->audit_date->format('d M Y') }}</p>
                 </div>
                 <div class="flex items-center gap-2 flex-shrink-0">
-                    @if($laporan->status === 'pending') <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-medium">Pending</span>
-                    @elseif($laporan->status === 'approve') <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">Approve</span>
+                    @if($laporan->status === 'review') <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-medium">Review</span>
+                    @elseif($laporan->status === 'disetujui') <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">Disetujui</span>
                     @else <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-medium">Revisi</span>
                     @endif
                     <a href="{{ route('audit_reports.show', $laporan) }}" class="text-blue-600 hover:text-blue-800">

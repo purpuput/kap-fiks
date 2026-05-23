@@ -123,9 +123,11 @@
                                     <div class="flex items-center justify-center gap-2">
 
                                         {{-- PREVIEW --}}
-                                        <button type="button" 
-                                            onclick="openModalPreview('{{ route('document_managements.preview', $doc->id) }}', '{{ $doc->document_name }}')"
-                                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold">
+                                        <button type="button"
+                                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold"
+                                            data-url="{{ route('document_managements.preview', $doc->id) }}"
+                                            data-name="{{ $doc->document_name }}"
+                                            onclick="openModalPreview(this.dataset.url, this.dataset.name)">
 
                                             Lihat
 
@@ -180,7 +182,9 @@
             <div class="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
                 <h3 class="text-lg font-bold text-gray-800" id="previewTitle">Preview Dokumen</h3>
                 <button type="button" onclick="closeModalPreview()" class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-200 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
             </div>
             <div class="flex-1 bg-gray-100 overflow-hidden relative" id="previewContainer">
@@ -198,15 +202,15 @@
             const modal = document.getElementById('modalPreview');
             const iframe = document.getElementById('previewIframe');
             const loading = document.getElementById('previewLoading');
-            
+
             document.getElementById('previewTitle').innerText = title || 'Preview Dokumen';
-            
+
             modal.classList.remove('hidden');
             loading.classList.remove('hidden');
             iframe.classList.add('hidden');
-            
+
             iframe.src = url;
-            
+
             iframe.onload = function() {
                 loading.classList.add('hidden');
                 iframe.classList.remove('hidden');
@@ -216,7 +220,7 @@
         function closeModalPreview() {
             const modal = document.getElementById('modalPreview');
             const iframe = document.getElementById('previewIframe');
-            
+
             modal.classList.add('hidden');
             iframe.src = '';
         }
