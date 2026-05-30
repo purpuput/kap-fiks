@@ -88,16 +88,16 @@ class ChatbotController extends Controller
         // Ambil data ringkasan dan detail untuk mendukung berbagai tipe query
         try {
             // === STATISTIK UMUM ===
-            $totalReports = \App\Models\AuditReport::count() ?? 0;
-            $pendingReports = \App\Models\AuditReport::where('status', 'pending')->count() ?? 0;
-            $completedReports = \App\Models\AuditReport::where('status', 'completed')->count() ?? 0;
-            $inProgressReports = \App\Models\AuditReport::where('status', 'in_progress')->count() ?? 0;
-            $totalClients = \App\Models\Client::count() ?? 0;
-            $totalUsers = \App\Models\User::count() ?? 0;
+            $totalReports = \App\Models\AuditReport::query()->count('*');
+            $pendingReports = \App\Models\AuditReport::query()->where('status', 'pending')->count('*');
+            $completedReports = \App\Models\AuditReport::query()->where('status', 'completed')->count('*');
+            $inProgressReports = \App\Models\AuditReport::query()->where('status', 'in_progress')->count('*');
+            $totalClients = \App\Models\Client::query()->count('*');
+            $totalUsers = \App\Models\User::query()->count('*');
 
             // === LAPORAN AUDIT ===
             // Data lengkap dengan detail yang lebih komprehensif
-            $auditReports = \App\Models\AuditReport::select('id', 'report_number', 'title', 'audit_type', 'status', 'audit_date', 'created_by')
+            $auditReports = \App\Models\AuditReport::query()->select(['id', 'report_number', 'title', 'audit_type', 'status', 'audit_date', 'created_by'])
                 ->with('client:id,institution_name')
                 ->with('creator:id,name')
                 ->orderBy('created_at', 'desc')
@@ -118,7 +118,7 @@ class ChatbotController extends Controller
                 ->toArray() ?? [];
 
             // === KLIEN ===
-            $allClients = \App\Models\Client::select('id', 'institution_name', 'institution_type', 'leader_name', 'address', 'city', 'phone', 'status')
+            $allClients = \App\Models\Client::query()->select(['id', 'institution_name', 'institution_type', 'leader_name', 'address', 'city', 'phone', 'status'])
                 ->orderBy('created_at', 'desc')
                 ->take(10)
                 ->get()
@@ -137,7 +137,7 @@ class ChatbotController extends Controller
                 ->toArray() ?? [];
 
             // === LOGBOOK & KEGIATAN ===
-            $recentLogbooks = \App\Models\Logbook::select('id', 'main_task', 'date', 'user_id', 'has_obstacle', 'obstacle_type')
+            $recentLogbooks = \App\Models\Logbook::query()->select(['id', 'main_task', 'date', 'user_id', 'has_obstacle', 'obstacle_type'])
                 ->with('user:id,name')
                 ->orderBy('date', 'desc')
                 ->take(15)
@@ -155,7 +155,7 @@ class ChatbotController extends Controller
                 ->toArray() ?? [];
 
             // === ABSENSI ===
-            $todayAttendances = \App\Models\Attendance::with('user:id,name')
+            $todayAttendances = \App\Models\Attendance::query()->with('user:id,name')
                 ->whereDate('date', today())
                 ->get(['id', 'user_id', 'check_in', 'check_out', 'status'])
                 ->map(function ($att) {
@@ -169,7 +169,7 @@ class ChatbotController extends Controller
                 ->toArray() ?? [];
 
             // === KENDALA YANG MEMBUTUHKAN SOLUSI ===
-            $obstacleLogbooks = \App\Models\Logbook::with('user:id,name')
+            $obstacleLogbooks = \App\Models\Logbook::query()->with('user:id,name')
                 ->where('has_obstacle', 1)
                 ->orderBy('date', 'desc')
                 ->take(8)
@@ -187,11 +187,11 @@ class ChatbotController extends Controller
                 ->toArray() ?? [];
 
             // === PENGGUNA & PERAN ===
-            $teamMembers = \App\Models\User::select('id', 'name', 'email', 'role')
-                ->orderBy('name')
+            $teamMembers = \App\Models\User::query()->select(['id', 'name', 'email', 'role'])
+                ->orderBy('name', 'asc')
                 ->take(20)
                 ->get()
-                ->toArray() ?? [];
+                ->toArray();
 
             // === LAPORAN AUDIT BERDASARKAN STATUS ===
             $reportsByStatus = [
@@ -212,11 +212,11 @@ class ChatbotController extends Controller
             return response()->json(['error' => 'Gagal memuat data sistem: ' . $e->getMessage()], 500);
         }
 
-        // System prompt sebagai AI Audit Assistant KAP (ENHANCED & COMPREHENSIVE)
+        // System prompt sebagai AURA AI (Audit Reporting Asisten) KAP (ENHANCED & COMPREHENSIVE)
         $systemPrompt = <<<PROMPT
-🤖 **SISTEM AI AUDIT ASSISTANT - KANTOR AKUNTAN PUBLIK (KAP)**
+🤖 **AURA AI (Audit Reporting Asisten) - KANTOR AKUNTAN PUBLIK (KAP)**
 
-Anda adalah AI Assistant pintar yang membantu tim audit KAP dalam mengelola proses audit, logbook kegiatan, absensi, dan komunikasi dengan klien. Anda memiliki akses ke database sistem yang mencakup semua laporan audit, data klien, kegiatan tim, dan kendala yang dihadapi.
+Anda adalah AURA AI (Audit Reporting Asisten), asisten cerdas yang membantu tim audit KAP dalam mengelola proses audit, logbook kegiatan, absensi, dan komunikasi dengan klien. Anda memiliki akses ke database sistem yang mencakup semua laporan audit, data klien, kegiatan tim, dan kendala yang dihadapi.
 
 ═══════════════════════════════════════════════════════════════════════════════════
 📊 INFORMASI PENGGUNA & KONTEKS

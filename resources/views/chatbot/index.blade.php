@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="title">AI Audit Assistant</x-slot>
+    <x-slot name="title">AURA AI (Audit Reporting Asisten)</x-slot>
 
     <style>
         .chat-container {
@@ -221,7 +221,7 @@
                     </div>
                     <div>
                         <h2 class="text-gray-800 font-bold text-lg leading-tight" id="chat-title">
-                            {{ $currentSession ? $currentSession->title : 'AI Audit Assistant' }}
+                            {{ $currentSession ? $currentSession->title : 'AURA AI (Audit Reporting Asisten)' }}
                         </h2>
                         <div class="flex items-center gap-1.5 mt-0.5">
                             <span class="relative flex h-2 w-2">
@@ -231,18 +231,6 @@
                             <span class="text-gray-500 text-xs font-medium">Groq Engine (<span id="model-badge">llama-3.3-70b</span>)</span>
                         </div>
                     </div>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    @if(auth()->user()->role === 'admin')
-                    <button onclick="toggleSettings()" title="Pengaturan Token API" class="flex items-center gap-2 text-gray-500 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm border border-gray-200 transition-all duration-200">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        <span class="hidden xl:inline font-medium">API Settings</span>
-                    </button>
-                    @endif
                 </div>
             </div>
 
@@ -278,12 +266,12 @@
                         </svg>
                     </div>
                     <div class="message-bubble bg-gray-50 border border-gray-200 text-gray-700 rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm">
-                        <p class="font-bold text-blue-700 text-sm mb-1">AI Audit Assistant</p>
+                        <p class="font-bold text-blue-700 text-sm mb-1">AURA AI (Audit Reporting Asisten)</p>
                         <p class="text-sm leading-relaxed text-gray-800">
                             Halo, <strong class="text-gray-900">{{ Auth::user()->name }}</strong>! 👋
                         </p>
                         <p class="text-sm leading-relaxed mt-1 text-gray-600">
-                            Saya telah dihubungkan dengan <strong>data sistem KAP</strong> ini. Anda bisa bertanya mengenai jumlah laporan audit, status klien, maupun standar ISA/SPAP secara umum.
+                            Saya adalah <strong>AURA AI (Audit Reporting Asisten)</strong>, asisten cerdas yang siap membantu Anda dalam memantau, menganalisis, dan melaporkan kegiatan audit, status klien, serta data operasional KAP secara cepat dan akurat langsung dari database sistem.
                         </p>
                     </div>
                 </div>
@@ -346,9 +334,10 @@
                 <div class="flex flex-wrap gap-2">
                     @foreach([
                     '📊 Berapa total laporan audit saat ini?',
-                    '📋 Apa itu opini WTP?',
-                    '⚠️ Cara menilai risiko material',
-                    '✅ Standar ISA 315',
+                    '🏢 Berapa jumlah klien yang terdaftar?',
+                    '📋 Tampilkan daftar laporan audit terbaru',
+                    '⚠️ Apakah ada kendala yang dilaporkan oleh tim?',
+                    '📅 Bagaimana ringkasan absensi kehadiran hari ini?',
                     ] as $prompt)
                     <button class="quick-prompt text-xs font-medium text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full shadow-sm" onclick="setQuickPrompt(this)">
                         {{ $prompt }}

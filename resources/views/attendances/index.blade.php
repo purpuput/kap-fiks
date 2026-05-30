@@ -14,11 +14,11 @@
                 <div>
 
                     <h2 class="text-3xl font-bold text-gray-800">
-                        Absensi Auditor
+                        Absensi Pegawai
                     </h2>
 
                     <p class="text-sm text-gray-500 mt-1">
-                        Monitoring dan riwayat absensi auditor.
+                        Monitoring dan riwayat absensi pegawai.
                     </p>
 
                 </div>
@@ -44,33 +44,12 @@
 
             </div>
 
-            {{-- ===================================================== --}}
-            {{-- ALERT --}}
-            {{-- ===================================================== --}}
-            @if(session('success'))
 
-            <div class="mb-6 p-4 rounded-2xl border border-green-200 bg-green-50 text-green-700">
-
-                {{ session('success') }}
-
-            </div>
-
-            @endif
-
-            @if(session('error'))
-
-            <div class="mb-6 p-4 rounded-2xl border border-red-200 bg-red-50 text-red-700">
-
-                {{ session('error') }}
-
-            </div>
-
-            @endif
 
             {{-- ===================================================== --}}
-            {{-- DASHBOARD AUDITOR --}}
+            {{-- DASHBOARD PEGAWAI --}}
             {{-- ===================================================== --}}
-            @if(auth()->user()->role === 'auditor')
+            @if(in_array(auth()->user()->role, ['auditor', 'admin']))
 
             @php
 
@@ -241,35 +220,47 @@
 
             @php
 
-            // Total auditor
-            $totalAuditor = \App\Models\User::where('role', 'auditor')->count();
+            // Total pegawai (Admin & Auditor)
+            $totalAuditor = \App\Models\User::whereIn('role', ['auditor', 'admin'])->count();
 
             // Hadir hari ini
             $hadirToday = \App\Models\Attendance::whereDate('date', now())
             ->where('status', 'hadir')
+            ->whereHas('user', function($q) {
+                $q->whereIn('role', ['auditor', 'admin']);
+            })
             ->count();
 
             // Sakit
             $sakitToday = \App\Models\Attendance::whereDate('date', now())
             ->where('status', 'sakit')
+            ->whereHas('user', function($q) {
+                $q->whereIn('role', ['auditor', 'admin']);
+            })
             ->count();
 
             // Izin
             $izinToday = \App\Models\Attendance::whereDate('date', now())
             ->where('status', 'izin')
+            ->whereHas('user', function($q) {
+                $q->whereIn('role', ['auditor', 'admin']);
+            })
             ->count();
 
             // Belum absen
             $belumAbsen = $totalAuditor - ($hadirToday + $sakitToday + $izinToday);
 
-            // Auditor hadir hari ini
+            // Pegawai hadir hari ini
             $attendanceToday = \App\Models\Attendance::with('user')
             ->whereDate('date', now())
             ->where('status', 'hadir')
+            ->whereHas('user', function($q) {
+                $q->whereIn('role', ['auditor', 'admin']);
+            })
             ->get();
 
-            // Auditor yang belum absen
-            $notAttendance = \App\Models\User::where('role', 'auditor')
+            // Pegawai yang belum absen
+            $notAttendance = \App\Models\User::whereIn('role', ['auditor', 'admin'])
             ->whereNotIn('id', function ($query) {
 
             $query->select('user_id')
@@ -309,7 +300,7 @@
                                 class="inline-flex items-center gap-2 px-6 py-3
                                        bg-white text-blue-800 rounded-2xl
                                        font-bold hover:bg-blue-50 transition">
-                                Tambahkan Absen Admin
+                                Tambah Absensi
                             </a>
                         </div>
                         @endif
@@ -388,7 +379,7 @@
                         <div class="bg-white/10 rounded-2xl p-5">
 
                             <h3 class="font-semibold text-lg mb-4">
-                                Auditor Hadir Hari Ini
+                                Pegawai Hadir Hari Ini
                             </h3>
 
                             @forelse($attendanceToday as $item)
@@ -420,7 +411,7 @@
                             @empty
 
                             <p class="text-slate-300 text-sm">
-                                Belum ada auditor yang hadir.
+                                Belum ada pegawai yang hadir.
                             </p>
 
                             @endforelse
@@ -453,7 +444,7 @@
                             @empty
 
                             <p class="text-slate-300 text-sm">
-                                Semua auditor sudah absen.
+                                Semua pegawai sudah absen.
                             </p>
 
                             @endforelse
@@ -479,7 +470,7 @@
                     </h2>
 
                     <p class="text-sm text-gray-500 mt-1">
-                        Menampilkan riwayat absensi auditor.
+                        Menampilkan riwayat absensi pegawai.
                     </p>
 
                 </div>
@@ -513,7 +504,7 @@
                     <div class="w-full md:w-60">
 
                         <label class="block text-sm font-semibold mb-2">
-                            Auditor
+                            Pegawai
                         </label>
 
                         <select
@@ -523,7 +514,7 @@
                                    focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 
                             <option value="">
-                                Semua Auditor
+                                Semua Pegawai
                             </option>
 
                             @foreach($users as $user)
@@ -597,7 +588,7 @@
                                     @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
 
                                     <th class="px-6 py-4 text-left">
-                                        Auditor
+                                        Pegawai
                                     </th>
 
                                     @endif

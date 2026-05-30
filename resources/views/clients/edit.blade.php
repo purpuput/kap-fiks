@@ -145,106 +145,97 @@
 
                     {{-- Telepon --}}
                     <div>
-
                         <label class="block mb-2 font-semibold">
                             Telepon
                         </label>
-
                         <input type="text"
                             name="phone"
                             value="{{ old('phone', $client->phone) }}"
                             required
+                            placeholder="Contoh: 081234567890"
+                            pattern="08[0-9]{8,11}"
                             class="w-full border rounded-xl px-4 py-2">
-
+                        <p class="text-xs text-gray-500 mt-1">Harus diawali 08, panjang 10-13 digit angka.</p>
                     </div>
 
                     {{-- Email --}}
                     <div>
-
                         <label class="block mb-2 font-semibold">
                             Email
                         </label>
-
                         <input type="email"
                             name="email"
                             value="{{ old('email', $client->email) }}"
+                            required
+                            placeholder="Contoh: info@klien.com"
                             class="w-full border rounded-xl px-4 py-2">
-
                     </div>
 
                     {{-- NPWP --}}
                     <div>
-
                         <label class="block mb-2 font-semibold">
                             NPWP
                         </label>
-
                         <input type="text"
                             name="npwp"
                             value="{{ old('npwp', $client->npwp) }}"
+                            required
+                            placeholder="Contoh: 01.234.567.8-999.000"
+                            pattern="(\d{15}|\d{16}|\d{2}\.\d{3}\.\d{3}\.\d{1}-\d{3}\.\d{3})"
                             class="w-full border rounded-xl px-4 py-2">
-
+                        <p class="text-xs text-gray-500 mt-1">Format: 15/16 digit angka, atau format NPWP standar (XX.XXX.XXX.X-XXX.XXX).</p>
                     </div>
 
                     {{-- Alamat --}}
                     <div>
-
                         <label class="block mb-2 font-semibold">
                             Alamat
                         </label>
-
                         <textarea name="address"
                             rows="4"
                             required
                             class="w-full border rounded-xl px-4 py-2">{{ old('address', $client->address) }}</textarea>
-
                     </div>
 
                     {{-- Lokasi --}}
                     <div class="grid md:grid-cols-3 gap-4">
-
                         <div>
-
-                            <label class="block mb-2 font-semibold">
-                                Kota
-                            </label>
-
-                            <input type="text"
-                                name="city"
-                                value="{{ old('city', $client->city) }}"
-                                required
-                                class="w-full border rounded-xl px-4 py-2">
-
-                        </div>
-
-                        <div>
-
                             <label class="block mb-2 font-semibold">
                                 Provinsi
                             </label>
-
-                            <input type="text"
-                                name="province"
-                                value="{{ old('province', $client->province) }}"
+                            <select name="province"
+                                id="province"
                                 required
                                 class="w-full border rounded-xl px-4 py-2">
-
+                                <option value="">-- Pilih Provinsi --</option>
+                            </select>
                         </div>
 
                         <div>
+                            <label class="block mb-2 font-semibold">
+                                Kota/Kabupaten
+                            </label>
+                            <select name="city"
+                                id="city"
+                                required
+                                class="w-full border rounded-xl px-4 py-2">
+                                <option value="">-- Pilih Kota/Kabupaten --</option>
+                            </select>
+                        </div>
 
+                        <div>
                             <label class="block mb-2 font-semibold">
                                 Kode Pos
                             </label>
-
                             <input type="text"
                                 name="postal_code"
                                 value="{{ old('postal_code', $client->postal_code) }}"
                                 required
+                                pattern="[0-9]{5}"
+                                placeholder="Contoh: 36111"
                                 class="w-full border rounded-xl px-4 py-2">
-
+                            <p class="text-xs text-gray-500 mt-1">Harus 5 digit angka.</p>
                         </div>
-
                     </div>
 
                     {{-- Kontrak --}}
@@ -410,4 +401,137 @@
 
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const provinceSelect = document.getElementById('province');
+            const citySelect = document.getElementById('city');
+
+            // Helper to title-case names from API (e.g. "KOTA JAMBI" -> "Kota Jambi")
+            function toTitleCase(str) {
+                return str.replace(/\w\S*/g, function(txt){
+                    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                });
+            }
+
+            const initialProvince = "{{ old('province', $client->province ?? '') }}".trim();
+            const initialCity = "{{ old('city', $client->city ?? '') }}".trim();
+
+            // Load Provinces
+            fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
+                .then(response => response.json())
+                .then(provinces => {
+                    provinceSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+                    let matchedProvinceId = null;
+
+                    provinces.forEach(p => {
+                        const formattedName = toTitleCase(p.name);
+                        const option = document.createElement('option');
+                        option.value = formattedName;
+                        option.textContent = formattedName;
+                        option.dataset.id = p.id;
+
+                        if (initialProvince && formattedName.toLowerCase() === initialProvince.toLowerCase()) {
+                            option.selected = true;
+                            matchedProvinceId = p.id;
+                        }
+                        provinceSelect.appendChild(option);
+                    });
+
+                    // Fallback if old province is not in API list
+                    if (initialProvince && !matchedProvinceId) {
+                        const option = document.createElement('option');
+                        option.value = initialProvince;
+                        option.textContent = initialProvince;
+                        option.selected = true;
+                        provinceSelect.appendChild(option);
+                    }
+
+                    if (matchedProvinceId) {
+                        loadCities(matchedProvinceId, initialCity);
+                    } else if (initialProvince && !matchedProvinceId && initialCity) {
+                        citySelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+                        const option = document.createElement('option');
+                        option.value = initialCity;
+                        option.textContent = initialCity;
+                        option.selected = true;
+                        citySelect.appendChild(option);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching provinces:', error);
+                    provinceSelect.innerHTML = '<option value="">-- Gagal memuat data API --</option>';
+                    if (initialProvince) {
+                        const opt = document.createElement('option');
+                        opt.value = initialProvince;
+                        opt.textContent = initialProvince;
+                        opt.selected = true;
+                        provinceSelect.appendChild(opt);
+                    }
+                    if (initialCity) {
+                        citySelect.innerHTML = '<option value="">-- Gagal memuat data API --</option>';
+                        const opt = document.createElement('option');
+                        opt.value = initialCity;
+                        opt.textContent = initialCity;
+                        opt.selected = true;
+                        citySelect.appendChild(opt);
+                    }
+                });
+
+            // Function to load cities/regencies based on province ID
+            function loadCities(provinceId, selectedCity = '') {
+                citySelect.innerHTML = '<option value="">Memuat...</option>';
+
+                fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
+                    .then(response => response.json())
+                    .then(cities => {
+                        citySelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+                        let matchedCity = false;
+
+                        cities.forEach(c => {
+                            const formattedName = toTitleCase(c.name);
+                            const option = document.createElement('option');
+                            option.value = formattedName;
+                            option.textContent = formattedName;
+
+                            if (selectedCity && formattedName.toLowerCase() === selectedCity.toLowerCase()) {
+                                option.selected = true;
+                                matchedCity = true;
+                            }
+                            citySelect.appendChild(option);
+                        });
+
+                        if (selectedCity && !matchedCity) {
+                            const option = document.createElement('option');
+                            option.value = selectedCity;
+                            option.textContent = selectedCity;
+                            option.selected = true;
+                            citySelect.appendChild(option);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching cities:', error);
+                        citySelect.innerHTML = '<option value="">-- Gagal memuat data Kota --</option>';
+                        if (selectedCity) {
+                            const option = document.createElement('option');
+                            option.value = selectedCity;
+                            option.textContent = selectedCity;
+                            option.selected = true;
+                            citySelect.appendChild(option);
+                        }
+                    });
+            }
+
+            // Event listener for province change
+            provinceSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const provinceId = selectedOption.dataset.id;
+
+                if (provinceId) {
+                    loadCities(provinceId);
+                } else {
+                    citySelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+                }
+            });
+        });
+    </script>
 </x-app-layout>

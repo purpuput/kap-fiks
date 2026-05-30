@@ -45,7 +45,7 @@
                     
                     {{-- INFO UMUM --}}
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Nama Auditor</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Nama Pegawai</p>
                         <p class="text-sm text-gray-900 font-medium">{{ $logbook->user->name }}</p>
                     </div>
 
@@ -54,6 +54,7 @@
                         <p class="text-sm text-gray-900 font-medium">{{ $logbook->date->format('d M Y') }}</p>
                     </div>
 
+                    @if($logbook->user->role === 'auditor')
                     <div>
                         <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Klien</p>
                         <p class="text-sm text-gray-900 font-medium">{{ optional($logbook->client)->institution_name ?? '-' }}</p>
@@ -90,6 +91,7 @@
                             <span class="text-sm font-bold text-gray-700 min-w-[3rem]">{{ $logbook->cumulative_progress }}%</span>
                         </div>
                     </div>
+                    @endif
 
                     <div class="md:col-span-2">
                         <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Pekerjaan Utama Hari Ini</p>

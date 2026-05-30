@@ -46,9 +46,9 @@ class LogbookController extends Controller
             ->withQueryString();
 
         /**
-         * Data auditor untuk filter
+         * Data pegawai untuk filter
          */
-        $users = User::where('role', 'auditor')
+        $users = User::whereIn('role', ['auditor', 'admin'])
             ->orderBy('name')
             ->get();
 

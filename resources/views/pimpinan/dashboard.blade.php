@@ -15,8 +15,8 @@
         </div>
         <div class="space-y-2">
             @foreach($laporanMenunggu->take(3) as $laporan)
-            <div class="flex items-center justify-between bg-white border border-yellow-100 rounded-xl px-4 py-3">
-                <div class="flex-1 min-w-0 mr-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-yellow-100 rounded-xl px-4 py-3 gap-2">
+                <div class="flex-1 min-w-0">
                     <p class="font-semibold text-gray-800 text-sm truncate">{{ $laporan->title }}</p>
                     <p class="text-xs text-gray-400 mt-0.5">
                         {{ $laporan->report_number }} · {{ $laporan->client->institution_name ?? '-' }}

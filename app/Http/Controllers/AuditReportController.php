@@ -41,7 +41,7 @@ class AuditReportController extends Controller
     /**
      * Tipe dokumen berdasarkan role
      */
-    public function getDocumentTypesForRole($role)
+    public function getDocumentTypesForRole(string $role): array
     {
         if ($role === 'admin') {
             return [
@@ -224,9 +224,9 @@ class AuditReportController extends Controller
 
             $mimes = ($type === 'data_klien')
 
-                ? 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx|max:102400'
+                ? 'mimes:pdf,zip,tar|max:102400'
 
-                : 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:51200';
+                : 'mimes:pdf,zip,tar|max:51200';
 
             $fileRules["files.{$type}"] =
                 "required|file|{$mimes}";
@@ -245,22 +245,15 @@ class AuditReportController extends Controller
         $lastReport = AuditReport::latest()->first();
 
         $number = $lastReport
-
-            ? ((int) substr(
-                $lastReport->report_number,
-                -4
-            )) + 1
-
+            ? ((int) explode('/', $lastReport->report_number)[0]) + 1
             : 1;
 
-        $reportNumber = 'LAP-' .
-            date('Y') . '-' .
-            str_pad(
-                $number,
-                4,
-                '0',
-                STR_PAD_LEFT
-            );
+        $formattedNumber = str_pad($number, 2, '0', STR_PAD_LEFT);
+        $auditType = $client->audit_type === 'keuangan' ? 'KEU' : 'KPT';
+        $month = date('m');
+        $year = date('Y');
+
+        $reportNumber = "{$formattedNumber}/LA/{$auditType}/{$month}/{$year}";
 
         // Simpan laporan
         $report = AuditReport::create([
@@ -425,9 +418,9 @@ class AuditReportController extends Controller
 
             $mimes = ($type === 'data_klien')
 
-                ? 'mimes:zip,rar,7z,pdf,doc,docx,xls,xlsx|max:102400'
+                ? 'mimes:pdf,zip,tar|max:102400'
 
-                : 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:51200';
+                : 'mimes:pdf,zip,tar|max:51200';
 
             $fileRules["files.{$type}"] =
                 "{$required}|file|{$mimes}";

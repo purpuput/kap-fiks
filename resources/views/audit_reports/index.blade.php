@@ -30,18 +30,6 @@
     <div class="py-10">
         <div class="max-w-7xl mx-auto px-4">
 
-            {{-- FLASH --}}
-            @if(session('success'))
-            <div class="mb-4 p-4 bg-green-100 border border-green-300 text-green-700 rounded-xl text-sm">
-                {{ session('success') }}
-            </div>
-            @endif
-            @if(session('error'))
-            <div class="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded-xl text-sm">
-                {{ session('error') }}
-            </div>
-            @endif
-
             {{-- HEADER --}}
             <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <div>
@@ -61,19 +49,17 @@
 
             {{-- FILTER --}}
             <div class="bg-white rounded-2xl shadow p-4 mb-6">
-                <form method="GET" action="{{ route('audit_reports.index') }}" class="flex flex-wrap gap-3">
-                    <input type="text" name="search" value="{{ $search }}"
+                <form id="reportFilterForm" method="GET" action="{{ route('audit_reports.index') }}" class="flex flex-wrap gap-3">
+                    <input type="text" id="searchInput" name="search" value="{{ $search }}"
                         placeholder="Cari judul / no. laporan..."
                         class="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none flex-1 min-w-48">
-                    <select name="status"
+                    <select name="status" onchange="this.form.submit()"
                         class="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none">
                         <option value="">Semua Status</option>
                         <option value="review" {{ $status === 'review' ? 'selected' : '' }}>Review</option>
                         <option value="disetujui" {{ $status === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
                         <option value="revisi" {{ $status === 'revisi' ? 'selected' : '' }}>Revisi</option>
                     </select>
-                    <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold">Filter</button>
                     @if($search || $status)
                     <a href="{{ route('audit_reports.index') }}"
                         class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold">Reset</a>
@@ -235,6 +221,26 @@
         }
         document.getElementById('modalRevisi').addEventListener('click', function(e) {
             if (e.target === this) closeModalRevisi();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const form = document.getElementById('reportFilterForm');
+            let timeout = null;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    form.submit();
+                }, 500);
+            });
+
+            // Keep cursor at the end of search input after page load/submit
+            if (searchInput.value.length > 0) {
+                const len = searchInput.value.length;
+                searchInput.focus();
+                searchInput.setSelectionRange(len, len);
+            }
         });
     </script>
 

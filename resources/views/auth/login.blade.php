@@ -5,21 +5,21 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Name -->
+        <!-- Email -->
         <div>
-            <x-input-label for="name" :value="__('Name')" />
+            <x-input-label for="email" :value="'Email'" />
 
             <x-text-input
-                id="name"
+                id="email"
                 class="block mt-1 w-full"
-                type="text"
-                name="name"
-                :value="old('name')"
+                type="email"
+                name="email"
+                :value="old('email')"
                 required
                 autofocus
                 autocomplete="username" />
 
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Password -->
@@ -101,7 +101,7 @@
                     name="remember">
 
                 <span class="ms-2 text-sm text-gray-600">
-                    {{ __('Remember me') }}
+                    Remember me
                 </span>
             </label>
         </div>
@@ -111,12 +111,12 @@
             <a
                 class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 href="{{ route('password.request') }}">
-                {{ __('Forgot your password?') }}
+                Lupa kata sandi Anda?
             </a>
             @endif
 
             <x-primary-button class="ms-3 !bg-blue-600 hover:!bg-blue-700 focus:!bg-blue-700 active:!bg-blue-800 !text-white">
-                {{ __('Log in') }}
+                Login
             </x-primary-button>
         </div>
     </form>

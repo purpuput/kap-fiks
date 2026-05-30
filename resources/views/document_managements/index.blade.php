@@ -16,21 +16,16 @@
 
             {{-- SEARCH --}}
             <div class="bg-white rounded-2xl shadow p-4 mb-8">
-                <form method="GET">
+                <form id="docFilterForm" method="GET">
 
                     <div class="flex gap-3">
                         <input
                             type="text"
+                            id="searchInput"
                             name="search"
                             value="{{ $search }}"
                             placeholder="Cari nama klien..."
                             class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none">
-
-                        <button
-                            type="submit"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-xl text-sm font-semibold">
-                            Cari
-                        </button>
                     </div>
 
                 </form>
@@ -106,4 +101,25 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const form = document.getElementById('docFilterForm');
+            let timeout = null;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    form.submit();
+                }, 500);
+            });
+
+            // Keep cursor at the end of search input after page load/submit
+            if (searchInput.value.length > 0) {
+                const len = searchInput.value.length;
+                searchInput.focus();
+                searchInput.setSelectionRange(len, len);
+            }
+        });
+    </script>
 </x-app-layout>

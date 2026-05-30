@@ -6,7 +6,9 @@
             <div class="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
                 <h3 class="text-lg font-bold text-gray-800" id="previewTitle">Preview Dokumen</h3>
                 <button type="button" onclick="closeModalPreview()" class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-200 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
             </div>
             <div class="flex-1 bg-gray-100 overflow-hidden relative" id="previewContainerBox">
@@ -35,7 +37,7 @@
             <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-xl p-4">
                 <div class="flex items-start gap-3">
                     <svg class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                     </svg>
                     <div>
                         <p class="font-semibold text-yellow-800">Laporan Perlu Direvisi</p>
@@ -123,7 +125,9 @@
 
                                 @if($existingFile)
                                 <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
                                     Sudah ada
                                 </span>
                                 @else
@@ -136,10 +140,10 @@
                             @if($existingFile)
                             <div class="flex items-center gap-2 mb-2 p-2 bg-white rounded-lg border border-green-200">
                                 <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 <span class="text-xs text-gray-600 truncate flex-1">{{ $existingFile->document_name }}</span>
-                                
+
                                 @php
                                 $ext = strtolower(pathinfo($existingFile->file, PATHINFO_EXTENSION));
                                 $isImage = in_array($ext, ['jpg', 'jpeg', 'png']);
@@ -147,7 +151,7 @@
                                 @endphp
 
                                 @if($isImage || $isPdf)
-                                <button type="button" 
+                                <button type="button"
                                     onclick="openModalPreview('{{ route('audit_reports.preview', $existingFile->id) }}', '{{ $existingFile->document_name }}', {{ $isImage ? 'true' : 'false' }})"
                                     class="text-xs text-gray-600 hover:text-gray-900 hover:underline flex-shrink-0 mr-2">
                                     Preview
@@ -160,26 +164,28 @@
                             @endif
 
                             @if(array_key_exists($type, $allowedDocumentTypes))
-                                <input type="file" name="files[{{ $type }}]"
-                                    @if($type === 'data_klien')
-                                        accept=".zip,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx"
-                                    @else
-                                        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                                    @endif
-                                    class="w-full text-xs text-gray-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-
-                                @if(!$existingFile)
-                                <p class="text-xs text-red-500 mt-1">Wajib diisi</p>
+                            <input type="file" name="files[{{ $type }}]"
+                                @if($type==='data_klien' )
+                                accept=".zip,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx"
+                                @else
+                                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                                 @endif
+                                class="w-full text-xs text-gray-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
 
-                                @error("files.$type")
-                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                                @enderror
+                            @if(!$existingFile)
+                            <p class="text-xs text-red-500 mt-1">Wajib diisi</p>
+                            @endif
+
+                            @error("files.$type")
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
                             @else
-                                <p class="text-xs text-gray-400 mt-2 italic flex items-center gap-1">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                    Akses upload ditutup (Bukan tanggung jawab {{ ucfirst(auth()->user()->role) }})
-                                </p>
+                            <p class="text-xs text-gray-400 mt-2 italic flex items-center gap-1">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Akses upload ditutup (Bukan tanggung jawab {{ ucfirst(auth()->user()->role) }})
+                            </p>
                             @endif
                         </div>
                         @endforeach
@@ -208,14 +214,14 @@
             const iframe = document.getElementById('previewIframe');
             const img = document.getElementById('previewImage');
             const loading = document.getElementById('previewLoading');
-            
+
             document.getElementById('previewTitle').innerText = title || 'Preview Dokumen';
-            
+
             modal.classList.remove('hidden');
             loading.classList.remove('hidden');
             iframe.classList.add('hidden');
             img.classList.add('hidden');
-            
+
             if (isImage) {
                 img.src = url;
                 img.onload = function() {
@@ -235,7 +241,7 @@
             const modal = document.getElementById('modalPreview');
             const iframe = document.getElementById('previewIframe');
             const img = document.getElementById('previewImage');
-            
+
             modal.classList.add('hidden');
             iframe.src = '';
             img.src = '';

@@ -38,16 +38,19 @@ class AuditReportFileSeeder extends Seeder
 
     public function run(): void
     {
+        // User admin
+        $admin = User::where('role', 'admin')->first();
+
         // User auditor
         $auditor = User::where('role', 'auditor')->first();
 
         // User pimpinan
         $pimpinan = User::where('role', 'pimpinan')->first();
 
-        if (!$auditor || !$pimpinan) {
+        if (!$admin || !$auditor || !$pimpinan) {
 
             $this->command->warn(
-                'Seeder membutuhkan user auditor dan pimpinan.'
+                'Seeder membutuhkan user admin, auditor, dan pimpinan.'
             );
 
             return;
@@ -58,18 +61,14 @@ class AuditReportFileSeeder extends Seeder
 
         foreach ($reports as $report) {
 
-            // Gunakan creator report sebagai auditor uploader
-            $auditor = User::find($report->created_by);
-
-            if (!$auditor) {
-                // Fallback ke auditor pertama client
-                $auditor = $report->client->auditors->first() ?? User::where('role', 'auditor')->first();
-            }
+            // Ambil auditor pertama dari klien laporan tersebut, atau fallback ke auditor umum
+            $clientAuditor = $report->client->auditors->first() ?? $auditor;
 
             $this->seedFilesForReport(
                 $report,
-                $auditor,
-                $pimpinan
+                $clientAuditor,
+                $pimpinan,
+                $admin
             );
         }
     }
@@ -80,7 +79,8 @@ class AuditReportFileSeeder extends Seeder
     protected function seedFilesForReport(
         AuditReport $report,
         User $auditor,
-        User $pimpinan
+        User $pimpinan,
+        User $admin
     ): void {
 
         $prefix = strtolower(
@@ -98,15 +98,18 @@ class AuditReportFileSeeder extends Seeder
 
                 'data_klien' => 'zip',
 
-                'laporan_keuangan',
-                'kertas_kerja' => 'xlsx',
-
                 default => 'pdf',
             };
 
             $fileName = "{$prefix}_{$type}.{$ext}";
 
             $fakePath = "audit_reports/{$report->id}/{$fileName}";
+
+            // SPK, Surat Tugas, dan Invoice diupload oleh admin
+            $uploadedBy = match ($type) {
+                'spk', 'surat_tugas', 'invoice' => $admin->id,
+                default => $auditor->id,
+            };
 
             // File audit
             $file = AuditReportFile::create([
@@ -125,7 +128,7 @@ class AuditReportFileSeeder extends Seeder
 
                 'status' => $report->status === 'disetujui' ? 'lengkap' : 'pending',
 
-                'uploaded_by' => $auditor->id,
+                'uploaded_by' => $uploadedBy,
             ]);
 
             // Arsip dokumen

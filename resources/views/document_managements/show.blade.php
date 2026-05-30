@@ -34,6 +34,7 @@
 
                         <select
                             name="document_type"
+                            onchange="this.form.submit()"
                             class="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none">
 
                             <option value="">Semua Tipe</option>
@@ -51,14 +52,6 @@
                             @endforeach
 
                         </select>
-
-                        <button
-                            type="submit"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold">
-
-                            Filter
-
-                        </button>
 
                     </div>
 

@@ -314,18 +314,30 @@
                                 </div>
 
                                 <div>
-
                                     <p class="text-sm text-gray-500 mb-1">
-                                        Kota / Provinsi
+                                        Provinsi
                                     </p>
-
                                     <h3 class="font-semibold text-gray-800">
-
-                                        {{ $client->city }},
                                         {{ $client->province }}
-
                                     </h3>
+                                </div>
 
+                                <div>
+                                    <p class="text-sm text-gray-500 mb-1">
+                                        Kota/Kabupaten
+                                    </p>
+                                    <h3 class="font-semibold text-gray-800">
+                                        {{ $client->city }}
+                                    </h3>
+                                </div>
+
+                                <div>
+                                    <p class="text-sm text-gray-500 mb-1">
+                                        Kode Pos
+                                    </p>
+                                    <h3 class="font-semibold text-gray-800">
+                                        {{ $client->postal_code }}
+                                    </h3>
                                 </div>
 
                             </div>

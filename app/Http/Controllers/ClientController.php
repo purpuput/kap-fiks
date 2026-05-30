@@ -67,7 +67,7 @@ class ClientController extends Controller
             abort(403);
         }
 
-        $auditors = User::where('role', 'auditor')->get();
+        $auditors = User::query()->where('role', 'auditor')->get();
 
         return view('clients.create', compact('auditors'));
     }
@@ -83,37 +83,21 @@ class ClientController extends Controller
         }
 
         $validated = $request->validate([
-
             'institution_type' => 'required|in:Pemerintahan,Swasta',
-
             'audit_type' => 'required|in:keuangan,kepatuhan',
-
             'institution_name' => 'required|string|max:255',
-
             'leader_name' => 'required|string|max:255',
-
             'address' => 'required|string',
-
             'city' => 'required|string|max:100',
-
             'province' => 'required|string|max:100',
-
-            'postal_code' => 'required|string|max:10',
-
-            'phone' => 'required|string|max:20',
-
-            'email' => 'nullable|email',
-
-            'npwp' => 'nullable|string|max:50',
-
+            'postal_code' => 'required|regex:/^[0-9]{5}$/',
+            'phone' => 'required|regex:/^08[0-9]{8,11}$/',
+            'email' => 'required|email|max:255',
+            'npwp' => ['required', 'regex:/^(\d{15}|\d{16}|\d{2}\.\d{3}\.\d{3}\.\d{1}-\d{3}\.\d{3})$/'],
             'contract_start' => 'nullable|date',
-
             'contract_end' => 'nullable|date',
-
             'auditors' => 'required|array',
-
             'auditors.*' => 'exists:users,id',
-
             'team_role' => 'required|array',
         ]);
 
@@ -155,7 +139,7 @@ class ClientController extends Controller
             abort(403);
         }
 
-        $auditors = User::where('role', 'auditor')->get();
+        $auditors = User::query()->where('role', 'auditor')->get();
 
         return view('clients.edit', compact(
             'client',
@@ -174,39 +158,22 @@ class ClientController extends Controller
         }
 
         $validated = $request->validate([
-
             'institution_type' => 'required|in:Pemerintahan,Swasta',
-
             'audit_type' => 'required|in:keuangan,kepatuhan',
-
             'institution_name' => 'required|string|max:255',
-
             'leader_name' => 'required|string|max:255',
-
             'address' => 'required|string',
-
             'city' => 'required|string|max:100',
-
             'province' => 'required|string|max:100',
-
-            'postal_code' => 'required|string|max:10',
-
-            'phone' => 'required|string|max:20',
-
-            'email' => 'nullable|email',
-
-            'npwp' => 'nullable|string|max:50',
-
+            'postal_code' => 'required|regex:/^[0-9]{5}$/',
+            'phone' => 'required|regex:/^08[0-9]{8,11}$/',
+            'email' => 'required|email|max:255',
+            'npwp' => ['required', 'regex:/^(\d{15}|\d{16}|\d{2}\.\d{3}\.\d{3}\.\d{1}-\d{3}\.\d{3})$/'],
             'status' => 'required|in:aktif,nonaktif',
-
             'contract_start' => 'nullable|date',
-
             'contract_end' => 'nullable|date',
-
             'auditors' => 'required|array',
-
             'auditors.*' => 'exists:users,id',
-
             'team_role' => 'required|array',
         ]);
 

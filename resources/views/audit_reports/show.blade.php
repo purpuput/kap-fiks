@@ -50,18 +50,6 @@
     <div class="py-10">
         <div class="max-w-5xl mx-auto px-4">
 
-            {{-- FLASH MESSAGE --}}
-            @if(session('success'))
-            <div class="mb-4 p-4 bg-green-100 border border-green-300 text-green-700 rounded-xl text-sm">
-                {{ session('success') }}
-            </div>
-            @endif
-            @if(session('error'))
-            <div class="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded-xl text-sm">
-                {{ session('error') }}
-            </div>
-            @endif
-
             {{-- HEADER --}}
             <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
                 <div>

@@ -11,11 +11,11 @@ class ClientSeeder extends Seeder
     public function run(): void
     {
         // User role
-        $admin = User::where('role', 'admin')->first();
+        $admin = User::query()->where('role', 'admin')->first();
 
-        $pimpinan = User::where('role', 'pimpinan')->first();
+        $pimpinan = User::query()->where('role', 'pimpinan')->first();
 
-        $auditors = User::where('role', 'auditor')->get();
+        $auditors = User::query()->where('role', 'auditor')->get();
 
         /*
         |--------------------------------------------------------------------------
@@ -36,7 +36,7 @@ class ClientSeeder extends Seeder
 
             'address' => 'Jl. Sudirman No. 10',
 
-            'city' => 'Jambi',
+            'city' => 'Kota Jambi',
 
             'province' => 'Jambi',
 
@@ -98,7 +98,7 @@ class ClientSeeder extends Seeder
 
             'address' => 'Jl. Pattimura No. 20',
 
-            'city' => 'Jambi',
+            'city' => 'Kota Jambi',
 
             'province' => 'Jambi',
 

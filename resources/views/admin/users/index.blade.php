@@ -21,28 +21,23 @@
 
             <!-- Search & Filter -->
             <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <form method="GET" action="{{ route('admin.users.index') }}" class="space-y-4">
+                <form id="userFilterForm" method="GET" action="{{ route('admin.users.index') }}" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Cari Nama/Email</label>
-                            <input type="text" name="search" value="{{ $search }}" placeholder="Ketik nama atau email..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <input type="text" id="searchInput" name="search" value="{{ $search }}" placeholder="Ketik nama atau email..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Filter Role</label>
-                            <select name="role" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <select name="role" onchange="this.form.submit()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">Semua Role</option>
                                 <option value="admin" {{ $role === 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="kepala_kantor" {{ $role === 'kepala_kantor' ? 'selected' : '' }}>Kepala Kantor</option>
                                 <option value="auditor" {{ $role === 'auditor' ? 'selected' : '' }}>Auditor</option>
-                                <option value="karyawan" {{ $role === 'karyawan' ? 'selected' : '' }}>Karyawan</option>
                                 <option value="pimpinan" {{ $role === 'pimpinan' ? 'selected' : '' }}>Pimpinan</option>
                             </select>
                         </div>
-                        <div class="flex items-end gap-2">
-                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
-                                Cari
-                            </button>
-                            <a href="{{ route('admin.users.index') }}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200 text-center">
+                        <div class="flex items-end">
+                            <a href="{{ route('admin.users.index') }}" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200 text-center">
                                 Reset
                             </a>
                         </div>
@@ -114,4 +109,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const form = document.getElementById('userFilterForm');
+            let timeout = null;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    form.submit();
+                }, 500);
+            });
+
+            // Keep cursor at the end of search input after page load/submit
+            if (searchInput.value.length > 0) {
+                const len = searchInput.value.length;
+                searchInput.focus();
+                searchInput.setSelectionRange(len, len);
+            }
+        });
+    </script>
 </x-app-layout>

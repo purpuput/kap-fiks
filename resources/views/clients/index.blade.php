@@ -35,26 +35,17 @@
 
             </div>
 
-            {{-- Success --}}
-            @if(session('success'))
-
-            <div class="mb-5 bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-xl">
-
-                {{ session('success') }}
-
-            </div>
-
-            @endif
 
             {{-- Search --}}
             <div class="bg-white rounded-2xl shadow p-5 mb-6">
 
-                <form method="GET"
+                <form id="clientFilterForm" method="GET"
                     action="{{ route('clients.index') }}">
 
                     <div class="relative">
 
                         <input type="text"
+                            id="searchInput"
                             name="search"
                             value="{{ request('search') }}"
                             placeholder="Cari nama instansi..."
@@ -373,5 +364,27 @@
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const form = document.getElementById('clientFilterForm');
+            let timeout = null;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    form.submit();
+                }, 500);
+            });
+
+            // Keep cursor at the end of search input after page load/submit
+            if (searchInput.value.length > 0) {
+                const len = searchInput.value.length;
+                searchInput.focus();
+                searchInput.setSelectionRange(len, len);
+            }
+        });
+    </script>
 
 </x-app-layout>

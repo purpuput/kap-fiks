@@ -1,22 +1,11 @@
-<x-app-layout title="Logbook Auditor">
+<x-app-layout title="Logbook Pegawai">
 
     <div class="py-10">
         <div class="max-w-7xl mx-auto px-4">
 
-            {{-- FLASH --}}
-            @if(session('success'))
-            <div class="mb-4 p-4 bg-green-100 border border-green-300 text-green-700 rounded-xl text-sm">
-                {{ session('success') }}
-            </div>
-            @endif
-            @if(session('error'))
-            <div class="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded-xl text-sm">
-                {{ session('error') }}
-            </div>
-            @endif
 
-            {{-- DASHBOARD AUDITOR --}}
-            @if(auth()->user()->role === 'auditor')
+            {{-- DASHBOARD PEGAWAI --}}
+            @if(in_array(auth()->user()->role, ['auditor', 'admin']))
             @php
                 $todayLogbook = \App\Models\Logbook::where('user_id', auth()->id())
                     ->whereDate('date', now())
@@ -75,22 +64,21 @@
             {{-- DASHBOARD MONITORING (ADMIN & PIMPINAN) --}}
             @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
             @php
-                $totalAuditor = \App\Models\User::where('role', 'auditor')->count();
+                $totalAuditor = \App\Models\User::whereIn('role', ['auditor', 'admin'])->count();
                 $logbooksToday = \App\Models\Logbook::whereDate('date', now())->get();
                 
-                // Pisahkan logbook admin vs auditor
-                $auditorFilledIds = $logbooksToday->whereNotIn('user_id', \App\Models\User::where('role', 'admin')->pluck('id')->toArray())
-                                                  ->pluck('user_id')->unique()->toArray();
+                // Pegawai yang sudah mengisi logbook
+                $auditorFilledIds = $logbooksToday->pluck('user_id')->unique()->toArray();
                                                   
                 $filledCount = count($auditorFilledIds);
                 $notFilledCount = $totalAuditor - $filledCount;
                 $obstacleCount = $logbooksToday->where('has_obstacle', 1)->count();
 
-                $auditorFilled = \App\Models\User::where('role', 'auditor')->whereIn('id', $auditorFilledIds)->get();
-                $auditorNotFilled = \App\Models\User::where('role', 'auditor')->whereNotIn('id', $auditorFilledIds)->get();
+                $auditorFilled = \App\Models\User::whereIn('role', ['auditor', 'admin'])->whereIn('id', $auditorFilledIds)->get();
+                $auditorNotFilled = \App\Models\User::whereIn('role', ['auditor', 'admin'])->whereNotIn('id', $auditorFilledIds)->get();
 
                 $auditorObstaclesIds = $logbooksToday->where('has_obstacle', 1)->pluck('user_id')->unique()->toArray();
-                $auditorObstacles = \App\Models\User::where('role', 'auditor')->whereIn('id', $auditorObstaclesIds)->get();
+                $auditorObstacles = \App\Models\User::whereIn('role', ['auditor', 'admin'])->whereIn('id', $auditorObstaclesIds)->get();
             @endphp
             <div class="mb-8">
                 <div class="bg-gradient-to-r from-blue-600 to-blue-700
@@ -100,19 +88,11 @@
                             <p class="text-blue-100 text-sm mb-1">Monitoring Logbook Hari Ini</p>
                             <h2 class="text-3xl font-bold">{{ now()->translatedFormat('l, d F Y') }}</h2>
                         </div>
-                        @if(auth()->user()->role === 'admin')
-                        <div>
-                            <a href="{{ route('logbooks.create') }}"
-                               class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-800 rounded-2xl font-bold hover:bg-blue-50 transition shadow">
-                                Tambah Logbook Admin
-                            </a>
-                        </div>
-                        @endif
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <div class="bg-white/10 rounded-2xl p-4 border border-white/5">
-                            <p class="text-blue-200 text-xs mb-1">Total Auditor</p>
+                            <p class="text-blue-200 text-xs mb-1">Total Pegawai</p>
                             <p class="text-2xl font-bold">{{ $totalAuditor }}</p>
                         </div>
                         <div class="bg-green-500/20 rounded-2xl p-4 border border-green-500/20">
@@ -179,12 +159,14 @@
 
             {{-- FILTER --}}
             <div class="bg-white rounded-2xl shadow p-4 mb-6">
-                <form method="GET" action="{{ route('logbooks.index') }}" class="flex flex-wrap gap-3">
+                <form id="filterFormLogbook" method="GET" action="{{ route('logbooks.index') }}" class="flex flex-wrap gap-3">
                     <input type="date" name="date" value="{{ request('date') }}"
+                        onchange="document.getElementById('filterFormLogbook').submit()"
                         class="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none">
 
                     @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
                     <select name="user_id"
+                        onchange="document.getElementById('filterFormLogbook').submit()"
                         class="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none">
                         <option value="">Semua Pegawai</option>
                         @foreach($users as $user)
@@ -195,11 +177,9 @@
                     </select>
                     @endif
 
-                    <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold">Filter</button>
                     @if(request('date') || request('user_id'))
                     <a href="{{ route('logbooks.index') }}"
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold">Reset</a>
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center">Reset</a>
                     @endif
                 </form>
             </div>
@@ -212,7 +192,7 @@
                             <tr>
                                 <th class="px-4 py-3.5 text-left">No</th>
                                 @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
-                                <th class="px-4 py-3.5 text-left">Auditor</th>
+                                <th class="px-4 py-3.5 text-left">Pegawai</th>
                                 @endif
                                 <th class="px-4 py-3.5 text-left">Tanggal</th>
                                 <th class="px-4 py-3.5 text-left">Klien</th>

@@ -14,9 +14,9 @@
                     @csrf
                     @method('PUT')
 
-                    <!-- Nama Auditor -->
+                    <!-- Nama Pegawai -->
                     <div>
-                        <label class="block text-sm font-semibold mb-2">Nama Auditor</label>
+                        <label class="block text-sm font-semibold mb-2">Nama Pegawai</label>
                         <input type="text" value="{{ $logbook->user->name }}" disabled class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 text-gray-600">
                     </div>
 
