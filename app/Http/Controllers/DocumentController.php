@@ -48,7 +48,7 @@ class DocumentController extends Controller
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $path = $file->store('documents/' . now()->format('Y/m'), 'public');
+            $path = $file->store('documents/' . now()->format('Y/m'), 'local');
 
             $validated['file_path'] = $path;
             $validated['file_type'] = $file->getClientOriginalExtension();
@@ -64,7 +64,7 @@ class DocumentController extends Controller
 
     public function download(Document $document)
     {
-        return Storage::download(
+        return Storage::disk('local')->download(
             $document->file_path,
             $document->name . '.' . $document->file_type
         );
@@ -72,7 +72,7 @@ class DocumentController extends Controller
 
     public function destroy(Document $document)
     {
-        Storage::disk('public')->delete($document->file_path);
+        Storage::disk('local')->delete($document->file_path);
         $document->delete();
         return redirect()->route('documents.index')->with('success', 'Dokumen berhasil dihapus');
     }

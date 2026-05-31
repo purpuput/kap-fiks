@@ -28,6 +28,8 @@ class ClientController extends Controller
             $query = Client::query();
         }
 
+        $query->withCount('documentManagements');
+
         // Search client
         if ($search) {
 

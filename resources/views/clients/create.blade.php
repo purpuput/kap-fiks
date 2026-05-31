@@ -1,12 +1,12 @@
 <x-app-layout title="Tambah Klien">
 
-    <div class="py-10">
+    <div class="py-6">
 
         <div class="max-w-4xl mx-auto px-4">
 
-            <div class="bg-white rounded-2xl shadow p-6">
+            <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
 
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-6">
                     Tambah Klien
                 </h2>
 

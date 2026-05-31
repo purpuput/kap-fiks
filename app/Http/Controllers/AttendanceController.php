@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AttendanceExport;
 use App\Models\Attendance;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\AttendanceExport;
 
 class AttendanceController extends Controller
 {
@@ -96,7 +96,7 @@ class AttendanceController extends Controller
 
         // Load view PDF
         $pdf = Pdf::loadView(
-            'attendances.pdf',
+            'attendances.pdf.pdf',
             compact('attendances')
         );
 
@@ -132,12 +132,12 @@ class AttendanceController extends Controller
             $query->get()->map(function ($item) {
 
                 return [
-                    'Auditor'     => $item->user->name ?? '-',
-                    'Tanggal'     => $item->date,
-                    'Check In'    => $item->check_in,
-                    'Check Out'   => $item->check_out,
-                    'Status'      => ucfirst($item->status),
-                    'Keterangan'  => $item->notes,
+                    'Auditor' => $item->user->name ?? '-',
+                    'Tanggal' => $item->date,
+                    'Check In' => $item->check_in,
+                    'Check Out' => $item->check_out,
+                    'Status' => ucfirst($item->status),
+                    'Keterangan' => $item->notes,
                 ];
             })
         );
@@ -204,13 +204,13 @@ class AttendanceController extends Controller
             'user_id' => ['nullable', 'exists:users,id'],
 
             // Tipe absensi
-            'tipe' => 'required|in:Masuk,Pulang',
+            'tipe' => 'required_if:status,hadir,alpha|nullable|in:Masuk,Pulang',
 
             // Status absensi
             'status' => 'required|in:hadir,izin,sakit,alpha',
 
-            // Catatan tambahan
-            'notes' => 'nullable|string',
+            // File lampiran (wajib jika sakit atau izin)
+            'attachment' => 'required_if:status,izin,sakit|nullable|file|mimes:pdf|max:2048',
         ]);
 
         /**
@@ -239,7 +239,7 @@ class AttendanceController extends Controller
             return back()
                 ->withInput()
                 ->withErrors([
-                    'tipe' => 'Absensi hari ini sudah lengkap.'
+                    'tipe' => 'Absensi hari ini sudah lengkap.',
                 ]);
         }
 
@@ -248,14 +248,15 @@ class AttendanceController extends Controller
          * sebelum melakukan absen masuk
          */
         if (
+            $validated['status'] === 'hadir' &&
             $validated['tipe'] === 'Pulang' &&
-            (!$attendance || !$attendance->check_in)
+            (! $attendance || ! $attendance->check_in)
         ) {
 
             return back()
                 ->withInput()
                 ->withErrors([
-                    'tipe' => 'Absensi masuk harus dilakukan terlebih dahulu.'
+                    'tipe' => 'Absensi masuk harus dilakukan terlebih dahulu.',
                 ]);
         }
 
@@ -264,9 +265,8 @@ class AttendanceController extends Controller
          */
         $data = [
             'user_id' => $validated['user_id'],
-            'date'    => $validated['date'],
-            'status'  => $validated['status'],
-            'notes'   => $validated['notes'] ?? null,
+            'date' => $validated['date'],
+            'status' => $validated['status'],
         ];
 
         /**
@@ -277,7 +277,7 @@ class AttendanceController extends Controller
             /**
              * Absensi masuk
              */
-            if ($validated['tipe'] === 'Masuk') {
+            if (($validated['tipe'] ?? 'Masuk') === 'Masuk') {
 
                 // Menyimpan jam masuk saat ini
                 $data['check_in'] = now()->format('H:i:s');
@@ -290,6 +290,18 @@ class AttendanceController extends Controller
                 // Menyimpan jam pulang saat ini
                 $data['check_out'] = now()->format('H:i:s');
             }
+        } else {
+            // Jika sakit/izin, jam masuk dan pulang kosong
+            $data['check_in'] = null;
+            $data['check_out'] = null;
+        }
+
+        // Simpan file attachment jika ada
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $filename = time().'_'.$file->getClientOriginalName();
+            $path = $file->storeAs('attachments', $filename, 'local');
+            $data['attachment'] = $path;
         }
 
         /**
@@ -314,12 +326,69 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Menampilkan form edit absensi
+     */
+    public function edit(Attendance $attendance)
+    {
+        // Hanya admin yang boleh mengedit
+        abort_unless(Auth::user()->role === 'admin', 403);
+
+        return view('attendances.edit', compact('attendance'));
+    }
+
+    /**
+     * Memperbarui data absensi
+     */
+    public function update(Request $request, Attendance $attendance)
+    {
+        // Hanya admin yang boleh mengupdate
+        abort_unless(Auth::user()->role === 'admin', 403);
+
+        $validated = $request->validate([
+            'status' => 'required|in:hadir,izin,sakit,alpha',
+            'check_in' => 'nullable',
+            'check_out' => 'nullable',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048',
+        ]);
+
+        $data = [
+            'status' => $validated['status'],
+        ];
+
+        if ($validated['status'] === 'hadir') {
+            $data['check_in'] = $validated['check_in'];
+            $data['check_out'] = $validated['check_out'];
+        } else {
+            $data['check_in'] = null;
+            $data['check_out'] = null;
+        }
+
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $filename = time().'_'.$file->getClientOriginalName();
+            $path = $file->storeAs('attachments', $filename, 'local');
+            $data['attachment'] = $path;
+        }
+
+        $attendance->update($data);
+
+        return redirect()
+            ->route('attendances.index')
+            ->with('success', 'Absensi berhasil diperbarui');
+    }
+
+    /**
      * Menghapus data absensi
      */
     public function destroy(Attendance $attendance)
     {
         // Hanya admin yang boleh menghapus
         abort_unless(Auth::user()->role === 'admin', 403);
+
+        // Hapus file attachment dari local storage jika ada
+        if ($attendance->attachment) {
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($attendance->attachment);
+        }
 
         // Menghapus data
         $attendance->delete();
@@ -328,5 +397,26 @@ class AttendanceController extends Controller
         return redirect()
             ->route('attendances.index')
             ->with('success', 'Absensi berhasil dihapus');
+    }
+
+    /**
+     * Download lampiran absensi secara aman
+     */
+    public function downloadAttachment(Attendance $attendance)
+    {
+        // Otorisasi: Hanya admin, pimpinan, atau pemilik absensi yang boleh mengunduh
+        if (Auth::user()->role !== 'admin' && Auth::user()->role !== 'pimpinan' && Auth::id() !== $attendance->user_id) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengunduh lampiran ini.');
+        }
+
+        if (empty($attendance->attachment) || !\Illuminate\Support\Facades\Storage::disk('local')->exists($attendance->attachment)) {
+            return back()->with('error', 'File lampiran tidak ditemukan di server.');
+        }
+
+        // Mengambil extension file untuk memberikan nama file unduhan yang bersih
+        $extension = pathinfo($attendance->attachment, PATHINFO_EXTENSION);
+        $cleanName = 'Lampiran_Absensi_' . str_replace(' ', '_', $attendance->user->name) . '_' . $attendance->date . '.' . $extension;
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($attendance->attachment, $cleanName);
     }
 }

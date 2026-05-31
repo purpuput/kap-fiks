@@ -1,12 +1,12 @@
 <x-app-layout title="Edit Logbook">
 
-    <div class="py-12">
+    <div class="py-6">
 
         <div class="max-w-2xl mx-auto px-4">
 
-            <div class="bg-white rounded-2xl shadow p-6">
+            <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
 
-                <h2 class="text-2xl font-bold mb-6">
+                <h2 class="text-lg font-bold mb-6">
                     Edit Logbook
                 </h2>
 
@@ -25,7 +25,7 @@
                     <div>
                         <label class="block text-sm font-semibold mb-2">Peran dalam Tim</label>
                         <input type="text" name="team_role" id="team_role" value="{{ old('team_role', $logbook->team_role) }}" readonly required class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 text-gray-600">
-                        @error('team_role')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('team_role')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <!-- Klien -->
@@ -39,7 +39,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        @error('client_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('client_id')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     @endif
 
@@ -47,7 +47,7 @@
                     <div>
                         <label class="block text-sm font-semibold mb-2">Tanggal Pengisian</label>
                         <input type="date" name="date" value="{{ old('date', $logbook->date->toDateString()) }}" required class="w-full px-4 py-3 border border-gray-300 rounded-xl">
-                        @error('date')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('date')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     @if($logbook->user->role === 'auditor')
@@ -63,7 +63,7 @@
                                 <option value="{{ $stage }}" {{ old('audit_stage', $logbook->audit_stage) == $stage ? 'selected' : '' }}>{{ $stage }}</option>
                             @endforeach
                         </select>
-                        @error('audit_stage')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('audit_stage')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <!-- Area Audit -->
@@ -78,14 +78,14 @@
                                 <option value="{{ $area }}" {{ old('audit_area', $logbook->audit_area) == $area ? 'selected' : '' }}>{{ $area }}</option>
                             @endforeach
                         </select>
-                        @error('audit_area')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('audit_area')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <!-- Progress Kumulatif -->
                     <div>
                         <label class="block text-sm font-semibold mb-2">Progress Kumulatif (%)</label>
                         <input type="number" name="cumulative_progress" min="1" max="100" value="{{ old('cumulative_progress', $logbook->cumulative_progress) }}" required class="w-full px-4 py-3 border border-gray-300 rounded-xl">
-                        @error('cumulative_progress')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('cumulative_progress')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                     @endif
 
@@ -93,7 +93,7 @@
                     <div>
                         <label class="block text-sm font-semibold mb-2">Pekerjaan Utama Hari Ini</label>
                         <textarea name="main_task" rows="3" required placeholder="Masukkan pekerjaan utama..." class="w-full px-4 py-3 border border-gray-300 rounded-xl">{{ old('main_task', $logbook->main_task) }}</textarea>
-                        @error('main_task')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('main_task')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <!-- Terdapat Kendala -->
@@ -103,7 +103,7 @@
                             <option value="0" {{ old('has_obstacle', $logbook->has_obstacle ? '1' : '0') == '0' ? 'selected' : '' }}>Tidak Ada</option>
                             <option value="1" {{ old('has_obstacle', $logbook->has_obstacle ? '1' : '0') == '1' ? 'selected' : '' }}>Ada</option>
                         </select>
-                        @error('has_obstacle')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('has_obstacle')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <!-- Kondisional Kendala -->
@@ -121,20 +121,20 @@
                                 @endforeach
                                 <option value="Lainnya" {{ old('obstacle_type', $isLainnya ? 'Lainnya' : '') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                             </select>
-                            @error('obstacle_type')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                            @error('obstacle_type')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <!-- Kendala Lainnya (Custom) -->
                         <div id="other_obstacle_section" style="display: none;">
                             <label class="block text-sm font-semibold mb-2">Sebutkan Kendala Lainnya</label>
                             <input type="text" name="other_obstacle_type" id="other_obstacle_type" value="{{ old('other_obstacle_type', $isLainnya ? $logbook->obstacle_type : '') }}" placeholder="Tuliskan kendala..." class="w-full px-4 py-3 border border-gray-300 rounded-xl">
-                            @error('other_obstacle_type')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                            @error('other_obstacle_type')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold mb-2">Penjelasan Singkat Kendala</label>
                             <textarea name="obstacle_description" rows="3" placeholder="Jelaskan kendala..." class="w-full px-4 py-3 border border-gray-300 rounded-xl">{{ old('obstacle_description', $logbook->obstacle_description) }}</textarea>
-                            @error('obstacle_description')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                            @error('obstacle_description')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
 
                         <div>
@@ -148,7 +148,7 @@
                                     <option value="{{ $help }}" {{ old('help_needed', $logbook->help_needed) == $help ? 'selected' : '' }}>{{ $help }}</option>
                                 @endforeach
                             </select>
-                            @error('help_needed')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                            @error('help_needed')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
                     </div>
 
@@ -156,7 +156,7 @@
                     <div>
                         <label class="block text-sm font-semibold mb-2">Rencana Pekerjaan Besok</label>
                         <textarea name="next_plan" rows="3" required placeholder="Masukkan rencana pekerjaan besok..." class="w-full px-4 py-3 border border-gray-300 rounded-xl">{{ old('next_plan', $logbook->next_plan) }}</textarea>
-                        @error('next_plan')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        @error('next_plan')<p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <!-- Tombol -->

@@ -41,6 +41,23 @@ return new class extends Migration
                 ->constrained('users')
                 ->onDelete('cascade');
 
+            $table->enum('status', [
+                'pending',
+                'lengkap',
+                'belum lengkap'
+            ])->default('pending');
+
+            $table->text('revision_note')
+                ->nullable();
+
+            $table->foreignId('approved_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->timestamp('approved_at')
+                ->nullable();
+
             $table->timestamps();
         });
     }

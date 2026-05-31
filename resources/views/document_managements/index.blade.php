@@ -1,104 +1,70 @@
 <x-app-layout title="Manajemen Dokumen">
 
-    <div class="py-10">
-        <div class="max-w-7xl mx-auto px-4">
-
-            {{-- HEADER --}}
-            <div class="mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">
-                    Manajemen Dokumen
-                </h2>
-
-                <p class="text-gray-500 mt-2">
-                    Arsip dokumen audit berdasarkan klien
-                </p>
-            </div>
-
-            {{-- SEARCH --}}
-            <div class="bg-white rounded-2xl shadow p-4 mb-8">
-                <form id="docFilterForm" method="GET">
-
-                    <div class="flex gap-3">
-                        <input
-                            type="text"
-                            id="searchInput"
-                            name="search"
-                            value="{{ $search }}"
-                            placeholder="Cari nama klien..."
-                            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-200 focus:outline-none">
+    <div class="space-y-6">
+        {{-- SEARCH ROW --}}
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white border border-gray-200/80 rounded-xl p-3 shadow-sm">
+            <form id="docFilterForm" method="GET" class="flex-1">
+                <!-- Search -->
+                <div class="relative w-full md:w-72">
+                    <input type="text" id="searchInput" name="search" value="{{ $search }}"
+                        placeholder="Cari nama klien..."
+                        class="w-full bg-slate-50/50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-xs placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
+                </div>
+            </form>
+        </div>
 
-                </form>
-            </div>
-
-            {{-- CARD CLIENT --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-                @forelse($clients as $client)
-
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition p-6">
-
-                    <div class="flex items-start justify-between mb-5">
-
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">
+        {{-- GRID CLIENT FOLDERS --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @forelse($clients as $client)
+            <div class="bg-white border border-gray-200/80 rounded-xl p-4 shadow-sm hover:shadow transition-all duration-150 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all duration-200">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h3 class="font-bold text-[13px] text-gray-800 truncate" title="{{ $client->institution_name }}">
                                 {{ $client->institution_name }}
                             </h3>
-
-                            <p class="text-sm text-gray-500 mt-1">
+                            <p class="text-[11px] text-gray-400 font-semibold mt-0.5">
                                 {{ $client->document_managements_count }} Dokumen
                             </p>
                         </div>
-
-                        <div class="bg-blue-100 text-blue-600 p-3 rounded-2xl">
-                            <svg class="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24">
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-                            </svg>
-                        </div>
-
                     </div>
-
+                </div>
+                
+                <div class="border-t border-gray-100 pt-2.5 mt-3 flex justify-end">
                     <a href="{{ route('document_managements.show', $client) }}"
-                        class="w-full inline-flex justify-center items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition">
-
+                        class="text-xs font-bold text-blue-600 hover:text-blue-700 inline-flex items-center gap-0.5 hover:underline transition">
                         Lihat Dokumen
-
+                        <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
                     </a>
-
                 </div>
-
-                @empty
-
-                <div class="col-span-full">
-
-                    <div class="bg-white rounded-2xl shadow p-12 text-center">
-
-                        <p class="text-gray-400">
-                            Belum ada data klien
-                        </p>
-
-                    </div>
-
-                </div>
-
-                @endforelse
-
             </div>
-
-            {{-- PAGINATION --}}
-            <div class="mt-8">
-                {{ $clients->links() }}
+            @empty
+            <div class="col-span-full bg-white border border-gray-200/80 rounded-xl p-12 text-center shadow-sm">
+                <p class="text-gray-400 text-xs font-semibold">
+                    Belum ada data klien
+                </p>
             </div>
-
+            @endforelse
         </div>
+
+        {{-- PAGINATION --}}
+        @if($clients->hasPages())
+        <div class="mt-4">
+            {{ $clients->links() }}
+        </div>
+        @endif
     </div>
 
     <script>
@@ -114,7 +80,6 @@
                 }, 500);
             });
 
-            // Keep cursor at the end of search input after page load/submit
             if (searchInput.value.length > 0) {
                 const len = searchInput.value.length;
                 searchInput.focus();

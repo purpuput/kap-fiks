@@ -4,9 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\AuditReport;
 use App\Models\AuditReportFile;
-use App\Models\DocumentManagement;
+
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class AuditReportFileSeeder extends Seeder
 {
@@ -131,24 +132,10 @@ class AuditReportFileSeeder extends Seeder
                 'uploaded_by' => $uploadedBy,
             ]);
 
-            // Arsip dokumen
-            if ($report->status === 'disetujui') {
+            // Buat file fisik dummy agar fungsi download & preview berfungsi
+            Storage::disk('local')->put($fakePath, "Ini adalah file dummy untuk dokumen: {$fileName}.\nTipe dokumen: {$type}.\nStatus: " . ($report->status === 'disetujui' ? 'Lengkap' : 'Pending'));
 
-                DocumentManagement::create([
 
-                    'audit_report_id' => $report->id,
-
-                    'document_name' => $fileName,
-
-                    'document_type' => $type,
-
-                    'file' => $fakePath,
-
-                    'archived_by' => $pimpinan->id,
-
-                    'archived_at' => now()->subDays(rand(1, 30)),
-                ]);
-            }
         }
     }
 }

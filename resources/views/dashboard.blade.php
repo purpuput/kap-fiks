@@ -48,7 +48,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 uppercase tracking-wide">Manajemen Dokumen</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ \App\Models\DocumentManagement::count() }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ \App\Models\AuditReportFile::where('status', 'lengkap')->count() }}</p>
                     </div>
                 </div>
 
@@ -76,8 +76,8 @@
                     <h3 class="text-base font-bold text-gray-700 mb-4">Status Laporan Audit</h3>
                     <div class="space-y-3">
                         @php
-                            $pending = \App\Models\AuditReport::where('status','pending')->count();
-                            $approve = \App\Models\AuditReport::where('status','approve')->count();
+                            $pending = \App\Models\AuditReport::where('status','review')->count();
+                            $approve = \App\Models\AuditReport::where('status','disetujui')->count();
                             $revisi  = \App\Models\AuditReport::where('status','revisi')->count();
                             $total   = max($pending + $approve + $revisi, 1);
                         @endphp

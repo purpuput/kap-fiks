@@ -96,8 +96,8 @@ class AuditReport extends Model
     public function documentManagements()
     {
         return $this->hasMany(
-            DocumentManagement::class
-        );
+            AuditReportFile::class
+        )->where('status', 'lengkap');
     }
 
     /*

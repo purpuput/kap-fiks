@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('attendances', function (Blueprint $table) {
-            $table->string('photo_check_in')->nullable();
-            $table->string('photo_check_out')->nullable();
+        Schema::create('chat_messages', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('chat_session_id')->constrained()->cascadeOnDelete();
+            $table->text('message');
+            $table->text('reply');
+            $table->timestamps();
         });
     }
 
@@ -22,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('attendances', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('chat_messages');
     }
 };

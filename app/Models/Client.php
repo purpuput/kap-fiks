@@ -81,12 +81,12 @@ class Client extends Model
     public function documentManagements()
     {
         return $this->hasManyThrough(
-            \App\Models\DocumentManagement::class,
+            \App\Models\AuditReportFile::class,
             \App\Models\AuditReport::class,
             'client_id',
             'audit_report_id',
             'id',
             'id'
-        );
+        )->where('audit_report_files.status', 'lengkap');
     }
 }

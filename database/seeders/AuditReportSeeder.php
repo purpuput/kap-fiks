@@ -11,7 +11,7 @@ class AuditReportSeeder extends Seeder
 {
     public function run(): void
     {
-        $clients = Client::query()->with('auditors')->get();
+        $clients = Client::query()->where('approval_status', 'disetujui')->with('auditors')->get();
         $admin = User::query()->where('role', 'admin')->first();
 
         foreach ($clients as $index => $client) {
@@ -41,7 +41,7 @@ class AuditReportSeeder extends Seeder
                     'findings' => 'Lihat pada dokumen lampiran.',
                     'recommendations' => 'Lihat pada dokumen lampiran.',
                     'status' => $status,
-                    'created_by' => $admin ? $admin->id : $auditor->id,
+                    'created_by' => $auditor->id,
                 ];
 
                 // Jika statusnya disetujui, tambahkan reviewer

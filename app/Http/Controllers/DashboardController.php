@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuditReport;
 use App\Models\Attendance;
 use App\Models\Client;
-use App\Models\DocumentManagement;
+use App\Models\AuditReportFile;
 use App\Models\Logbook;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -31,7 +31,7 @@ class DashboardController extends Controller
             'totalAuditor'        => User::where('role', 'auditor')->count(),
             'totalKlien'          => Client::count(),
             'totalLaporan'        => AuditReport::count(),
-            'totalDokumen'        => DocumentManagement::count(),
+            'totalDokumen'        => AuditReportFile::where('status', 'lengkap')->count(),
 
             // Laporan per status
             'laporanPending'      => AuditReport::where('status', 'review')->count(),
@@ -70,8 +70,12 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Laporan milik auditor ini
-        $myReports = $user->auditReports()->with('client')->latest()->get();
+        // Laporan milik auditor ini (berdasarkan klien yang diassign ke auditor ini dan sudah disetujui)
+        $myReports = AuditReport::whereHas('client.auditors', function ($q) use ($user) {
+            $q->where('users.id', $user->id);
+        })->whereHas('client', function ($q) {
+            $q->where('approval_status', 'disetujui');
+        })->with('client')->latest()->get();
 
         // Absensi hari ini
         $absensiHariIni = Attendance::where('user_id', $user->id)
@@ -84,7 +88,11 @@ class DashboardController extends Controller
             ->first();
 
         // Laporan yang perlu direvisi
-        $laporanRevisi = $user->auditReports()
+        $laporanRevisi = AuditReport::whereHas('client.auditors', function ($q) use ($user) {
+            $q->where('users.id', $user->id);
+        })->whereHas('client', function ($q) {
+            $q->where('approval_status', 'disetujui');
+        })
             ->where('status', 'revisi')
             ->with('client')
             ->latest()
@@ -119,7 +127,7 @@ class DashboardController extends Controller
             'laporanPending'      => AuditReport::where('status', 'review')->count(),
             'laporanApprove'      => AuditReport::where('status', 'disetujui')->count(),
             'laporanRevisi'       => AuditReport::where('status', 'revisi')->count(),
-            'totalDokumen'        => DocumentManagement::count(),
+            'totalDokumen'        => AuditReportFile::where('status', 'lengkap')->count(),
             'totalKlien'          => Client::count(),
             'laporanKeuangan'     => AuditReport::where('audit_type', 'keuangan')->count(),
             'laporanKepatuhan'    => AuditReport::where('audit_type', 'kepatuhan')->count(),
@@ -134,8 +142,9 @@ class DashboardController extends Controller
                                         ->get(),
 
             // Dokumen arsip terbaru
-            'dokumenTerbaru'      => DocumentManagement::with(['auditReport.client', 'archivedBy'])
-                                        ->latest('archived_at')
+            'dokumenTerbaru'      => AuditReportFile::where('status', 'lengkap')
+                                        ->with(['auditReport.client', 'approvedBy'])
+                                        ->latest('approved_at')
                                         ->take(5)
                                         ->get(),
 

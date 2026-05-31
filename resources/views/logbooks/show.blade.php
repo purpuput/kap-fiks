@@ -1,12 +1,12 @@
 <x-app-layout title="Detail Logbook">
 
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-4xl mx-auto px-4">
 
             {{-- HEADER --}}
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Detail Logbook</h2>
+                    <h2 class="text-lg font-bold text-gray-800">Detail Logbook</h2>
                     <p class="text-sm text-gray-500 mt-1">Laporan harian aktivitas audit</p>
                 </div>
                 <a href="{{ route('logbooks.index') }}"
@@ -16,7 +16,7 @@
             </div>
 
             {{-- CONTENT --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm-sm border border-gray-100 overflow-hidden">
                 
                 {{-- STATUS BADGE --}}
                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -88,7 +88,7 @@
                             <div class="w-full bg-gray-200 rounded-full h-2.5">
                                 <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $logbook->cumulative_progress }}%"></div>
                             </div>
-                            <span class="text-sm font-bold text-gray-700 min-w-[3rem]">{{ $logbook->cumulative_progress }}%</span>
+                            <span class="text-xs font-bold text-gray-600 min-w-[3rem]">{{ $logbook->cumulative_progress }}%</span>
                         </div>
                     </div>
                     @endif

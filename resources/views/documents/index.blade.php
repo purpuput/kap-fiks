@@ -32,7 +32,8 @@
                             <td class="px-4 py-2">{{ $document->created_at->format('d M Y') }}</td>
                             <td class="px-4 py-2 text-center space-x-2">
                                 <a href="{{ route('documents.download', $document) }}" class="text-blue-600 hover:text-blue-900">Download</a>
-                                <form action="{{ route('documents.destroy', $document) }}" method="POST" class="inline" onsubmit="return confirm('Hapus?')">
+                                <form action="{{ route('documents.destroy', $document) }}" method="POST" class="inline"
+                                    onsubmit="event.preventDefault(); confirmDelete(this, 'Berkas dokumen ini akan dihapus secara permanen!')">
                                     @csrf @method('DELETE')
                                     <button class="text-red-600 hover:text-red-900">Hapus</button>
                                 </form>

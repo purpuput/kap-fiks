@@ -2,7 +2,7 @@
 
 <x-app-layout title="Detail Klien">
 
-    <div class="py-10">
+    <div class="py-6">
 
         <div class="max-w-6xl mx-auto px-4">
 
@@ -11,7 +11,7 @@
 
                 <div>
 
-                    <h1 class="text-3xl font-bold text-gray-800">
+                    <h1 class="text-xl font-bold text-gray-800">
                         Detail Klien
                     </h1>
 
@@ -51,7 +51,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
 
                 {{-- Status client --}}
-                <div class="bg-white rounded-2xl shadow p-5 border border-gray-100">
+                <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm p-5 border border-gray-100">
 
                     <p class="text-sm text-gray-500 mb-2">
                         Status Klien
@@ -80,7 +80,7 @@
                 {{-- Approval --}}
                 @if(auth()->user()->role !== 'auditor')
 
-                <div class="bg-white rounded-2xl shadow p-5 border border-gray-100">
+                <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm p-5 border border-gray-100">
 
                     <p class="text-sm text-gray-500 mb-2">
                         Approval
@@ -123,13 +123,13 @@
                 {{-- Creator --}}
                 @if(auth()->user()->role !== 'auditor')
 
-                <div class="bg-white rounded-2xl shadow p-5 border border-gray-100">
+                <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm p-5 border border-gray-100">
 
                     <p class="text-sm text-gray-500 mb-2">
                         Dibuat Oleh
                     </p>
 
-                    <h3 class="text-lg font-semibold text-gray-800">
+                    <h3 class="text-lg font-bold text-gray-800 text-xs">
 
                         {{ $client->creator->name ?? '-' }}
 
@@ -140,7 +140,7 @@
                 @endif
 
                 {{-- Kontrak --}}
-                <div class="bg-white rounded-2xl shadow p-5 border border-gray-100">
+                <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm p-5 border border-gray-100">
 
                     <p class="text-sm text-gray-500 mb-2">
                         Status Kontrak
@@ -186,12 +186,12 @@
                 {{-- Main --}}
                 <div class="lg:col-span-2">
 
-                    <div class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+                    <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
                         {{-- Header --}}
                         <div class="px-6 py-5 border-b bg-gray-50">
 
-                            <h2 class="text-lg font-semibold text-gray-800">
+                            <h2 class="text-lg font-bold text-gray-800 text-xs">
                                 Informasi Instansi
                             </h2>
 
@@ -223,7 +223,7 @@
                                         Jenis Instansi
                                     </p>
 
-                                    <h3 class="font-semibold text-gray-800">
+                                    <h3 class="font-bold text-gray-800 text-xs">
 
                                         {{ $client->institution_type }}
 
@@ -263,7 +263,7 @@
                                         Pimpinan Instansi
                                     </p>
 
-                                    <h3 class="font-semibold text-gray-800">
+                                    <h3 class="font-bold text-gray-800 text-xs">
 
                                         {{ $client->leader_name }}
 
@@ -277,7 +277,7 @@
                                         Telepon
                                     </p>
 
-                                    <h3 class="font-semibold text-gray-800">
+                                    <h3 class="font-bold text-gray-800 text-xs">
 
                                         {{ $client->phone }}
 
@@ -291,7 +291,7 @@
                                         Email
                                     </p>
 
-                                    <h3 class="font-semibold text-gray-800">
+                                    <h3 class="font-bold text-gray-800 text-xs">
 
                                         {{ $client->email ?? '-' }}
 
@@ -305,7 +305,7 @@
                                         NPWP
                                     </p>
 
-                                    <h3 class="font-semibold text-gray-800">
+                                    <h3 class="font-bold text-gray-800 text-xs">
 
                                         {{ $client->npwp ?? '-' }}
 
@@ -317,7 +317,7 @@
                                     <p class="text-sm text-gray-500 mb-1">
                                         Provinsi
                                     </p>
-                                    <h3 class="font-semibold text-gray-800">
+                                    <h3 class="font-bold text-gray-800 text-xs">
                                         {{ $client->province }}
                                     </h3>
                                 </div>
@@ -326,7 +326,7 @@
                                     <p class="text-sm text-gray-500 mb-1">
                                         Kota/Kabupaten
                                     </p>
-                                    <h3 class="font-semibold text-gray-800">
+                                    <h3 class="font-bold text-gray-800 text-xs">
                                         {{ $client->city }}
                                     </h3>
                                 </div>
@@ -335,7 +335,7 @@
                                     <p class="text-sm text-gray-500 mb-1">
                                         Kode Pos
                                     </p>
-                                    <h3 class="font-semibold text-gray-800">
+                                    <h3 class="font-bold text-gray-800 text-xs">
                                         {{ $client->postal_code }}
                                     </h3>
                                 </div>
@@ -396,11 +396,11 @@
                 <div class="space-y-6">
 
                     {{-- Tim audit --}}
-                    <div class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+                    <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
                         <div class="px-6 py-5 border-b bg-gray-50">
 
-                            <h2 class="text-lg font-semibold text-gray-800">
+                            <h2 class="text-lg font-bold text-gray-800 text-xs">
                                 Tim Audit
                             </h2>
 
@@ -453,11 +453,11 @@
                     {{-- Informasi sistem --}}
                     @if(auth()->user()->role !== 'auditor')
 
-                    <div class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+                    <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
                         <div class="px-6 py-5 border-b bg-gray-50">
 
-                            <h2 class="text-lg font-semibold text-gray-800">
+                            <h2 class="text-lg font-bold text-gray-800 text-xs">
                                 Informasi Sistem
                             </h2>
 
@@ -471,7 +471,7 @@
                                     Dibuat Pada
                                 </p>
 
-                                <h3 class="font-semibold text-gray-800">
+                                <h3 class="font-bold text-gray-800 text-xs">
 
                                     {{ $client->created_at->format('d M Y H:i') }}
 
@@ -485,7 +485,7 @@
                                     Update Terakhir
                                 </p>
 
-                                <h3 class="font-semibold text-gray-800">
+                                <h3 class="font-bold text-gray-800 text-xs">
 
                                     {{ $client->updated_at->format('d M Y H:i') }}
 
@@ -499,7 +499,7 @@
                                     Disetujui Oleh
                                 </p>
 
-                                <h3 class="font-semibold text-gray-800">
+                                <h3 class="font-bold text-gray-800 text-xs">
 
                                     {{ optional($client->approver)->name ?? '-' }}
 
@@ -513,7 +513,7 @@
                                     Tanggal Approval
                                 </p>
 
-                                <h3 class="font-semibold text-gray-800">
+                                <h3 class="font-bold text-gray-800 text-xs">
 
                                     @if($client->approved_at)
 
@@ -538,12 +538,12 @@
                     {{-- Review pimpinan --}}
                     @if(auth()->user()->role === 'pimpinan')
 
-                    <div class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+                    <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
                         {{-- Header --}}
                         <div class="px-6 py-5 border-b bg-gray-50">
 
-                            <h2 class="text-lg font-semibold text-gray-800">
+                            <h2 class="text-lg font-bold text-gray-800 text-xs">
                                 Review Pimpinan
                             </h2>
 
@@ -656,7 +656,7 @@
                                         Catatan Revisi
                                     </p>
 
-                                    <p class="text-sm text-red-600 leading-relaxed">
+                                    <p class="text-xs text-red-500 leading-relaxed">
 
                                         {{ $client->revision_note }}
 

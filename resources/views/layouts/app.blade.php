@@ -55,30 +55,12 @@
                             @else
                             <p class="text-sm text-gray-500 mt-0.5">
                                 Selamat datang, <span class="font-semibold text-blue-600">{{ auth()->user()->name }}</span>
-                                — <span class="capitalize">{{ auth()->user()->role }}</span>
                             </p>
                             @endisset
                         </div>
                     </div>
-                    <div id="realtime-clock" class="hidden sm:block text-xs text-gray-400"></div>
-                    <div id="realtime-date" class="hidden sm:block text-xs text-gray-400"></div>
-
-<script>
-    function updateDate() {
-        const now = new Date();
-
-        const tanggal = now.toLocaleDateString('id-ID', {
-            weekday: 'long',
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        });
-
-        document.getElementById('realtime-date').innerHTML = tanggal;
-    }
-
-    updateDate();
-</script>
+                    <div id="realtime-clock" class="hidden sm:block text-xs text-gray-600"></div>
+                    <div id="realtime-date" class="hidden sm:block text-xs text-gray-600"></div>
                 </div>
             </header>
 

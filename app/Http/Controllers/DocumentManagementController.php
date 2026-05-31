@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
-use App\Models\DocumentManagement;
+use App\Models\AuditReportFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -53,10 +53,11 @@ class DocumentManagementController extends Controller
     {
         $documentType = $request->input('document_type');
 
-        $query = DocumentManagement::with([
+        $query = AuditReportFile::with([
             'auditReport',
-            'archivedBy'
+            'approvedBy'
         ])
+            ->where('status', 'lengkap')
             ->whereHas('auditReport', function ($q) use ($client) {
                 $q->where('client_id', $client->id);
             });
@@ -66,7 +67,7 @@ class DocumentManagementController extends Controller
         }
 
         $documents = $query
-            ->latest('archived_at')
+            ->latest('approved_at')
             ->paginate(15);
 
         $documentTypeLabels = $this->documentTypeLabels;
@@ -82,13 +83,21 @@ class DocumentManagementController extends Controller
     /**
      * Download dokumen
      */
-    public function download(DocumentManagement $documentManagement)
+    public function download(AuditReportFile $documentManagement)
     {
-        if (empty($documentManagement->file) || !Storage::disk('public')->exists($documentManagement->file)) {
-            return back()->with('error', 'File tidak ditemukan di server (Data dummy/hilang).');
+        // Pengecekan otorisasi auditor
+        if (Auth::user()->role === 'auditor') {
+            $hasAccess = $documentManagement->auditReport->client->auditors()->where('users.id', Auth::id())->exists();
+            if (!$hasAccess) {
+                abort(403, 'Anda tidak memiliki hak akses untuk dokumen ini.');
+            }
         }
 
-        return Storage::disk('public')->download(
+        if (empty($documentManagement->file) || !Storage::disk('local')->exists($documentManagement->file)) {
+            return back()->with('error', 'File tidak ditemukan di server.');
+        }
+
+        return Storage::disk('local')->download(
             $documentManagement->file,
             $documentManagement->document_name
         );
@@ -97,13 +106,21 @@ class DocumentManagementController extends Controller
     /**
      * Preview dokumen
      */
-    public function preview(DocumentManagement $documentManagement)
+    public function preview(AuditReportFile $documentManagement)
     {
-        if (empty($documentManagement->file) || !Storage::disk('public')->exists($documentManagement->file)) {
+        // Pengecekan otorisasi auditor
+        if (Auth::user()->role === 'auditor') {
+            $hasAccess = $documentManagement->auditReport->client->auditors()->where('users.id', Auth::id())->exists();
+            if (!$hasAccess) {
+                abort(403, 'Anda tidak memiliki hak akses untuk dokumen ini.');
+            }
+        }
+
+        if (empty($documentManagement->file) || !Storage::disk('local')->exists($documentManagement->file)) {
             return response('<div style="text-align:center; padding: 50px; font-family: sans-serif; color: #666;"><h3>File Tidak Ditemukan</h3><p>File fisik tidak ada di server karena ini adalah data dummy atau file telah dihapus.</p></div>', 404);
         }
 
-        $path = storage_path('app/public/' . $documentManagement->file);
+        $path = Storage::disk('local')->path($documentManagement->file);
         return response()->file($path);
     }
 }

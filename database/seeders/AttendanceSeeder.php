@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Attendance;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class AttendanceSeeder extends Seeder
 {
@@ -20,7 +20,7 @@ class AttendanceSeeder extends Seeder
         // Generate 30 hari terakhir
         foreach ($users as $user) {
 
-            for ($i = 1; $i <= 30; $i++) {
+            for ($i = 1; $i <= 10; $i++) {
 
                 $date = Carbon::now()->subDays($i);
 
@@ -42,14 +42,9 @@ class AttendanceSeeder extends Seeder
 
                     'status' => $status,
 
-                    'notes' => match ($status) {
-                        'izin' => 'Izin tidak masuk',
-                        'sakit' => 'Sakit',
-                        default => 'Hadir tepat waktu',
-                    },
-
                     'photo_check_in' => null,
                     'photo_check_out' => null,
+                    'attachment' => in_array($status, ['izin', 'sakit']) ? 'attachments/dummy_surat.pdf' : null,
                 ]);
             }
         }

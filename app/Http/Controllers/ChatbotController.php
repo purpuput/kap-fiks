@@ -89,9 +89,9 @@ class ChatbotController extends Controller
         try {
             // === STATISTIK UMUM ===
             $totalReports = \App\Models\AuditReport::query()->count('*');
-            $pendingReports = \App\Models\AuditReport::query()->where('status', 'pending')->count('*');
-            $completedReports = \App\Models\AuditReport::query()->where('status', 'completed')->count('*');
-            $inProgressReports = \App\Models\AuditReport::query()->where('status', 'in_progress')->count('*');
+            $pendingReports = \App\Models\AuditReport::query()->where('status', 'review')->count('*');
+            $completedReports = \App\Models\AuditReport::query()->where('status', 'disetujui')->count('*');
+            $inProgressReports = \App\Models\AuditReport::query()->where('status', 'revisi')->count('*');
             $totalClients = \App\Models\Client::query()->count('*');
             $totalUsers = \App\Models\User::query()->count('*');
 
@@ -223,7 +223,7 @@ Anda adalah AURA AI (Audit Reporting Asisten), asisten cerdas yang membantu tim 
 ═══════════════════════════════════════════════════════════════════════════════════
 - Pengguna: {$user->name}
 - Role: {$user->role} (auditor | pimpinan | admin)
-- Total Laporan Audit: {$totalReports} (Pending: {$pendingReports}, In Progress: {$inProgressReports}, Selesai: {$completedReports})
+- Total Laporan Audit: {$totalReports} (Review: {$pendingReports}, Revisi: {$inProgressReports}, Disetujui: {$completedReports})
 - Total Klien: {$totalClients}
 - Total Anggota Tim: {$totalUsers}
 
@@ -234,7 +234,7 @@ Anda adalah AURA AI (Audit Reporting Asisten), asisten cerdas yang membantu tim 
 1️⃣ **LAPORAN AUDIT** (10 Laporan Terbaru):
 {$reportsJson}
 
-Data laporan audit mencakup: nomor laporan, judul, tipe audit, status (pending/in_progress/completed), tanggal audit, klien terkait, dan pembuat laporan.
+Data laporan audit mencakup: nomor laporan, judul, tipe audit, status (review/revisi/disetujui), tanggal audit, klien terkait, dan pembuat laporan.
 
 2️⃣ **DAFTAR KLIEN** (10 Klien):
 {$clientsJson}

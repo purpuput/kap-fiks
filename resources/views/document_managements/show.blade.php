@@ -1,13 +1,13 @@
 <x-app-layout title="Dokumen Klien">
 
-    <div class="py-10">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto px-4">
 
             {{-- HEADER --}}
             <div class="flex items-center justify-between mb-8">
 
                 <div>
-                    <h2 class="text-3xl font-bold text-gray-800">
+                    <h2 class="text-xl font-bold text-gray-800">
                         {{ $client->institution_name }}
                     </h2>
 
@@ -26,7 +26,7 @@
             </div>
 
             {{-- FILTER --}}
-            <div class="bg-white rounded-2xl shadow p-4 mb-6">
+            <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm p-4 mb-6">
 
                 <form method="GET">
 
@@ -60,7 +60,7 @@
             </div>
 
             {{-- TABLE --}}
-            <div class="bg-white rounded-2xl shadow overflow-hidden">
+            <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm overflow-hidden">
 
                 <div class="overflow-x-auto">
 
@@ -104,11 +104,11 @@
                                 </td>
 
                                 <td class="px-4 py-4 text-gray-500">
-                                    {{ $doc->archived_at?->format('d M Y H:i') }}
+                                    {{ $doc->approved_at?->format('d M Y H:i') }}
                                 </td>
 
                                 <td class="px-4 py-4 text-gray-500">
-                                    {{ $doc->archivedBy?->name }}
+                                    {{ $doc->approvedBy?->name }}
                                 </td>
 
                                 <td class="px-4 py-4 text-center">

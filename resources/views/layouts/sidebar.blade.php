@@ -16,7 +16,7 @@
             <span x-show="sidebarOpen" x-transition:enter="transition-opacity duration-200"
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 class="text-base font-bold tracking-wide whitespace-nowrap">
-                KAP Sistem
+                KAP Eko Prasetyo
             </span>
         </div>
         <button @click="sidebarOpen = !sidebarOpen; localStorage.setItem('sidebarOpen', sidebarOpen)"

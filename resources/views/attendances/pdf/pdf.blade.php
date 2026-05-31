@@ -46,7 +46,7 @@
                 <th>Check In</th>
                 <th>Check Out</th>
                 <th>Status</th>
-                <th>Keterangan</th>
+                <th>Lampiran</th>
             </tr>
         </thead>
 
@@ -54,11 +54,17 @@
             @foreach($attendances as $attendance)
             <tr>
                 <td>{{ $attendance->user->name ?? '-' }}</td>
-                <td>{{ $attendance->date }}</td>
-                <td>{{ $attendance->check_in }}</td>
-                <td>{{ $attendance->check_out }}</td>
+                <td>{{ $attendance->date ? $attendance->date->format('d/m/Y') : '-' }}</td>
+                <td>{{ $attendance->check_in ?? '-' }}</td>
+                <td>{{ $attendance->check_out ?? '-' }}</td>
                 <td>{{ ucfirst($attendance->status) }}</td>
-                <td>{{ $attendance->notes }}</td>
+                <td>
+                    @if($attendance->attachment)
+                        <span style="color: #1d4ed8;">[Ada Lampiran]</span>
+                    @else
+                        -
+                    @endif
+                </td>
             </tr>
             @endforeach
         </tbody>

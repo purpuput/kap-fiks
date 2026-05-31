@@ -6,12 +6,12 @@
     <x-slot name="header">
 
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Form Absensi
+            Tambah Absensi
         </h2>
 
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-6">
 
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
 
@@ -52,9 +52,12 @@
 
                 // Jika absensi sudah lengkap
                 $isCompleted =
-                $todayAttendance &&
-                $todayAttendance->check_in &&
-                $todayAttendance->check_out;
+                $todayAttendance && (
+                    in_array($todayAttendance->status, ['izin', 'sakit']) || (
+                        $todayAttendance->check_in &&
+                        $todayAttendance->check_out
+                    )
+                );
 
                 @endphp
 
@@ -90,7 +93,8 @@
                 {{-- Form absensi --}}
                 <form
                     action="{{ route('attendances.store') }}"
-                    method="POST">
+                    method="POST"
+                    enctype="multipart/form-data">
 
                     @csrf
 
@@ -143,7 +147,7 @@
                         </div>
 
                         {{-- Tipe absensi otomatis --}}
-                        <div>
+                        <div id="tipe-absensi-container">
 
                             <label class="block text-sm font-semibold mb-2">
                                 Tipe Absensi
@@ -173,6 +177,7 @@
 
                             <select
                                 name="status"
+                                id="statusSelect"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-xl
                                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 
@@ -187,31 +192,24 @@
                                 <option value="sakit">
                                     Sakit
                                 </option>
-
-                                <option value="alpha">
-                                    Alpha
-                                </option>
-
                             </select>
 
                         </div>
 
                     </div>
 
-                    {{-- Keterangan --}}
-                    <div class="mt-5">
-
+                    {{-- Lampiran Surat Keterangan / Izin --}}
+                    <div id="attachment-field" class="mt-5 hidden">
                         <label class="block text-sm font-semibold mb-2">
-                            Keterangan
+                            Upload Surat Keterangan (Sakit / Izin) <span class="text-rose-500">*</span>
                         </label>
-
-                        <textarea
-                            name="notes"
-                            rows="4"
-                            placeholder="Tambahkan keterangan jika diperlukan..."
-                            class="w-full px-4 py-2 border border-gray-300 rounded-xl
-                                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500">{{ old('notes') }}</textarea>
-
+                        <input
+                            type="file"
+                            name="attachment"
+                            id="attachmentInput"
+                            accept=".pdf"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-xs text-gray-400 mt-1">Format file: PDF. Maksimal 2MB.</p>
                     </div>
 
                     {{-- Tombol aksi --}}
@@ -220,6 +218,7 @@
                         {{-- Tombol simpan --}}
                         <button
                             type="submit"
+                            id="submitBtn"
                             class="px-5 py-2 rounded-xl transition shadow
                                    text-white bg-blue-600 hover:bg-blue-700">
 
@@ -248,4 +247,42 @@
 
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.getElementById('statusSelect');
+            const attachmentField = document.getElementById('attachment-field');
+            const attachmentInput = document.getElementById('attachmentInput');
+            const tipeContainer = document.getElementById('tipe-absensi-container');
+            const submitBtn = document.getElementById('submitBtn');
+            const defaultTipe = "{{ $attendanceType }}";
+
+            function toggleStatusFields() {
+                const status = statusSelect.value;
+                if (status === 'sakit' || status === 'izin') {
+                    attachmentField.classList.remove('hidden');
+                    attachmentInput.required = true;
+                    if (tipeContainer) {
+                        tipeContainer.classList.add('hidden');
+                    }
+                    if (submitBtn) {
+                        submitBtn.innerText = 'Simpan Absensi';
+                    }
+                } else {
+                    attachmentField.classList.add('hidden');
+                    attachmentInput.required = false;
+                    if (tipeContainer) {
+                        tipeContainer.classList.remove('hidden');
+                    }
+                    if (submitBtn) {
+                        submitBtn.innerText = 'Simpan ' + defaultTipe;
+                    }
+                }
+            }
+
+            if (statusSelect) {
+                statusSelect.addEventListener('change', toggleStatusFields);
+                toggleStatusFields(); // Jalankan saat awal render halaman
+            }
+        });
+    </script>
 </x-app-layout>

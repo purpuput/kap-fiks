@@ -2,7 +2,7 @@
 
     {{-- MODAL REVISI --}}
     <div id="modalRevisi" class="fixed inset-0 z-50 hidden bg-black/50 flex items-center justify-center p-4 transition-opacity">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md transform transition-transform scale-95 opacity-0" id="modalRevisiContent">
+        <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm-xl w-full max-w-md transform transition-transform scale-95 opacity-0" id="modalRevisiContent">
             <div class="p-6">
                 <h3 class="text-lg font-bold text-gray-800 mb-1">Kembalikan untuk Revisi</h3>
                 <p class="text-sm text-gray-500 mb-4">Berikan catatan yang jelas agar auditor dapat memperbaiki laporan.</p>
@@ -47,14 +47,14 @@
         </div>
     </div>
 
-    <div class="py-10">
+    <div class="py-6">
         <div class="max-w-5xl mx-auto px-4">
 
             {{-- HEADER --}}
             <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">{{ $auditReport->title }}</h2>
-                    <p class="text-gray-500 text-sm mt-1">{{ $auditReport->report_number }}</p>
+                    <h2 class="text-lg font-bold text-gray-800">{{ $auditReport->title }}</h2>
+                    <p class="text-xs text-gray-400 mt-1">{{ $auditReport->report_number }}</p>
                 </div>
 
                 {{-- STATUS BADGE --}}
@@ -84,12 +84,12 @@
             <div class="space-y-6">
 
                 {{-- INFORMASI --}}
-                <div class="bg-white rounded-2xl shadow p-6">
+                <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
                     <h3 class="text-base font-bold text-gray-700 mb-4 border-b pb-2">Informasi Laporan</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         <div>
                             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Klien</p>
-                            <p class="font-semibold text-gray-800 text-sm">{{ $auditReport->client->institution_name }}</p>
+                            <p class="font-bold text-gray-800 text-xs text-sm">{{ $auditReport->client->institution_name }}</p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Jenis Audit</p>
@@ -101,7 +101,7 @@
                         </div>
                         <div>
                             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Tanggal Audit</p>
-                            <p class="font-semibold text-gray-800 text-sm">{{ $auditReport->audit_date->format('d M Y') }}</p>
+                            <p class="font-bold text-gray-800 text-xs text-sm">{{ $auditReport->audit_date->format('d M Y') }}</p>
                         </div>
                         <div class="md:col-span-3">
                             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Auditor</p>
@@ -116,7 +116,7 @@
                 </div>
 
                 {{-- TABEL DOKUMEN --}}
-                <div class="bg-white rounded-2xl shadow p-6">
+                <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
                     <h3 class="text-base font-bold text-gray-700 mb-4 border-b pb-2">
                         Dokumen Laporan
                         <span class="text-sm font-normal text-gray-400 ml-2">
@@ -203,7 +203,7 @@
 
                 {{-- AKSI PIMPINAN --}}
                 @if(auth()->user()->role === 'pimpinan' && $auditReport->status !== 'disetujui')
-                <div class="bg-white rounded-2xl shadow p-6">
+                <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
                     <h3 class="text-base font-bold text-gray-700 mb-4 border-b pb-2">Tindakan</h3>
 
                     @php $allUploaded = $auditReport->files->count() === count($documentTypes); @endphp
@@ -276,7 +276,7 @@
 
     {{-- MODAL APPROVE FILE --}}
     <div id="modalApproveFile" class="fixed inset-0 z-50 hidden bg-black/50 flex items-center justify-center p-4 transition-opacity">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md transform transition-transform scale-95 opacity-0" id="modalApproveFileContent">
+        <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm-xl w-full max-w-md transform transition-transform scale-95 opacity-0" id="modalApproveFileContent">
             <div class="p-6">
                 <h3 class="text-lg font-bold text-gray-800 mb-1">Validasi Dokumen</h3>
                 <p class="text-sm text-gray-500 mb-4">Pilih status dokumen ini.</p>

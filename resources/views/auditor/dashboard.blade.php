@@ -1,176 +1,286 @@
 <x-app-layout title="Dashboard Auditor">
-<div class="py-10">
-<div class="max-w-7xl mx-auto px-4 space-y-6">
+    <div class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-    {{-- ALERT REVISI --}}
-    @if($laporanRevisi->count() > 0)
-    <div class="bg-red-50 border-l-4 border-red-400 rounded-xl p-4 flex items-start gap-3">
-        <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-        </svg>
-        <div class="flex-1">
-            <p class="font-semibold text-red-700 text-sm">{{ $laporanRevisi->count() }} laporan perlu diperbaiki!</p>
-            <div class="mt-2 space-y-1">
-                @foreach($laporanRevisi as $rev)
-                <div class="flex items-center justify-between bg-white border border-red-100 rounded-lg px-3 py-2">
+            {{-- WELCOME HERO BANNER --}}
+            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-emerald-900/10 border border-emerald-700/20">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
+                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <span class="text-xs font-semibold text-gray-700">{{ $rev->report_number }}</span>
-                        <span class="text-xs text-gray-400 ml-2">— {{ $rev->client->institution_name ?? '-' }}</span>
+                        <span class="bg-emerald-500/20 text-emerald-200 text-xs px-3.5 py-1 rounded-full font-semibold tracking-wide uppercase border border-emerald-500/30">Auditor Portal</span>
+                        <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight mt-3">Semangat Bekerja, {{ auth()->user()->name }}!</h1>
+                        <p class="text-emerald-200/90 text-sm md:text-base mt-2 max-w-2xl">Pantau berkas laporan, isi kehadiran harian, perbarui logbook aktivitas, dan tindak lanjuti revisi dari pimpinan KAP.</p>
                     </div>
-                    <a href="{{ route('audit_reports.edit', $rev) }}"
-                        class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg font-semibold transition">
-                        Perbaiki
-                    </a>
+                    <div class="bg-white/5 backdrop-blur-md rounded-2xl px-5 py-4 flex items-center gap-4 border border-white/10 flex-shrink-0">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                            <svg class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-emerald-300 font-medium">Hari ini</p>
+                            <p class="text-base font-bold text-white mt-0.5">{{ today()->translatedFormat('d F Y') }}</p>
+                        </div>
+                    </div>
                 </div>
-                @endforeach
             </div>
-        </div>
-    </div>
-    @endif
 
-    {{-- STATUS HARI INI --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
-        {{-- Absensi Hari Ini --}}
-        <div class="bg-white rounded-2xl shadow p-5">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <p class="text-sm font-bold text-gray-700">Absensi Hari Ini</p>
-            </div>
-            @if($absensiHariIni)
-                @if($absensiHariIni->check_in && $absensiHariIni->check_out)
-                <span class="bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-semibold">✓ Lengkap</span>
-                <p class="text-xs text-gray-400 mt-2">Masuk: {{ $absensiHariIni->check_in }} · Pulang: {{ $absensiHariIni->check_out }}</p>
-                @elseif($absensiHariIni->check_in)
-                <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-semibold">⏳ Belum Pulang</span>
-                <p class="text-xs text-gray-400 mt-2">Masuk: {{ $absensiHariIni->check_in }}</p>
-                @endif
-            @else
-                <span class="bg-red-100 text-red-600 text-xs px-3 py-1.5 rounded-full font-semibold">✗ Belum Absen</span>
-                <div class="mt-3">
-                    <a href="{{ route('attendances.create') }}"
-                        class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-semibold transition inline-block">
-                        Absen Sekarang
-                    </a>
+            {{-- ALERT REVISI --}}
+            @if($laporanRevisi->count() > 0)
+                <div class="bg-rose-50 border border-rose-200 rounded-2xl p-5 flex items-start gap-4 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-200">
+                        <svg class="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-extrabold text-rose-800 text-sm">Ada {{ $laporanRevisi->count() }} Laporan Butuh Tindakan Segera!</h4>
+                        <p class="text-xs text-rose-600 mt-1">Laporan berikut ditolak oleh pimpinan dan memerlukan revisi/perbaikan dokumen.</p>
+                        <div class="mt-4 space-y-2">
+                            @foreach($laporanRevisi as $rev)
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-rose-100 rounded-xl p-3.5 gap-3 shadow-sm hover:border-rose-300 transition duration-300">
+                                    <div>
+                                        <span class="inline-flex text-[10px] font-bold font-mono bg-rose-50 text-rose-700 px-2 py-0.5 rounded border border-rose-100">{{ $rev->report_number }}</span>
+                                        <span class="text-xs font-bold text-slate-700 ml-2">{{ $rev->title }}</span>
+                                        <p class="text-[10px] text-slate-400 mt-0.5">Klien: {{ $rev->client->institution_name ?? '-' }}</p>
+                                    </div>
+                                    <a href="{{ route('audit_reports.edit', $rev) }}"
+                                        class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-5 py-2 rounded-xl font-bold transition duration-300 shadow-sm shadow-rose-600/10 text-center">
+                                        Perbaiki Dokumen
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             @endif
-        </div>
 
-        {{-- Logbook Hari Ini --}}
-        <div class="bg-white rounded-2xl shadow p-5">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                </div>
-                <p class="text-sm font-bold text-gray-700">Logbook Hari Ini</p>
-            </div>
-            @if($logbookHariIni)
-                @if($logbookHariIni->status === 'approved')
-                <span class="bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-semibold">✓ Disetujui</span>
-                @elseif($logbookHariIni->status === 'revision')
-                <span class="bg-red-100 text-red-700 text-xs px-3 py-1.5 rounded-full font-semibold">↩ Perlu Revisi</span>
-                <p class="text-xs text-red-500 mt-1 truncate">{{ $logbookHariIni->note }}</p>
-                @else
-                <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-semibold">⏳ Menunggu</span>
-                @endif
-                <p class="text-xs text-gray-400 mt-2 truncate">{{ Str::limit($logbookHariIni->activity, 60) }}</p>
-            @else
-                <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1.5 rounded-full font-semibold">Belum diisi</span>
-                <div class="mt-3">
-                    <a href="{{ route('logbooks.create') }}"
-                        class="text-xs bg-orange-500 hover:bg-orange-600 text-white px-4 py-1.5 rounded-lg font-semibold transition inline-block">
-                        Isi Logbook
-                    </a>
-                </div>
-            @endif
-        </div>
+            {{-- DAILY ATTENDANCE & LOGBOOK STATUS --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        {{-- Progress Laporan --}}
-        <div class="bg-white rounded-2xl shadow p-5">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <p class="text-sm font-bold text-gray-700">Laporan Saya</p>
-            </div>
-            <div class="grid grid-cols-3 gap-2 text-center">
-                <div class="bg-yellow-50 rounded-xl p-2">
-                    <p class="text-xl font-extrabold text-yellow-600">{{ $myPending }}</p>
-                    <p class="text-xs text-gray-400">Review</p>
-                </div>
-                <div class="bg-green-50 rounded-xl p-2">
-                    <p class="text-xl font-extrabold text-green-600">{{ $myApprove }}</p>
-                    <p class="text-xs text-gray-400">Disetujui</p>
-                </div>
-                <div class="bg-red-50 rounded-xl p-2">
-                    <p class="text-xl font-extrabold text-red-500">{{ $myRevisi }}</p>
-                    <p class="text-xs text-gray-400">Revisi</p>
-                </div>
-            </div>
-        </div>
-    </div>
+                {{-- Absensi Hari Ini --}}
+                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-700">Absensi Hari Ini</h3>
+                                    <p class="text-xs text-slate-400 mt-0.5">Catatan presensi masuk & pulang</p>
+                                </div>
+                            </div>
+                        </div>
 
-    {{-- AKSI CEPAT --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <a href="{{ route('audit_reports.create') }}"
-            class="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl p-4 flex flex-col items-center gap-2 transition text-center group">
-            <svg class="w-7 h-7 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            <span class="text-xs font-semibold">Buat Laporan</span>
-        </a>
-        <a href="{{ route('logbooks.create') }}"
-            class="bg-orange-500 hover:bg-orange-600 text-white rounded-2xl p-4 flex flex-col items-center gap-2 transition text-center group">
-            <svg class="w-7 h-7 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-            <span class="text-xs font-semibold">Tambah Logbook</span>
-        </a>
-        <a href="{{ route('attendances.create') }}"
-            class="bg-teal-600 hover:bg-teal-700 text-white rounded-2xl p-4 flex flex-col items-center gap-2 transition text-center group">
-            <svg class="w-7 h-7 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="text-xs font-semibold">Absensi</span>
-        </a>
-        <a href="{{ route('clients.create') }}"
-            class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl p-4 flex flex-col items-center gap-2 transition text-center group">
-            <svg class="w-7 h-7 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-            <span class="text-xs font-semibold">Tambah Klien</span>
-        </a>
-    </div>
-
-    {{-- LAPORAN TERBARU SAYA --}}
-    <div class="bg-white rounded-2xl shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">Laporan Saya</h3>
-            <a href="{{ route('audit_reports.index') }}" class="text-blue-600 text-xs hover:underline font-semibold">Lihat semua →</a>
-        </div>
-        @if($laporanTerbaru->isEmpty())
-        <div class="py-8 text-center">
-            <svg class="w-12 h-12 text-gray-200 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            <p class="text-gray-400 text-sm">Belum ada laporan</p>
-            <a href="{{ route('audit_reports.create') }}" class="mt-2 inline-block text-xs text-blue-600 hover:underline font-semibold">Buat laporan pertama →</a>
-        </div>
-        @else
-        <div class="space-y-3">
-            @foreach($laporanTerbaru as $laporan)
-            <div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition">
-                <div class="flex-1 min-w-0 mr-4">
-                    <p class="font-semibold text-gray-800 text-sm truncate">{{ $laporan->title }}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">{{ $laporan->report_number }} · {{ $laporan->client->institution_name ?? '-' }} · {{ $laporan->audit_date->format('d M Y') }}</p>
-                </div>
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    @if($laporan->status === 'review') <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-medium">Review</span>
-                    @elseif($laporan->status === 'disetujui') <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">Disetujui</span>
-                    @else <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-medium">Revisi</span>
+                        @if($absensiHariIni)
+                            <div class="grid grid-cols-2 gap-4 mt-2 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold text-slate-400">Jam Masuk</p>
+                                    <p class="text-sm font-bold text-slate-700 mt-1">{{ $absensiHariIni->check_in ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold text-slate-400">Jam Pulang</p>
+                                    <p class="text-sm font-bold text-slate-700 mt-1">{{ $absensiHariIni->check_out ?? '-' }}</p>
+                                </div>
+                            </div>
+                        @else
+                            <div class="mt-2 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
+                                <span class="text-xs text-slate-400 block mb-3">Anda belum mengisi absensi kehadiran hari ini.</span>
+                            </div>
+                        @endif
+                    </div>
+                    @if(!$absensiHariIni)
+                        <div class="mt-4">
+                            <a href="{{ route('attendances.create') }}" class="w-full text-center block bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-blue-600/10">
+                                Absen Sekarang
+                            </a>
+                        </div>
+                    @elseif(!$absensiHariIni->check_out)
+                        <div class="mt-4">
+                            <a href="{{ route('attendances.edit', $absensiHariIni) }}" class="w-full text-center block bg-amber-500 hover:bg-amber-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-amber-500/10">
+                                Absen Pulang
+                            </a>
+                        </div>
+                    @else
+                        <div class="mt-4 text-center">
+                            <span class="inline-flex items-center bg-emerald-50 text-emerald-700 text-xs px-3 py-1.5 rounded-full font-bold border border-emerald-200 w-full justify-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span> Kehadiran Terpenuhi
+                            </span>
+                        </div>
                     @endif
-                    <a href="{{ route('audit_reports.show', $laporan) }}" class="text-blue-600 hover:text-blue-800">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+
+                {{-- Logbook Hari Ini --}}
+                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-700">Logbook Hari Ini</h3>
+                                    <p class="text-xs text-slate-400 mt-0.5">Catatan aktivitas pekerjaan harian</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if($logbookHariIni)
+                            <div class="mt-2 bg-slate-50 border border-slate-100 rounded-xl p-4">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[10px] uppercase font-bold text-slate-400">Pekerjaan</span>
+                                    @if($logbookHariIni->status === 'approved')
+                                        <span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-200">Disetujui</span>
+                                    @elseif($logbookHariIni->status === 'revision')
+                                        <span class="text-[9px] bg-rose-50 text-rose-700 font-bold px-1.5 py-0.5 rounded border border-rose-200">Revisi</span>
+                                    @else
+                                        <span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-200">Review</span>
+                                    @endif
+                                </div>
+                                <p class="text-xs font-semibold text-slate-700 mt-1 truncate">{{ $logbookHariIni->main_task ?? $logbookHariIni->activity }}</p>
+                                @if($logbookHariIni->status === 'revision' && $logbookHariIni->note)
+                                    <p class="text-[10px] text-rose-600 bg-rose-50 border border-rose-100 rounded-lg p-2 mt-2 font-semibold">Catatan: {{ $logbookHariIni->note }}</p>
+                                @endif
+                            </div>
+                        @else
+                            <div class="mt-2 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
+                                <span class="text-xs text-slate-400 block mb-3">Progress kerja hari ini belum dilaporkan.</span>
+                            </div>
+                        @endif
+                    </div>
+                    @if(!$logbookHariIni)
+                        <div class="mt-4">
+                            <a href="{{ route('logbooks.create') }}" class="w-full text-center block bg-orange-500 hover:bg-orange-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-orange-500/10">
+                                Isi Logbook Sekarang
+                            </a>
+                        </div>
+                    @else
+                        <div class="mt-4">
+                            <a href="{{ route('logbooks.index') }}" class="w-full text-center block bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300">
+                                Riwayat Logbook
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Ringkasan Laporan --}}
+                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-700">Ringkasan Laporan</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Status dokumen laporan saya</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3 text-center mt-2">
+                            <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-3.5">
+                                <p class="text-2xl font-extrabold text-amber-600">{{ $myPending }}</p>
+                                <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider mt-1">Review</p>
+                            </div>
+                            <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3.5">
+                                <p class="text-2xl font-extrabold text-emerald-600">{{ $myApprove }}</p>
+                                <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mt-1">Selesai</p>
+                            </div>
+                            <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-3.5">
+                                <p class="text-2xl font-extrabold text-rose-500">{{ $myRevisi }}</p>
+                                <p class="text-[10px] text-rose-500 font-bold uppercase tracking-wider mt-1">Revisi</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{{ route('audit_reports.index') }}" class="w-full text-center block bg-teal-600 hover:bg-teal-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-teal-600/10">
+                            Kelola Semua Laporan
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- AKSI CEPAT --}}
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Navigasi Aktivitas</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <a href="{{ route('audit_reports.index') }}"
+                        class="bg-white border border-slate-100 hover:border-blue-200 rounded-2xl p-5 flex flex-col items-center gap-3 transition duration-300 text-center shadow-sm hover:shadow-md group">
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform border border-blue-100/50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold text-slate-700">Kelola Laporan</span>
+                    </a>
+                    <a href="{{ route('logbooks.create') }}"
+                        class="bg-white border border-slate-100 hover:border-orange-200 rounded-2xl p-5 flex flex-col items-center gap-3 transition duration-300 text-center shadow-sm hover:shadow-md group">
+                        <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform border border-orange-100/50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold text-slate-700">Tambah Logbook</span>
+                    </a>
+                    <a href="{{ route('attendances.create') }}"
+                        class="bg-white border border-slate-100 hover:border-teal-200 rounded-2xl p-5 flex flex-col items-center gap-3 transition duration-300 text-center shadow-sm hover:shadow-md group">
+                        <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform border border-teal-100/50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold text-slate-700">Presensi Kehadiran</span>
+                    </a>
+                    <a href="{{ route('clients.index') }}"
+                        class="bg-white border border-slate-100 hover:border-indigo-200 rounded-2xl p-5 flex flex-col items-center gap-3 transition duration-300 text-center shadow-sm hover:shadow-md group">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform border border-indigo-100/50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>   
+                        </div>
+                        <span class="text-xs font-bold text-slate-700">Daftar Klien</span>
                     </a>
                 </div>
             </div>
-            @endforeach
-        </div>
-        @endif
-    </div>
 
-</div>
-</div>
+            {{-- LAPORAN TERBARU SAYA --}}
+            <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Daftar Laporan Saya</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Daftar laporan audit yang terakhir kali Anda ajukan</p>
+                    </div>
+                    <a href="{{ route('audit_reports.index') }}" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold">Lihat Semua →</a>
+                </div>
+                @if($laporanTerbaru->isEmpty())
+                    <div class="py-12 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
+                        <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <p class="text-slate-400 text-xs font-medium">Belum ada dokumen laporan audit yang tercatat.</p>
+                        <a href="{{ route('audit_reports.create') }}" class="mt-3 inline-flex bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition duration-300">
+                            Buat Laporan Pertama
+                        </a>
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach($laporanTerbaru as $laporan)
+                            <div class="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100/50 border border-slate-100 hover:border-slate-200 rounded-2xl transition duration-300">
+                                <div class="flex-1 min-w-0 mr-4">
+                                    <div class="flex items-center gap-2 mb-1.5">
+                                        <span class="inline-flex text-[9px] font-bold font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200/50">{{ $laporan->report_number }}</span>
+                                        <span class="text-[10px] text-slate-400 font-semibold">{{ $laporan->audit_date->format('d M Y') }}</span>
+                                    </div>
+                                    <p class="font-bold text-slate-800 text-sm truncate">{{ $laporan->title }}</p>
+                                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">Klien: {{ $laporan->client->institution_name ?? '-' }}</p>
+                                </div>
+                                <div class="flex items-center gap-3 flex-shrink-0">
+                                    @if($laporan->status === 'review')
+                                        <span class="bg-amber-50 text-amber-700 font-bold text-[10px] px-2.5 py-1 rounded-full border border-amber-200">Review</span>
+                                    @elseif($laporan->status === 'disetujui')
+                                        <span class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2.5 py-1 rounded-full border border-emerald-200">Selesai</span>
+                                    @else
+                                        <span class="bg-rose-50 text-rose-700 font-bold text-[10px] px-2.5 py-1 rounded-full border border-rose-200">Revisi</span>
+                                    @endif
+                                    <a href="{{ route('audit_reports.show', $laporan) }}" class="w-8 h-8 rounded-full bg-white hover:bg-indigo-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:text-indigo-600 transition shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+        </div>
+    </div>
 </x-app-layout>

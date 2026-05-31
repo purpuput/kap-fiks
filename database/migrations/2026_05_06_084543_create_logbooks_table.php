@@ -18,14 +18,15 @@ return new class extends Migration
                 ->constrained()
                 ->onDelete('cascade');
             $table->foreignId('client_id')
+                ->nullable()
                 ->constrained('clients')
-                ->onDelete('cascade');
-            $table->enum('team_role', ['ketua tim', 'anggota tim']);
+                ->nullOnDelete();
+            $table->enum('team_role', ['ketua tim', 'anggota tim'])->nullable();
             $table->date('date');
             
-            $table->string('audit_stage');
-            $table->string('audit_area');
-            $table->integer('cumulative_progress')->comment('Progress in percentage 1-100');
+            $table->string('audit_stage')->nullable();
+            $table->string('audit_area')->nullable();
+            $table->integer('cumulative_progress')->nullable()->comment('Progress in percentage 1-100');
             $table->text('main_task');
             
             $table->boolean('has_obstacle')->default(false);
