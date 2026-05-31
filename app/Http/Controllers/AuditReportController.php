@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuditReport;
 use App\Models\AuditReportFile;
 use App\Models\Client;
-use App\Models\DocumentManagement;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -69,69 +69,80 @@ class AuditReportController extends Controller
     public function index(Request $request)
     {
         $search = $request->search;
-
         $status = $request->status;
+        $audit_type = $request->audit_type;
 
         $query = AuditReport::with([
-
-            'client',
-
+            'client.auditors',
             'creator',
-
             'reviewer',
-
             'files'
         ]);
 
-        // Auditor hanya melihat laporan untuk klien yang diassign kepadanya
+        // Auditor hanya melihat laporan untuk klien yang diassign kepadanya dan sudah disetujui
         if (Auth::user()->role === 'auditor') {
-
             $query->whereHas('client.auditors', function ($q) {
                 $q->where('users.id', Auth::id());
+            })->whereHas('client', function ($q) {
+                $q->where('approval_status', 'disetujui');
             });
         }
 
-        // Search
+        // Hitung statistik berdasarkan role (sebelum filter pencarian & status diaplikasikan)
+        $statsQuery = AuditReport::query();
+        if (Auth::user()->role === 'auditor') {
+            $statsQuery->whereHas('client.auditors', function ($q) {
+                $q->where('users.id', Auth::id());
+            })->whereHas('client', function ($q) {
+                $q->where('approval_status', 'disetujui');
+            });
+        }
+
+        $totalReports = (clone $statsQuery)->count();
+        $disetujuiCount = (clone $statsQuery)->where('status', 'disetujui')->count();
+        $reviewCount = (clone $statsQuery)->where('status', 'review')->count();
+        $revisiCount = (clone $statsQuery)->where('status', 'revisi')->count();
+
+        // Search berdasarkan nomor laporan, judul, klien, auditor
         if ($search) {
-
             $query->where(function ($q) use ($search) {
-
-                $q->where(
-                    'title',
-                    'like',
-                    "%{$search}%"
-                )
-
-                    ->orWhere(
-                        'report_number',
-                        'like',
-                        "%{$search}%"
-                    );
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('report_number', 'like', "%{$search}%")
+                    ->orWhereHas('client', function ($q2) use ($search) {
+                        $q2->where('institution_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('client.auditors', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
         // Filter status
         if ($status) {
+            $query->where('status', $status);
+        }
 
-            $query->where(
-                'status',
-                $status
-            );
+        // Filter jenis audit
+        if ($audit_type) {
+            $query->where('audit_type', $audit_type);
         }
 
         $reports = $query
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view(
             'audit_reports.index',
             compact(
-
                 'reports',
-
                 'search',
-
-                'status'
+                'status',
+                'audit_type',
+                'totalReports',
+                'disetujuiCount',
+                'reviewCount',
+                'revisiCount'
             )
         );
     }
@@ -289,11 +300,14 @@ class AuditReportController extends Controller
                     "files.{$type}"
                 );
 
-                $path = $file->store(
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs(
 
                     "audit_reports/{$report->id}",
 
-                    'public'
+                    $filename,
+
+                    'local'
                 );
 
                 AuditReportFile::create([
@@ -463,31 +477,22 @@ class AuditReportController extends Controller
                 // Hapus file lama
                 if ($existing) {
 
-                    Storage::disk('public')
+                    Storage::disk('local')
                         ->delete($existing->file);
 
                     $existing->delete();
 
-                    // Hapus archive lama
-                    DocumentManagement::where(
-
-                        'audit_report_id',
-                        $auditReport->id
-
-                    )
-                        ->where(
-                            'document_type',
-                            $type
-                        )
-                        ->delete();
                 }
 
                 // Upload file baru
-                $path = $file->store(
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs(
 
                     "audit_reports/{$auditReport->id}",
 
-                    'public'
+                    $filename,
+
+                    'local'
                 );
 
                 AuditReportFile::create([
@@ -625,37 +630,6 @@ class AuditReportController extends Controller
             'revision_note' => null,
         ]);
 
-        // Auto archive
-        foreach (
-            $auditReport->files
-            as $file
-        ) {
-
-            DocumentManagement::updateOrCreate(
-
-                [
-                    'audit_report_id' =>
-                    $auditReport->id,
-
-                    'document_type' =>
-                    $file->document_type,
-                ],
-
-                [
-                    'document_name' =>
-                    $file->document_name,
-
-                    'file' =>
-                    $file->file,
-
-                    'archived_by' =>
-                    Auth::id(),
-
-                    'archived_at' =>
-                    now(),
-                ]
-            );
-        }
 
         return back()->with(
 
@@ -712,14 +686,19 @@ class AuditReportController extends Controller
      */
     public function download(AuditReportFile $file)
     {
-        if (empty($file->file) || !Storage::disk('public')->exists($file->file)) {
-            return back()->with('error', 'File tidak ditemukan di server (Data dummy/hilang).');
+        // Pengecekan otorisasi auditor
+        if (Auth::user()->role === 'auditor') {
+            $hasAccess = $file->auditReport->client->auditors()->where('users.id', Auth::id())->exists();
+            if (!$hasAccess) {
+                abort(403, 'Anda tidak memiliki hak akses untuk dokumen ini.');
+            }
         }
 
-        return response()->download(
-            storage_path('app/public/' . $file->file),
-            $file->document_name
-        );
+        if (empty($file->file) || !Storage::disk('local')->exists($file->file)) {
+            return back()->with('error', 'File tidak ditemukan di server.');
+        }
+
+        return Storage::disk('local')->download($file->file, $file->document_name);
     }
 
     /**
@@ -727,11 +706,19 @@ class AuditReportController extends Controller
      */
     public function preview(AuditReportFile $file)
     {
-        if (empty($file->file) || !Storage::disk('public')->exists($file->file)) {
+        // Pengecekan otorisasi auditor
+        if (Auth::user()->role === 'auditor') {
+            $hasAccess = $file->auditReport->client->auditors()->where('users.id', Auth::id())->exists();
+            if (!$hasAccess) {
+                abort(403, 'Anda tidak memiliki hak akses untuk dokumen ini.');
+            }
+        }
+
+        if (empty($file->file) || !Storage::disk('local')->exists($file->file)) {
             return response('<div style="text-align:center; padding: 50px; font-family: sans-serif; color: #666;"><h3>File Tidak Ditemukan</h3><p>File fisik tidak ada di server karena ini adalah data dummy atau file telah dihapus.</p></div>', 404);
         }
 
-        $path = storage_path('app/public/' . $file->file);
+        $path = Storage::disk('local')->path($file->file);
         return response()->file($path);
     }
 }
