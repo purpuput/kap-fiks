@@ -70,4 +70,9 @@ class AuditReportFile extends Model
             'approved_by'
         );
     }
+
+    public function review()
+    {
+        return $this->hasOne(DocumentReview::class, 'audit_file_id');
+    }
 }

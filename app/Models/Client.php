@@ -87,6 +87,8 @@ class Client extends Model
             'audit_report_id',
             'id',
             'id'
-        )->where('audit_report_files.status', 'lengkap');
+        )->whereHas('review', function ($q) {
+            $q->where('status', 'approved');
+        });
     }
 }

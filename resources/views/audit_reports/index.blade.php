@@ -4,8 +4,8 @@
     <div id="modalRevisi" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4 transition-all duration-300">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md transform scale-95 opacity-0 transition-all duration-300" id="modalRevisiContent">
             <div class="p-5">
-                <h3 class="text-sm font-bold text-gray-800 mb-1">Kembalikan untuk Revisi</h3>
-                <p class="text-xs text-gray-400 mb-3">Berikan catatan perbaikan laporan audit ini secara detail.</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-1">Kembalikan untuk Revisi</h3>
+                <p class="text-sm text-gray-400 mb-3">Berikan catatan perbaikan laporan audit ini secara detail.</p>
                 <form id="formRevisi" method="POST" action="" onsubmit="showSkeleton()">
                     @csrf
                     @method('PUT')
@@ -31,54 +31,54 @@
         {{-- SUMMARY STATISTIC ROW --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white border border-gray-200/80 rounded-xl p-4 shadow-sm">
             <!-- Total Laporan -->
-            <div class="px-2 flex items-center gap-3 border-r border-gray-100 last:border-none">
+            <div class="px-2 flex items-center gap-3 border-r border-gray-100 last:border-none text-md">
                 <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block leading-none">Total Laporan</span>
-                    <h3 class="text-base font-extrabold text-gray-800 mt-1 leading-none">{{ $totalReports }}</h3>
+                    <span class=" font-bold text-gray-400 uppercase tracking-wider block leading-none">Total Laporan</span>
+                    <h3 class=" font-extrabold text-blue-800 mt-1 leading-none">{{ $totalReports }}</h3>
                 </div>
             </div>
 
             <!-- Disetujui -->
-            <div class="px-2 flex items-center gap-3 border-r border-gray-100 last:border-none">
+            <div class="px-2 flex items-center gap-3 border-r border-gray-100 last:border-none text-md">
                 <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block leading-none">Disetujui</span>
-                    <h3 class="text-base font-extrabold text-emerald-600 mt-1 leading-none">{{ $disetujuiCount }}</h3>
+                    <span class=" font-bold text-gray-400 uppercase tracking-wider block leading-none">Disetujui</span>
+                    <h3 class=" font-extrabold text-emerald-600 mt-1 leading-none">{{ $disetujuiCount }}</h3>
                 </div>
             </div>
 
             <!-- Dalam Review -->
-            <div class="px-2 flex items-center gap-3 border-r border-gray-100 last:border-none">
+            <div class="px-2 flex items-center gap-3 border-r border-gray-100 last:border-none text-md">
                 <div class="p-2 bg-amber-50 text-amber-500 rounded-lg">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block leading-none">Dalam Review</span>
-                    <h3 class="text-base font-extrabold text-amber-500 mt-1 leading-none">{{ $reviewCount }}</h3>
+                    <span class=" font-bold text-gray-400 uppercase tracking-wider block leading-none">Dalam Review</span>
+                    <h3 class=" font-extrabold text-amber-500 mt-1 leading-none">{{ $reviewCount }}</h3>
                 </div>
             </div>
 
             <!-- Revisi -->
-            <div class="px-2 flex items-center gap-3 border-r border-gray-100 last:border-none">
+            <div class="px-2 flex items-center gap-3 border-r border-gray-100 last:border-none text-md">
                 <div class="p-2 bg-rose-50 text-rose-500 rounded-lg">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block leading-none">Revisi</span>
-                    <h3 class="text-base font-extrabold text-rose-500 mt-1 leading-none">{{ $revisiCount }}</h3>
+                    <span class=" font-bold text-gray-400 uppercase tracking-wider block leading-none">Revisi</span>
+                    <h3 class=" font-extrabold text-rose-500 mt-1 leading-none">{{ $revisiCount }}</h3>
                 </div>
             </div>
         </div>
@@ -87,10 +87,10 @@
         <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white border border-gray-200/80 rounded-xl p-3 shadow-sm">
             <form id="reportFilterForm" method="GET" action="{{ route('audit_reports.index') }}" class="flex flex-wrap items-center gap-2 flex-1">
                 <!-- Search -->
-                <div class="relative w-full md:w-72">
+                <div class="relative w-full md:w-80">
                     <input type="text" id="searchInput" name="search" value="{{ $search }}"
                         placeholder="Cari nomor, judul, klien, atau auditor..."
-                        class="w-full bg-slate-50/50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-xs placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all">
+                        class="w-full bg-slate-50/50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-md placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all">
                     <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -100,7 +100,7 @@
 
                 <!-- Jenis Audit -->
                 <select name="audit_type" onchange="showSkeleton(); this.form.submit()"
-                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-8 py-1.5 text-md font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="">Semua Jenis</option>
                     <option value="keuangan" {{ $audit_type === 'keuangan' ? 'selected' : '' }}>Keuangan</option>
                     <option value="kepatuhan" {{ $audit_type === 'kepatuhan' ? 'selected' : '' }}>Kepatuhan</option>
@@ -108,7 +108,7 @@
 
                 <!-- Status -->
                 <select name="status" onchange="showSkeleton(); this.form.submit()"
-                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-8 py-1.5 text-md font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="">Semua Status</option>
                     <option value="review" {{ $status === 'review' ? 'selected' : '' }}>Review</option>
                     <option value="disetujui" {{ $status === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
@@ -118,7 +118,7 @@
                 <!-- Reset -->
                 @if($search || $status || $audit_type)
                 <a href="{{ route('audit_reports.index') }}" onclick="showSkeleton()"
-                    class="text-xs font-bold text-gray-400 hover:text-gray-600 px-1 py-1.5 transition">
+                    class="text-md font-bold text-gray-400 hover:text-gray-600 px-1 py-1.5 transition">
                     Reset
                 </a>
                 @endif
@@ -127,7 +127,7 @@
             <!-- Action Button -->
             @if(auth()->user()->role === 'admin')
             <a href="{{ route('audit_reports.create') }}"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1 whitespace-nowrap">
+                class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-md font-bold shadow-sm transition flex items-center justify-center gap-1 whitespace-nowrap">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -139,7 +139,7 @@
         {{-- TABLE SECTION --}}
         <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto relative">
-                <table class="w-full text-xs text-left">
+                <table class="w-full text-sm text-left">
                     <thead class="bg-slate-50/60 text-gray-400 font-bold uppercase tracking-wider sticky top-0 z-10 border-b border-gray-100">
                         <tr>
                             <th class="px-2 py-3 text-left">No. Laporan</th>
@@ -180,33 +180,33 @@
                         @forelse($reports as $report)
                         <tr class="hover:bg-slate-50/30 transition group">
                             {{-- No Laporan --}}
-                            <td class="px-2 py-3 font-mono text-xs text-gray-500 whitespace-nowrap">
+                            <td class="px-2 py-3 font-mono text-sm text-gray-500 whitespace-nowrap">
                                 {{ $report->report_number }}
                             </td>
 
                             {{-- Judul --}}
                             <td class="px-2 py-3 max-w-[130px]">
-                                <div class="font-bold text-gray-800 text-[13px] truncate" title="{{ $report->title }}">
+                                <div class="font-bold text-gray-800 text-md truncate" title="{{ $report->title }}">
                                     {{ $report->title }}
                                 </div>
-                                <div class="text-[10px] text-gray-400 mt-0.5">
+                                <div class="text-sm text-gray-400 mt-0.5">
                                     {{ $report->audit_date->format('d M Y') }}
                                 </div>
                             </td>
 
                             {{-- Klien --}}
-                            <td class="px-2 py-3 text-gray-700 font-bold max-w-[120px] truncate" title="{{ $report->client->institution_name }}">
+                            <td class="px-2 py-3 text-md text-gray-700 font-bold max-w-[120px] truncate" title="{{ $report->client->institution_name }}">
                                 {{ $report->client->institution_name }}
                             </td>
 
                             {{-- Jenis Audit --}}
                             <td class="px-2 py-3 whitespace-nowrap">
                                 @if($report->audit_type === 'keuangan')
-                                <span class="bg-blue-50 text-blue-700 text-[11px] px-2 py-0.5 rounded font-bold border border-blue-100/50">
+                                <span class="bg-blue-50 text-blue-700 text-sm px-2 py-0.5 rounded font-bold border border-blue-100/50">
                                     Keuangan
                                 </span>
                                 @else
-                                <span class="bg-purple-50 text-purple-700 text-[11px] px-2 py-0.5 rounded font-bold border border-purple-100/50">
+                                <span class="bg-purple-50 text-purple-700 text-sm px-2 py-0.5 rounded font-bold border border-purple-100/50">
                                     Kepatuhan
                                 </span>
                                 @endif
@@ -216,7 +216,7 @@
                             <td class="px-2 py-3">
                                 <div class="flex flex-wrap gap-1 max-w-[110px]">
                                     @foreach($report->client->auditors as $auditor)
-                                    <span class="bg-slate-50 text-slate-500 border border-slate-100 text-[10px] px-1.5 py-0.5 rounded font-medium truncate" title="{{ $auditor->name }}">
+                                    <span class="bg-slate-50 text-slate-500 border border-slate-100 text-sm px-1.5 py-0.5 rounded font-medium truncate" title="{{ $auditor->name }}">
                                         {{ $auditor->name }}
                                     </span>
                                     @endforeach
@@ -227,7 +227,7 @@
                             <td class="px-2 py-3">
                                 @php $fileCount = $report->files->count(); @endphp
                                 <div class="flex flex-col gap-0.5 w-20">
-                                    <div class="flex items-center justify-between text-[10px] font-bold text-gray-400">
+                                    <div class="flex items-center justify-between text-sm font-bold text-gray-400">
                                         <span>{{ $fileCount }}/10</span>
                                         <span class="{{ $fileCount === 10 ? 'text-emerald-600' : 'text-blue-600' }}">{{ $fileCount * 10 }}%</span>
                                     </div>
@@ -240,19 +240,19 @@
                             {{-- Status --}}
                             <td class="px-2 py-3 whitespace-nowrap">
                                 @if($report->status === 'review')
-                                <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-2 py-0.5 rounded border border-amber-200/50 font-bold">
+                                <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-sm px-2 py-0.5 rounded border border-amber-200/50 font-bold">
                                     Review
                                 </span>
                                 @elseif($report->status === 'revisi')
-                                <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-700 text-[11px] px-2 py-0.5 rounded border border-rose-200/50 font-bold">
+                                <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-700 text-sm px-2 py-0.5 rounded border border-rose-200/50 font-bold">
                                     Revisi
                                 </span>
                                 @elseif($report->status === 'disetujui')
-                                <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[11px] px-2 py-0.5 rounded border border-emerald-200/50 font-bold">
+                                <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-sm px-2 py-0.5 rounded border border-emerald-200/50 font-bold">
                                     Disetujui
                                 </span>
                                 @else
-                                <span class="inline-flex items-center gap-1 bg-gray-50 text-gray-600 text-[11px] px-2 py-0.5 rounded border border-gray-200/50 font-bold">
+                                <span class="inline-flex items-center gap-1 bg-gray-50 text-gray-600 text-sm px-2 py-0.5 rounded border border-gray-200/50 font-bold">
                                     Draft
                                 </span>
                                 @endif
@@ -269,24 +269,11 @@
 
                                     {{-- Detail --}}
                                     <a href="{{ route('audit_reports.show', $report) }}"
-                                        class="text-slate-500 hover:text-slate-800 font-bold hover:underline transition">
+                                        class="text-slate-500 hover:text-slate-800 font-bold hover:underline transition text-sm">
                                         Detail
                                     </a>
 
-                                    @if($report->status === 'disetujui')
-                                        {{-- Download PDF --}}
-                                        @php
-                                            $pdfFile = $report->files->firstWhere('document_type', 'laporan_audit');
-                                        @endphp
-                                        @if($pdfFile)
-                                            <a href="{{ route('audit_reports.download', $pdfFile->id) }}"
-                                                class="text-emerald-600 hover:text-emerald-700 font-bold hover:underline transition">
-                                                PDF
-                                            </a>
-                                        @else
-                                            <span class="text-gray-300 font-semibold cursor-not-allowed">PDF</span>
-                                        @endif
-                                    @else
+                                    @if($report->status !== 'disetujui')
                                         {{-- Edit --}}
                                         @if(in_array(auth()->user()->role, ['admin', 'auditor']))
                                             <a href="{{ route('audit_reports.edit', $report) }}"
@@ -308,23 +295,7 @@
                                         @endif
 
                                         {{-- Pimpinan: Approve / Revisi --}}
-                                        @if(auth()->user()->role === 'pimpinan')
-                                            <form action="{{ route('audit_reports.approve', $report->id) }}" method="POST" class="inline">
-                                                @csrf @method('PUT')
-                                                <button type="submit"
-                                                    onclick="return confirm('Setujui laporan ini?')"
-                                                    class="text-emerald-600 hover:text-emerald-700 font-bold hover:underline transition">
-                                                    Setujui
-                                                </button>
-                                            </form>
-
-                                            <button type="button"
-                                                data-url="{{ route('audit_reports.revisi', $report->id) }}"
-                                                onclick="openModalRevisi(this.dataset.url)"
-                                                class="text-amber-600 hover:text-amber-700 font-bold hover:underline transition">
-                                                Revisi
-                                            </button>
-                                        @endif
+                                        
                                     @endif
 
                                 </div>

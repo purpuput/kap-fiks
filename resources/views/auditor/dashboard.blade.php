@@ -52,7 +52,7 @@
             @endif
 
             {{-- DAILY ATTENDANCE & LOGBOOK STATUS --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
                 {{-- Absensi Hari Ini --}}
                 <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
@@ -190,10 +190,48 @@
                     </div>
                     <div class="mt-4">
                         <a href="{{ route('audit_reports.index') }}" class="w-full text-center block bg-teal-600 hover:bg-teal-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-teal-600/10">
-                            Kelola Semua Laporan
+                            Semua Laporan
                         </a>
                     </div>
                 </div>
+
+                {{-- Tugas Saya (Dokumen) --}}
+                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-650 flex items-center justify-center border border-indigo-100/50">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-700">Tugas Saya (Dokumen)</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Status dokumen review</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2.5 text-center mt-2">
+                            <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-2.5">
+                                <p class="text-lg font-extrabold text-rose-550">{{ $tugasRevisi }}</p>
+                                <p class="text-[9px] text-rose-600 font-bold uppercase tracking-wider mt-1">Revisi</p>
+                            </div>
+                            <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-2.5">
+                                <p class="text-lg font-extrabold text-amber-550">{{ $tugasDalamReview }}</p>
+                                <p class="text-[9px] text-amber-600 font-bold uppercase tracking-wider mt-1">Review</p>
+                            </div>
+                            <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5">
+                                <p class="text-lg font-extrabold text-emerald-550">{{ $tugasDisetujui }}</p>
+                                <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-wider mt-1">Selesai</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{{ route('audit_reports.index') }}" class="w-full text-center block bg-indigo-650 hover:bg-indigo-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-indigo-600/10">
+                            Kelola Dokumen
+                        </a>
+                    </div>
+                </div>
+
             </div>
 
             {{-- AKSI CEPAT --}}

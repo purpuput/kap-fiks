@@ -9,20 +9,20 @@
                 ->whereDate('date', now())
                 ->first();
         @endphp
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-5 text-white shadow-sm">
+        <div class="bg-gradient-to-r from-purple-900 to-purple-950 rounded-xl p-5 text-white shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <p class="text-blue-100 text-[10px] uppercase font-bold tracking-wider mb-0.5">Logbook Hari Ini</p>
+                    <p class="text-blue-100 text-md uppercase font-bold tracking-wider mb-0.5">Logbook Hari Ini</p>
                     <h2 class="text-xl font-bold">{{ now()->translatedFormat('l, d F Y') }}</h2>
                 </div>
                 <div>
                     @if(!$todayLogbook)
                     <a href="{{ route('logbooks.create') }}"
-                       class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-50 transition shadow-sm">
-                        Isi Logbook Hari Ini
+                       class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-blue-700 rounded-lg text-md font-bold hover:bg-blue-50 transition shadow-sm">
+                       + Isi Logbook Hari Ini
                     </a>
                     @else
-                    <div class="px-3.5 py-1.5 bg-white/10 border border-white/20 rounded-lg flex items-center gap-1.5 text-xs text-white">
+                    <div class="px-3.5 py-1.5 bg-white/10 border border-white/20 rounded-lg flex items-center gap-1.5 text-md text-white">
                         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         <span class="font-bold">Sudah Mengisi Logbook</span>
                     </div>
@@ -31,18 +31,18 @@
             </div>
 
             @if($todayLogbook)
-            <div class="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-4 text-md">
                 <div>
                     <p class="text-blue-200 font-semibold mb-0.5">Tugas Utama</p>
-                    <p class="font-medium truncate text-sm" title="{{ $todayLogbook->main_task }}">{{ $todayLogbook->main_task }}</p>
+                    <p class="font-medium truncate text-md" title="{{ $todayLogbook->main_task }}">{{ $todayLogbook->main_task }}</p>
                 </div>
                 <div>
                     <p class="text-blue-200 font-semibold mb-0.5">Progress & Tahapan</p>
-                    <p class="font-medium text-sm">{{ $todayLogbook->cumulative_progress }}% — {{ $todayLogbook->audit_stage }}</p>
+                    <p class="font-medium text-md">{{ $todayLogbook->cumulative_progress }}% — {{ $todayLogbook->audit_stage }}</p>
                 </div>
                 <div>
                     <p class="text-blue-200 font-semibold mb-1">Status</p>
-                    <div class="inline-flex items-center gap-1.5 bg-white/10 px-2 py-0.5 rounded text-[11px] font-bold">
+                    <div class="inline-flex items-center gap-1.5 bg-white/10 px-2 py-0.5 rounded text-md font-bold">
                         @if($todayLogbook->status === 'pending')
                             <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span> Pending
                         @elseif($todayLogbook->status === 'approved')
@@ -74,15 +74,15 @@
 
             $logbooksWithObstacles = $logbooksToday->where('has_obstacle', 1);
         @endphp
-        <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-5 text-white shadow-sm">
+        <div class="bg-gradient-to-r from-stone-800 to-stone-900 rounded-xl p-5 text-white shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                 <div>
-                    <p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-0.5">Monitoring Logbook Hari Ini</p>
+                    <p class="text-slate-400 text-md uppercase font-bold tracking-wider mb-0.5">Monitoring Logbook Hari Ini</p>
                     <h2 class="text-xl font-bold">{{ now()->translatedFormat('l, d F Y') }}</h2>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 text-xs">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 text-md">
                 <div class="bg-white/5 border border-white/5 rounded-lg p-3">
                     <p class="text-slate-400 mb-0.5">Total Pegawai</p>
                     <p class="text-xl font-bold">{{ $totalAuditor }}</p>
@@ -101,16 +101,16 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/10 text-xs">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/10 text-md">
                 <div>
                     <p class="font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Sudah Mengisi
                     </p>
                     <div class="flex flex-wrap gap-1">
                         @forelse($auditorFilled as $a)
-                            <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] text-slate-300">{{ $a->name }}</span>
+                            <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-md text-slate-300">{{ $a->name }}</span>
                         @empty
-                            <span class="text-[10px] text-slate-400">Belum ada data</span>
+                            <span class="text-md text-slate-400">Belum ada data</span>
                         @endforelse
                     </div>
                 </div>
@@ -120,9 +120,9 @@
                     </p>
                     <div class="flex flex-wrap gap-1">
                         @forelse($auditorNotFilled as $a)
-                            <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] text-slate-300">{{ $a->name }}</span>
+                            <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-md text-slate-300">{{ $a->name }}</span>
                         @empty
-                            <span class="text-[10px] text-slate-400">Semua sudah mengisi</span>
+                            <span class="text-md text-slate-400">Semua sudah mengisi</span>
                         @endforelse
                     </div>
                 </div>
@@ -133,17 +133,17 @@
                     <div class="flex flex-wrap gap-1.5">
                         @forelse($logbooksWithObstacles as $l)
                             <div class="group/obs relative inline-block">
-                                <span class="px-2 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded text-[10px] font-semibold cursor-help whitespace-nowrap">
+                                <span class="px-2 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded text-md font-semibold cursor-help whitespace-nowrap">
                                     {{ $l->user->name }} ({{ $l->obstacle_type }})
                                 </span>
                                 {{-- Tooltip --}}
-                                <div class="hidden group-hover/obs:block absolute z-20 left-0 mt-1 w-64 bg-slate-900 text-slate-100 border border-slate-700/60 rounded-lg p-2.5 shadow-lg text-[10px] leading-relaxed">
+                                <div class="hidden group-hover/obs:block absolute z-20 left-0 mt-1 w-64 bg-slate-900 text-slate-100 border border-slate-700/60 rounded-lg p-2.5 shadow-lg text-md leading-relaxed">
                                     <p class="font-bold border-b border-white/10 pb-1 mb-1 text-amber-400">Detail Kendala ({{ $l->obstacle_type }}):</p>
                                     <p class="text-slate-200 italic font-medium">"{{ $l->obstacle_description }}"</p>
                                 </div>
                             </div>
                         @empty
-                            <span class="text-[10px] text-slate-400">Tidak ada kendala</span>
+                            <span class="text-md text-slate-400">Tidak ada kendala</span>
                         @endforelse
                     </div>
                 </div>
@@ -157,12 +157,12 @@
                 <!-- Date -->
                 <input type="date" name="date" value="{{ request('date') }}"
                     onchange="document.getElementById('filterFormLogbook').submit()"
-                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-md font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
 
                 <!-- Auditor Filter (Admin & Pimpinan) -->
                 @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
                 <select name="user_id" onchange="document.getElementById('filterFormLogbook').submit()"
-                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-md font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="">Semua Pegawai</option>
                     @foreach($users as $user)
                     <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
@@ -175,7 +175,7 @@
                 <!-- Reset -->
                 @if(request('date') || request('user_id'))
                 <a href="{{ route('logbooks.index') }}"
-                    class="text-xs font-bold text-gray-400 hover:text-gray-600 px-1 py-1.5 transition">
+                    class="text-md font-bold text-gray-400 hover:text-gray-600 px-1 py-1.5 transition">
                     Reset
                 </a>
                 @endif
@@ -185,7 +185,7 @@
         {{-- TABLE SECTION --}}
         <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto relative">
-                <table class="w-full text-xs text-left">
+                <table class="w-full text-sm text-left">
                     <thead class="bg-slate-50/60 text-gray-400 font-bold uppercase tracking-wider sticky top-0 z-10 border-b border-gray-100">
                         <tr>
                             <th class="px-4 py-3 text-left w-12">No</th>
@@ -204,13 +204,13 @@
                         @forelse($logbooks as $logbook)
                         <tr class="hover:bg-slate-50/30 transition group">
                             {{-- No --}}
-                            <td class="px-4 py-3 font-mono text-xs text-gray-500 whitespace-nowrap">
+                            <td class="px-4 py-3 font-mono text-sm text-gray-500 whitespace-nowrap">
                                 {{ $logbooks->firstItem() + $loop->index }}
                             </td>
 
                             {{-- Pegawai --}}
                             @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
-                            <td class="px-4 py-3 whitespace-nowrap font-bold text-gray-800 text-[13px]">
+                            <td class="px-4 py-3 whitespace-nowrap font-bold text-gray-800 text-md">
                                 {{ optional($logbook->user)->name ?? '-' }}
                             </td>
                             @endif
@@ -221,7 +221,7 @@
                             </td>
 
                             {{-- Klien --}}
-                            <td class="px-4 py-3 text-gray-700 font-semibold whitespace-nowrap">
+                            <td class="px-4 py-3 text-gray-700 font-semibold text-md whitespace-nowrap">
                                 {{ optional($logbook->client)->institution_name ?? '-' }}
                             </td>
 
@@ -230,7 +230,7 @@
                                 <div class="flex items-center gap-1.5">
                                     <p class="truncate" title="{{ $logbook->main_task }}">{{ $logbook->main_task }}</p>
                                     @if($logbook->has_obstacle)
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/50 text-[9px] font-bold cursor-help" 
+                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200/50 text-sm font-bold cursor-help" 
                                           title="Kendala: {{ $logbook->obstacle_type }} — {{ $logbook->obstacle_description }}">
                                         ⚠️ Kendala
                                     </span>
@@ -241,18 +241,18 @@
                             {{-- Status --}}
                             <td class="px-4 py-3 whitespace-nowrap">
                                 @if($logbook->status === 'pending')
-                                <span class="bg-amber-50 text-amber-700 text-[11px] px-2 py-0.5 rounded border border-amber-200/50 font-bold">Pending</span>
+                                <span class="bg-amber-50 text-amber-700 text-sm px-2 py-0.5 rounded border border-amber-200/50 font-bold">Pending</span>
                                 @elseif($logbook->status === 'approved')
-                                <span class="bg-emerald-50 text-emerald-700 text-[11px] px-2 py-0.5 rounded border border-emerald-200/50 font-bold">Approved</span>
+                                <span class="bg-emerald-50 text-emerald-700 text-sm px-2 py-0.5 rounded border border-emerald-200/50 font-bold">Approved</span>
                                 @elseif($logbook->status === 'revision')
-                                <span class="bg-rose-50 text-rose-700 text-[11px] px-2 py-0.5 rounded border border-rose-200/50 font-bold">Revisi</span>
+                                <span class="bg-rose-50 text-rose-700 text-sm px-2 py-0.5 rounded border border-rose-200/50 font-bold">Revisi</span>
                                 @endif
                             </td>
 
                             {{-- Catatan --}}
                             <td class="px-4 py-3">
                                 @if($logbook->note)
-                                <div class="bg-rose-50/50 border border-rose-100 rounded-lg px-2.5 py-1 text-[11px] text-rose-700 max-w-xs">
+                                <div class="bg-rose-50/50 border border-rose-100 rounded-lg px-2.5 py-1 text-sm text-rose-700 max-w-xs">
                                     {{ $logbook->note }}
                                 </div>
                                 @else
@@ -261,8 +261,8 @@
                             </td>
 
                             {{-- Aksi --}}
-                            <td class="px-4 py-3 whitespace-nowrap">
-                                <div class="flex flex-col gap-1">
+                            <td class="px-4 py-3 whitespace-nowrap ">
+                                <div class="flex flex-col gap-1 text-sm">
                                     <div class="flex items-center justify-center gap-3">
                                         {{-- Detail --}}
                                         <a href="{{ route('logbooks.show', $logbook) }}"

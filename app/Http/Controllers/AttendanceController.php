@@ -161,26 +161,7 @@ class AttendanceController extends Controller
             'Akses ditolak!'
         );
 
-        // Tanggal hari ini
-        $today = now()->toDateString();
-
-        // Mengambil daftar auditor dan admin
-        $users = User::whereIn('role', ['admin', 'auditor'])
-            ->orderBy('name')
-            ->get();
-
-        /**
-         * Mengecek apakah user sudah absen hari ini
-         */
-        $todayAttendance = Attendance::where('user_id', Auth::id())
-            ->where('date', $today)
-            ->first();
-
-        // Menampilkan halaman create
-        return view('attendances.create', compact(
-            'users',
-            'todayAttendance'
-        ));
+        return redirect()->route('attendances.index', ['show_modal' => 1]);
     }
 
     /**

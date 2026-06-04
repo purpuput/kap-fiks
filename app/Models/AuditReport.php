@@ -88,6 +88,14 @@ class AuditReport extends Model
         );
     }
 
+    public function documentReviews()
+    {
+        return $this->hasMany(
+            DocumentReview::class,
+            'audit_report_id'
+        );
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Arsip dokumen
@@ -97,7 +105,32 @@ class AuditReport extends Model
     {
         return $this->hasMany(
             AuditReportFile::class
-        )->where('status', 'lengkap');
+        )->whereHas('review', function ($q) {
+            $q->where('status', 'approved');
+        });
+    }
+
+    public function updateStatusFromReviews($isResubmit = false)
+    {
+        $totalFilesCount = $this->files()->count();
+        $reviews = $this->documentReviews()->get();
+        $revisionCount = $reviews->where('status', 'revision')->count();
+        $approvedCount = $reviews->where('status', 'approved')->count();
+
+        if ($revisionCount > 0) {
+            $this->status = 'revisi';
+        } elseif ($approvedCount === $totalFilesCount && $totalFilesCount > 0) {
+            $this->status = 'disetujui';
+            if (!$this->reviewed_at) {
+                $this->reviewed_at = now();
+            }
+        } else {
+            if ($isResubmit || $this->status !== 'revisi') {
+                $this->status = 'review';
+            }
+        }
+
+        $this->save();
     }
 
     /*

@@ -161,14 +161,10 @@ class AuditReportController extends Controller
         }
 
         $auditReport->load([
-
             'client',
-
             'creator',
-
             'reviewer',
-
-            'files'
+            'files.review'
         ]);
 
         $documentTypes = $this->documentTypes;
@@ -200,8 +196,12 @@ class AuditReportController extends Controller
             403
         );
 
-        // Semua klien
-        $clients = Client::with('auditors')->get();
+        // Hanya klien yang sudah disetujui pimpinan dan belum memiliki laporan audit
+        $clients = Client::where('approval_status', 'disetujui')
+            ->where('status', 'aktif')
+            ->whereDoesntHave('auditReports')
+            ->with('auditors')
+            ->get();
 
         $documentTypes = $this->getDocumentTypesForRole('admin');
 
@@ -249,8 +249,16 @@ class AuditReportController extends Controller
             'audit_date' => 'required|date',
         ], $fileRules));
 
-        // Client
-        $client = Client::findOrFail($request->client_id);
+        // Client (pastikan disetujui pimpinan dan belum memiliki laporan audit)
+        $client = Client::where('id', $request->client_id)
+            ->where('approval_status', 'disetujui')
+            ->where('status', 'aktif')
+            ->whereDoesntHave('auditReports')
+            ->first();
+
+        if (!$client) {
+            return back()->withErrors(['client_id' => 'Klien tidak ditemukan, tidak aktif, belum disetujui oleh pimpinan, atau sudah memiliki laporan audit.'])->withInput();
+        }
 
         // Generate nomor laporan
         $lastReport = AuditReport::latest()->first();
@@ -364,7 +372,15 @@ class AuditReportController extends Controller
             );
         }
 
-        $clients = Client::with('auditors')->get();
+        // Hanya klien yang sudah disetujui pimpinan (dan belum memiliki laporan audit, kecuali klien laporan ini sendiri)
+        $clients = Client::where('approval_status', 'disetujui')
+            ->where('status', 'aktif')
+            ->where(function ($query) use ($auditReport) {
+                $query->whereDoesntHave('auditReports')
+                      ->orWhere('id', $auditReport->client_id);
+            })
+            ->with('auditors')
+            ->get();
 
         $documentTypes = $this->documentTypes;
         $allowedDocumentTypes = $this->getDocumentTypesForRole(Auth::user()->role);
@@ -405,35 +421,46 @@ class AuditReportController extends Controller
         if (
             $auditReport->status === 'disetujui'
         ) {
-
             return back()->with(
-
                 'error',
-
                 'Laporan tidak dapat diedit.'
             );
         }
 
         $fileRules = [];
-
-        $existingFiles = $auditReport->files
-            ->keyBy('document_type');
-
+        $existingFiles = $auditReport->files->keyBy('document_type');
         $allowedTypes = $this->getDocumentTypesForRole(Auth::user()->role);
+
+        // Validasi input: auditor tidak boleh mengunggah file yang sudah disetujui
+        if (Auth::user()->role === 'auditor') {
+            foreach ($request->file('files') ?? [] as $type => $file) {
+                $existing = $existingFiles[$type] ?? null;
+                if ($existing) {
+                    $review = $existing->review;
+                    if ($review && $review->status === 'approved') {
+                        return back()->withErrors(["files.{$type}" => "Dokumen " . ($this->documentTypes[$type] ?? $type) . " sudah disetujui dan tidak dapat diubah."]);
+                    }
+                }
+            }
+        }
 
         // Validasi file
         foreach (array_keys($allowedTypes) as $type) {
+            $existing = $existingFiles[$type] ?? null;
+            if ($existing && Auth::user()->role === 'auditor') {
+                $review = $existing->review;
+                if ($review && $review->status === 'approved') {
+                    // Dokumen yang sudah disetujui dilewati dari validasi file baru
+                    continue;
+                }
+            }
 
-            $required = isset(
-                $existingFiles[$type]
-            )
+            $required = isset($existingFiles[$type])
                 ? 'nullable'
                 : 'required';
 
             $mimes = ($type === 'data_klien')
-
                 ? 'mimes:pdf,zip,tar|max:102400'
-
                 : 'mimes:pdf,zip,tar|max:51200';
 
             $fileRules["files.{$type}"] =
@@ -452,7 +479,18 @@ class AuditReportController extends Controller
         // Update laporan
         $updateData = ['audit_date' => $request->audit_date];
         if (Auth::user()->role === 'admin') {
-            $client = Client::findOrFail($request->client_id);
+            $client = Client::where('id', $request->client_id)
+                ->where('approval_status', 'disetujui')
+                ->where('status', 'aktif')
+                ->where(function ($query) use ($auditReport) {
+                    $query->whereDoesntHave('auditReports')
+                          ->orWhere('id', $auditReport->client_id);
+                })
+                ->first();
+
+            if (!$client) {
+                return back()->withErrors(['client_id' => 'Klien tidak ditemukan, tidak aktif, belum disetujui oleh pimpinan, atau sudah memiliki laporan audit.'])->withInput();
+            }
             $updateData['client_id'] = $request->client_id;
             $updateData['title'] = 'Laporan Audit - ' . $client->institution_name;
             $updateData['audit_type'] = $client->audit_type;
@@ -462,11 +500,9 @@ class AuditReportController extends Controller
 
         // Update file
         foreach (array_keys($allowedTypes) as $type) {
-
             if (
                 $request->hasFile("files.{$type}")
             ) {
-
                 $file = $request->file(
                     "files.{$type}"
                 );
@@ -474,61 +510,49 @@ class AuditReportController extends Controller
                 $existing =
                     $existingFiles[$type] ?? null;
 
-                // Hapus file lama
+                // Hapus file lama beserta reviewnya (karena cascade delete)
                 if ($existing) {
-
                     Storage::disk('local')
                         ->delete($existing->file);
-
                     $existing->delete();
-
                 }
 
                 // Upload file baru
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $path = $file->storeAs(
-
                     "audit_reports/{$auditReport->id}",
-
                     $filename,
-
                     'local'
                 );
 
-                AuditReportFile::create([
-
+                $newFile = AuditReportFile::create([
                     'audit_report_id' =>
                     $auditReport->id,
-
                     'document_name' =>
                     $file->getClientOriginalName(),
-
                     'document_type' => $type,
-
                     'file' => $path,
-
                     'version' => $existing
                         ? $existing->version + 1
                         : 1,
-
                     'is_active' => true,
-
                     'uploaded_by' => Auth::id(),
                 ]);
+
+                // Buat/perbarui review menjadi pending_review
+                \App\Models\DocumentReview::updateOrCreate(
+                    [
+                        'audit_report_id' => $auditReport->id,
+                        'audit_file_id' => $newFile->id,
+                    ],
+                    [
+                        'reviewer_id' => null,
+                        'status' => 'pending_review',
+                        'note' => null,
+                        'reviewed_at' => null,
+                    ]
+                );
             }
-        }
-
-        // Submit ulang setelah revisi
-        if (
-            $auditReport->fresh()->status === 'revisi'
-        ) {
-
-            $auditReport->update([
-
-                'status' => 'review',
-
-                'revision_note' => null,
-            ]);
         }
 
         return redirect()
@@ -581,104 +605,89 @@ class AuditReportController extends Controller
     }
 
     /**
-     * Approve file (dokumen audit per item)
+     * Review file (dokumen audit per item)
      */
-    public function approveFile(Request $request, AuditReportFile $file)
+    public function reviewFile(Request $request, AuditReportFile $file)
     {
         // Hanya pimpinan
         abort_if(Auth::user()->role !== 'pimpinan', 403);
 
+        // Pastikan dokumen telah dilihat/diunduh terlebih dahulu
+        $review = \App\Models\DocumentReview::where('audit_file_id', $file->id)->first();
+        if (!$review || !$review->is_viewed) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dokumen harus dilihat atau diunduh terlebih dahulu sebelum direview.'
+                ], 422);
+            }
+            return back()->with('error', 'Dokumen harus dilihat atau diunduh terlebih dahulu sebelum direview.');
+        }
+
         $request->validate([
-            'status' => 'required|in:lengkap,belum lengkap',
-            'revision_note' => 'required_if:status,belum lengkap|nullable|string',
+            'status' => 'required|in:approved,revision',
+            'note' => 'required_if:status,revision|nullable|string',
         ]);
 
+        // Simpan review dokumen
+        \App\Models\DocumentReview::updateOrCreate(
+            [
+                'audit_report_id' => $file->audit_report_id,
+                'audit_file_id' => $file->id,
+            ],
+            [
+                'reviewer_id' => Auth::id(),
+                'status' => $request->status,
+                'note' => $request->status === 'revision' ? $request->note : null,
+                'reviewed_at' => now(),
+            ]
+        );
+
+        // Update status laporan secara otomatis
+        $auditReport = $file->auditReport;
+        $auditReport->updateStatusFromReviews();
+
+        // Update file status untuk backward compatibility
         $file->update([
-            'status' => $request->status,
-            'revision_note' => $request->status === 'belum lengkap' ? $request->revision_note : null,
+            'status' => $request->status === 'approved' ? 'lengkap' : 'belum lengkap',
+            'revision_note' => $request->status === 'revision' ? $request->note : null,
             'approved_by' => Auth::id(),
-            'approved_at' => now(),
+            'approved_at' => $request->status === 'approved' ? now() : null,
         ]);
 
-        return back()->with('success', 'Status dokumen berhasil diperbarui.');
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Review dokumen berhasil disimpan.',
+                'review_status' => $request->status,
+                'review_note' => $request->status === 'revision' ? $request->note : null,
+                'report_status' => $auditReport->fresh()->status,
+            ]);
+        }
+
+        return back()->with('success', 'Review dokumen berhasil disimpan.');
     }
 
     /**
-     * Approve laporan
+     * Kirim ulang review (Auditor mengirim kembali setelah perbaikan)
      */
-    public function approve(AuditReport $auditReport)
+    public function resubmit(AuditReport $auditReport)
     {
-        // Hanya pimpinan
-        abort_if(
+        // Hanya auditor yang ditugaskan atau admin
+        if (Auth::user()->role === 'auditor') {
+            abort_if(!$auditReport->client->auditors()->where('users.id', Auth::id())->exists(), 403);
+        }
 
-            Auth::user()->role !== 'pimpinan',
+        // Pastikan tidak ada dokumen yang statusnya 'revision'
+        $hasRevisions = $auditReport->documentReviews()->where('status', 'revision')->exists();
+        if ($hasRevisions) {
+            return back()->with('error', 'Masih ada dokumen yang belum diperbaiki.');
+        }
 
-            403
-        );
+        // Ubah status laporan ke review
+        $auditReport->updateStatusFromReviews(true);
 
-        $auditReport->load('files');
-
-        // Approve
-        $auditReport->update([
-
-            'status' => 'disetujui',
-
-            'reviewed_by' => Auth::id(),
-
-            'reviewed_at' => now(),
-
-            'revision_note' => null,
-        ]);
-
-
-        return back()->with(
-
-            'success',
-
-            'Laporan berhasil disetujui.'
-        );
-    }
-
-    /**
-     * Revisi laporan
-     */
-    public function revisi(
-        Request $request,
-        AuditReport $auditReport
-    ) {
-        // Hanya pimpinan
-        abort_if(
-
-            Auth::user()->role !== 'pimpinan',
-
-            403
-        );
-
-        $request->validate([
-
-            'revision_note' =>
-            'required|string|min:10',
-        ]);
-
-        // Revisi laporan
-        $auditReport->update([
-
-            'status' => 'revisi',
-
-            'revision_note' =>
-            $request->revision_note,
-
-            'reviewed_by' => Auth::id(),
-
-            'reviewed_at' => null,
-        ]);
-
-        return back()->with(
-
-            'success',
-
-            'Laporan dikembalikan untuk revisi.'
-        );
+        return back()->with('success', 'Laporan berhasil dikirim ulang untuk direview.');
     }
 
     /**
@@ -696,6 +705,18 @@ class AuditReportController extends Controller
 
         if (empty($file->file) || !Storage::disk('local')->exists($file->file)) {
             return back()->with('error', 'File tidak ditemukan di server.');
+        }
+
+        if (Auth::user()->role === 'pimpinan') {
+            \App\Models\DocumentReview::updateOrCreate(
+                [
+                    'audit_report_id' => $file->audit_report_id,
+                    'audit_file_id' => $file->id,
+                ],
+                [
+                    'is_viewed' => true,
+                ]
+            );
         }
 
         return Storage::disk('local')->download($file->file, $file->document_name);
@@ -716,6 +737,18 @@ class AuditReportController extends Controller
 
         if (empty($file->file) || !Storage::disk('local')->exists($file->file)) {
             return response('<div style="text-align:center; padding: 50px; font-family: sans-serif; color: #666;"><h3>File Tidak Ditemukan</h3><p>File fisik tidak ada di server karena ini adalah data dummy atau file telah dihapus.</p></div>', 404);
+        }
+
+        if (Auth::user()->role === 'pimpinan') {
+            \App\Models\DocumentReview::updateOrCreate(
+                [
+                    'audit_report_id' => $file->audit_report_id,
+                    'audit_file_id' => $file->id,
+                ],
+                [
+                    'is_viewed' => true,
+                ]
+            );
         }
 
         $path = Storage::disk('local')->path($file->file);

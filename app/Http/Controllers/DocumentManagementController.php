@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\AuditReportFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class DocumentManagementController extends Controller
 {
@@ -55,9 +56,12 @@ class DocumentManagementController extends Controller
 
         $query = AuditReportFile::with([
             'auditReport',
-            'approvedBy'
+            'approvedBy',
+            'review'
         ])
-            ->where('status', 'lengkap')
+            ->whereHas('review', function ($q) {
+                $q->where('status', 'approved');
+            })
             ->whereHas('auditReport', function ($q) use ($client) {
                 $q->where('client_id', $client->id);
             });

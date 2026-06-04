@@ -32,21 +32,6 @@
                 </p>
             </div>
 
-            {{-- ALERT REVISI --}}
-            @if($auditReport->status === 'revisi')
-            <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-xl p-4">
-                <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                    <div>
-                        <p class="font-semibold text-yellow-800">Laporan Perlu Direvisi</p>
-                        <p class="text-yellow-700 text-sm mt-1">{{ $auditReport->revision_note }}</p>
-                    </div>
-                </div>
-            </div>
-            @endif
-
             {{-- ERROR VALIDATION --}}
             @if ($errors->any())
             <div class="mb-6 bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-xl">
@@ -110,35 +95,61 @@
                 {{-- DOKUMEN --}}
                 <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
                     <h3 class="text-xs font-bold text-gray-600 border-b pb-2 mb-5">Dokumen Laporan</h3>
-                    <p class="text-sm text-gray-500 mb-4">Upload file baru hanya untuk dokumen yang ingin diganti. Dokumen yang tidak diganti akan tetap tersimpan.</p>
+                    <p class="text-sm text-gray-550 mb-4">Pengunggahan dokumen baru hanya diperbolehkan jika belum diunggah atau statusnya perlu revisi.</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach($documentTypes as $type => $label)
-                        @php $existingFile = $filesByType[$type] ?? null; @endphp
+                        @php
+                            $existingFile = $filesByType[$type] ?? null;
+                            $canUpload = true;
+                            $statusBadge = '';
+                            $bgColor = 'border-gray-200 bg-white';
+                            $revisionNote = null;
 
-                        <div class="border rounded-xl p-4 {{ $existingFile ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50' }}">
+                            if ($existingFile) {
+                                $review = $existingFile->review;
+                                if (auth()->user()->role === 'auditor') {
+                                    if ($review) {
+                                        if ($review->status === 'approved') {
+                                            $canUpload = false;
+                                            $statusBadge = '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">✓ Disetujui (Terkunci)</span>';
+                                            $bgColor = 'border-green-200 bg-green-50/40';
+                                        } elseif ($review->status === 'revision') {
+                                            $canUpload = true;
+                                            $statusBadge = '<span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">⚠️ Perlu Revisi</span>';
+                                            $bgColor = 'border-red-300 bg-red-50/70';
+                                            $revisionNote = $review->note;
+                                        } else {
+                                            $canUpload = false;
+                                            $statusBadge = '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-semibold">🔒 Menunggu Review (Terkunci)</span>';
+                                            $bgColor = 'border-yellow-200 bg-yellow-50/20';
+                                        }
+                                    } else {
+                                        $canUpload = false;
+                                        $statusBadge = '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-semibold">🔒 Menunggu Review (Terkunci)</span>';
+                                        $bgColor = 'border-yellow-200 bg-yellow-50/20';
+                                    }
+                                } else {
+                                    $statusBadge = '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">Sudah ada</span>';
+                                    $bgColor = 'border-green-200 bg-green-50/40';
+                                }
+                            } else {
+                                $statusBadge = '<span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Belum ada</span>';
+                                $bgColor = 'border-gray-200 bg-white';
+                            }
+                        @endphp
+
+                        <div class="border rounded-xl p-4 {{ $bgColor }}">
 
                             <div class="flex items-center justify-between mb-2">
-                                <label class="text-xs font-bold text-gray-600">
+                                <label class="text-xs font-bold text-gray-700">
                                     {{ $loop->iteration }}. {{ $label }}
                                 </label>
-
-                                @if($existingFile)
-                                <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                    </svg>
-                                    Sudah ada
-                                </span>
-                                @else
-                                <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
-                                    Belum ada
-                                </span>
-                                @endif
+                                {!! $statusBadge !!}
                             </div>
 
                             @if($existingFile)
-                            <div class="flex items-center gap-2 mb-2 p-2 bg-white rounded-lg border border-green-200">
+                            <div class="flex items-center gap-2 mb-3 p-2 bg-white rounded-lg border border-gray-150">
                                 <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -153,7 +164,7 @@
                                 @if($isImage || $isPdf)
                                 <button type="button"
                                     onclick="openModalPreview('{{ route('audit_reports.preview', $existingFile->id) }}', '{{ $existingFile->document_name }}', {{ $isImage ? 'true' : 'false' }})"
-                                    class="text-xs text-gray-600 hover:text-gray-900 hover:underline flex-shrink-0 mr-2">
+                                    class="text-xs text-gray-500 hover:text-gray-900 hover:underline flex-shrink-0 mr-2">
                                     Preview
                                 </button>
                                 @endif
@@ -163,14 +174,20 @@
                             </div>
                             @endif
 
-                            @if(array_key_exists($type, $allowedDocumentTypes))
+                            @if($revisionNote)
+                            <div class="mb-3 bg-red-100/50 border-l-2 border-red-400 p-2.5 rounded text-xs text-red-800">
+                                <span class="font-bold">Catatan Pimpinan:</span> "{{ $revisionNote }}"
+                            </div>
+                            @endif
+
+                            @if(array_key_exists($type, $allowedDocumentTypes) && $canUpload)
                             <input type="file" name="files[{{ $type }}]"
                                 @if($type==='data_klien' )
                                 accept=".zip,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx"
                                 @else
                                 accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                                 @endif
-                                class="w-full text-xs text-gray-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                                class="w-full text-xs text-gray-650 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
 
                             @if(!$existingFile)
                             <p class="text-[11px] text-red-500 mt-1">Wajib diisi</p>
@@ -179,6 +196,13 @@
                             @error("files.$type")
                             <p class="text-[11px] text-red-500 mt-1">{{ $message }}</p>
                             @enderror
+                            @elseif(array_key_exists($type, $allowedDocumentTypes))
+                            <p class="text-xs text-gray-400 italic flex items-center gap-1.5 mt-2 bg-gray-50 p-2 rounded border border-gray-150">
+                                <svg class="w-3.5 h-3.5 text-gray-450" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span>Pengunggahan dikunci.</span>
+                            </p>
                             @else
                             <p class="text-xs text-gray-400 mt-2 italic flex items-center gap-1">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,11 +219,11 @@
                 {{-- TOMBOL --}}
                 <div class="flex gap-3">
                     <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-bold text-xs transition">
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold text-xs transition">
                         Update Laporan
                     </button>
                     <a href="{{ route('audit_reports.show', $auditReport) }}"
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded-lg font-bold text-xs transition">
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl font-bold text-xs transition">
                         Kembali
                     </a>
                 </div>

@@ -5,10 +5,10 @@
         <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white border border-gray-200/80 rounded-xl p-3 shadow-sm">
             <form id="docFilterForm" method="GET" class="flex-1">
                 <!-- Search -->
-                <div class="relative w-full md:w-72">
+                <div class="relative w-full">
                     <input type="text" id="searchInput" name="search" value="{{ $search }}"
                         placeholder="Cari nama klien..."
-                        class="w-full bg-slate-50/50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-xs placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all">
+                        class="w-full bg-slate-50/50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-md placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all">
                     <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -30,10 +30,10 @@
                             </svg>
                         </div>
                         <div class="overflow-hidden">
-                            <h3 class="font-bold text-[13px] text-gray-800 truncate" title="{{ $client->institution_name }}">
+                            <h3 class="font-bold text-md text-gray-800 truncate" title="{{ $client->institution_name }}">
                                 {{ $client->institution_name }}
                             </h3>
-                            <p class="text-[11px] text-gray-400 font-semibold mt-0.5">
+                            <p class="text-sm text-gray-400 font-semibold mt-0.5">
                                 {{ $client->document_managements_count }} Dokumen
                             </p>
                         </div>
@@ -42,11 +42,8 @@
                 
                 <div class="border-t border-gray-100 pt-2.5 mt-3 flex justify-end">
                     <a href="{{ route('document_managements.show', $client) }}"
-                        class="text-xs font-bold text-blue-600 hover:text-blue-700 inline-flex items-center gap-0.5 hover:underline transition">
+                        class="text-sm font-bold text-blue-600 hover:text-blue-700 inline-flex items-center gap-0.5 hover:underline transition">
                         Lihat Dokumen
-                        <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
                     </a>
                 </div>
             </div>

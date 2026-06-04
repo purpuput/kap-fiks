@@ -98,6 +98,34 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
+        // Hitung status tugas dokumen riil
+        $myReportIds = AuditReport::whereHas('client.auditors', function ($q) use ($user) {
+            $q->where('users.id', $user->id);
+        })->whereHas('client', function ($q) {
+            $q->where('approval_status', 'disetujui');
+        })->pluck('id');
+
+        $myFiles = AuditReportFile::whereIn('audit_report_id', $myReportIds)->with('review')->get();
+
+        $tugasRevisi = 0;
+        $tugasDalamReview = 0;
+        $tugasDisetujui = 0;
+
+        foreach ($myFiles as $file) {
+            $review = $file->review;
+            if ($review) {
+                if ($review->status === 'revision') {
+                    $tugasRevisi++;
+                } elseif ($review->status === 'approved') {
+                    $tugasDisetujui++;
+                } else {
+                    $tugasDalamReview++;
+                }
+            } else {
+                $tugasDalamReview++;
+            }
+        }
+
         $data = [
             'myReports'          => $myReports,
             'totalMyReports'     => $myReports->count(),
@@ -108,6 +136,9 @@ class DashboardController extends Controller
             'logbookHariIni'     => $logbookHariIni,
             'laporanRevisi'      => $laporanRevisi,
             'laporanTerbaru'     => $myReports->take(5),
+            'tugasRevisi'        => $tugasRevisi,
+            'tugasDalamReview'   => $tugasDalamReview,
+            'tugasDisetujui'     => $tugasDisetujui,
         ];
 
         return view('auditor.dashboard', $data);

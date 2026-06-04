@@ -4,7 +4,6 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\AuditReportController;
-use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentManagementController;
 use App\Http\Controllers\ChatbotController;
 use Illuminate\Support\Facades\Route;
@@ -39,11 +38,10 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
 // AUDIT REPORTS - Admin, Auditor, Pimpinan
 Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::resource('audit_reports', AuditReportController::class);
-    Route::put('/audit_reports/{id}/approve', [AuditReportController::class, 'approve'])->name('audit_reports.approve');
-    Route::put('/audit_reports/{id}/revisi', [AuditReportController::class, 'revisi'])->name('audit_reports.revisi');
     Route::get('/audit_reports/files/{file}/download', [AuditReportController::class, 'download'])->name('audit_reports.download');
     Route::get('/audit_reports/files/{file}/preview', [AuditReportController::class, 'preview'])->name('audit_reports.preview');
-    Route::patch('/audit_reports/files/{file}/approve', [AuditReportController::class, 'approveFile'])->name('audit_reports.files.approve');
+    Route::patch('/audit_reports/files/{file}/review', [AuditReportController::class, 'reviewFile'])->name('audit_reports.files.review');
+    Route::put('/audit_reports/{audit_report}/resubmit', [AuditReportController::class, 'resubmit'])->name('audit_reports.resubmit');
 });
 
 // DOCUMENT MANAGEMENT - Admin, Auditor, Pimpinan (otomatis dari approve laporan)
@@ -52,12 +50,6 @@ Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
     Route::get('/document-managements/{documentManagement}/download', [DocumentManagementController::class, 'download'])->name('document_managements.download');
     Route::get('/document-managements/{client}', [DocumentManagementController::class, 'show'])->name('document_managements.show');
     Route::get('/document-managements/preview/{documentManagement}', [DocumentManagementController::class, 'preview'])->name('document_managements.preview');
-});
-
-// DOCUMENTS - Admin, Auditor, Pimpinan
-Route::middleware(['auth', 'role:admin,auditor,pimpinan'])->group(function () {
-    Route::resource('documents', DocumentController::class)->except(['show', 'edit', 'update']);
-    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
 });
 
 // CHATBOT - Semua role

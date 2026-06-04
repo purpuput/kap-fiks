@@ -338,14 +338,14 @@
                 <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 lg:col-span-2">
                     <div class="flex items-center justify-between mb-6">
                         <div>
-                            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Laporan Audit Terbaru</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Daftar laporan audit yang terakhir kali diperbarui</p>
+                            <h3 class="text-md font-bold text-slate-700 uppercase tracking-wider">Laporan Audit Terbaru</h3>
+                            <p class="text-sm text-slate-400 mt-0.5">Daftar laporan audit yang terakhir kali diperbarui</p>
                         </div>
-                        <a href="{{ route('audit_reports.index') }}" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold">Lihat Semua →</a>
+                        <a href="{{ route('audit_reports.index') }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-bold">Lihat Semua →</a>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
-                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-bold tracking-wider">
+                            <thead class="bg-slate-50 text-slate-500 text-sm uppercase font-bold tracking-wider">
                                 <tr>
                                     <th class="px-4 py-3 text-left rounded-l-xl">No. Laporan</th>
                                     <th class="px-4 py-3 text-left">Judul</th>
@@ -357,26 +357,26 @@
                             <tbody class="divide-y divide-slate-100">
                                 @forelse($laporanTerbaru as $laporan)
                                     <tr class="hover:bg-slate-50/50 transition">
-                                        <td class="px-4 py-3.5 font-mono text-[10px] text-slate-500 font-bold">{{ $laporan->report_number }}</td>
-                                        <td class="px-4 py-3.5 font-bold text-slate-800 max-w-xs truncate">{{ $laporan->title }}</td>
-                                        <td class="px-4 py-3.5 text-xs text-slate-500 font-medium">{{ $laporan->client->institution_name ?? '-' }}</td>
+                                        <td class="px-4 py-3.5 font-mono text-sm text-slate-500 font-bold">{{ $laporan->report_number }}</td>
+                                        <td class="px-4 py-3.5 font-bold text-slate-800 text-md max-w-xs truncate">{{ $laporan->title }}</td>
+                                        <td class="px-4 py-3.5 text-sm text-slate-500 font-medium">{{ $laporan->client->institution_name ?? '-' }}</td>
                                         <td class="px-4 py-3.5">
                                             @if($laporan->status === 'review')
-                                                <span class="inline-flex items-center bg-amber-50 text-amber-700 text-[10px] px-2.5 py-1 rounded-full font-bold border border-amber-200">
+                                                <span class="inline-flex items-center bg-amber-50 text-amber-700 text-sm px-2.5 py-1 rounded-full font-bold border border-amber-200">
                                                     Review
                                                 </span>
                                             @elseif($laporan->status === 'disetujui')
-                                                <span class="inline-flex items-center bg-emerald-50 text-emerald-700 text-[10px] px-2.5 py-1 rounded-full font-bold border border-emerald-200">
+                                                <span class="inline-flex items-center bg-emerald-50 text-emerald-700 text-sm px-2.5 py-1 rounded-full font-bold border border-emerald-200">
                                                     Disetujui
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center bg-rose-50 text-rose-700 text-[10px] px-2.5 py-1 rounded-full font-bold border border-rose-200">
+                                                <span class="inline-flex items-center bg-rose-50 text-rose-700 text-sm px-2.5 py-1 rounded-full font-bold border border-rose-200">
                                                     Revisi
                                                 </span>
                                             @endif
                                         </td>
                                         <td class="px-4 py-3.5 text-center">
-                                            <a href="{{ route('audit_reports.show', $laporan) }}" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold">Detail</a>
+                                            <a href="{{ route('audit_reports.show', $laporan) }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-bold">Detail</a>
                                         </td>
                                     </tr>
                                 @empty

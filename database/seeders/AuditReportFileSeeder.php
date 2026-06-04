@@ -112,24 +112,52 @@ class AuditReportFileSeeder extends Seeder
                 default => $auditor->id,
             };
 
+            // Tentukan status review dokumen seeder
+            $reviewStatus = 'pending_review';
+            $reviewNote = null;
+            $reviewerId = null;
+            $reviewedAt = null;
+
+            if ($report->status === 'disetujui') {
+                $reviewStatus = 'approved';
+                $reviewerId = $pimpinan->id;
+                $reviewedAt = now();
+            } elseif ($report->status === 'revisi') {
+                // Buat salah satu tipe dokumen menjadi revision, yang lain approved
+                if ($type === 'laporan_audit') {
+                    $reviewStatus = 'revision';
+                    $reviewNote = 'Mohon lengkapi bagian lampiran sesuai dengan standar yang berlaku.';
+                    $reviewerId = $pimpinan->id;
+                    $reviewedAt = now();
+                } else {
+                    $reviewStatus = 'approved';
+                    $reviewerId = $pimpinan->id;
+                    $reviewedAt = now();
+                }
+            }
+
             // File audit
             $file = AuditReportFile::create([
-
                 'audit_report_id' => $report->id,
-
                 'document_name' => $fileName,
-
                 'document_type' => $type,
-
                 'file' => $fakePath,
-
                 'version' => 1,
-
                 'is_active' => true,
-
-                'status' => $report->status === 'disetujui' ? 'lengkap' : 'pending',
-
+                'status' => $reviewStatus === 'approved' ? 'lengkap' : ($reviewStatus === 'revision' ? 'belum lengkap' : 'pending'),
                 'uploaded_by' => $uploadedBy,
+                'approved_by' => $reviewStatus === 'approved' ? $pimpinan->id : null,
+                'approved_at' => $reviewStatus === 'approved' ? now() : null,
+            ]);
+
+            // Buat record review dokumen
+            \App\Models\DocumentReview::create([
+                'audit_report_id' => $report->id,
+                'audit_file_id' => $file->id,
+                'reviewer_id' => $reviewerId,
+                'status' => $reviewStatus,
+                'note' => $reviewNote,
+                'reviewed_at' => $reviewedAt,
             ]);
 
             // Buat file fisik dummy agar fungsi download & preview berfungsi

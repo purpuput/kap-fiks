@@ -5,8 +5,8 @@
 
             {{-- HEADER --}}
             <div class="mb-8">
-                <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
-                <p class="text-gray-500 text-sm mt-1">
+                <h2 class="text-md font-bold text-gray-800">Dashboard</h2>
+                <p class="text-sm text-gray-500 mt-1">
                     Selamat datang, <span class="font-semibold text-blue-600">{{ auth()->user()->name }}</span>
                     — {{ ucfirst(auth()->user()->role) }}
                 </p>
@@ -23,8 +23,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-wide">Laporan Audit</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ \App\Models\AuditReport::count() }}</p>
+                        <p class="text-sm text-gray-400 uppercase tracking-wide">Laporan Audit</p>
+                        <p class="text-md font-bold text-gray-800">{{ \App\Models\AuditReport::count() }}</p>
                     </div>
                 </div>
 
@@ -35,8 +35,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-wide">Data Klien</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ \App\Models\Client::count() }}</p>
+                        <p class="text-sm text-gray-400 uppercase tracking-wide">Data Klien</p>
+                        <p class="text-md font-bold text-gray-800">{{ \App\Models\Client::count() }}</p>
                     </div>
                 </div>
 
@@ -47,8 +47,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-wide">Manajemen Dokumen</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ \App\Models\AuditReportFile::where('status', 'lengkap')->count() }}</p>
+                        <p class="text-sm text-gray-400 uppercase tracking-wide">Manajemen Dokumen</p>
+                        <p class="text-md font-bold text-gray-800">{{ \App\Models\AuditReportFile::where('status', 'lengkap')->count() }}</p>
                     </div>
                 </div>
 
@@ -59,8 +59,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-wide">Logbook</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ \App\Models\Logbook::count() }}</p>
+                        <p class="text-sm text-gray-400 uppercase tracking-wide">Logbook</p>
+                        <p class="text-md font-bold text-gray-800">{{ \App\Models\Logbook::count() }}</p>
                     </div>
                 </div>
                 @endif
@@ -73,7 +73,7 @@
 
                 {{-- Laporan per Status --}}
                 <div class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-base font-bold text-gray-700 mb-4">Status Laporan Audit</h3>
+                    <h3 class="text-md font-bold text-gray-700 mb-4">Status Laporan Audit</h3>
                     <div class="space-y-3">
                         @php
                             $pending = \App\Models\AuditReport::where('status','review')->count();
@@ -113,7 +113,7 @@
 
                 {{-- Akses Cepat --}}
                 <div class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-base font-bold text-gray-700 mb-4">Akses Cepat</h3>
+                    <h3 class="text-md font-bold text-gray-700 mb-4">Akses Cepat</h3>
                     <div class="grid grid-cols-2 gap-3">
                         <a href="{{ route('audit_reports.index') }}"
                             class="flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition">

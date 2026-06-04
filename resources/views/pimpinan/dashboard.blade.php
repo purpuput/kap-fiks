@@ -52,15 +52,8 @@
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-2 flex-shrink-0">
-                                    <form action="{{ route('audit_reports.approve', $laporan->id) }}" method="POST" class="inline">
-                                        @csrf @method('PUT')
-                                        <button onclick="return confirm('Approve laporan ini?')"
-                                            class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition shadow-sm shadow-emerald-600/10">
-                                            ✓ Approve
-                                        </button>
-                                    </form>
                                     <a href="{{ route('audit_reports.show', $laporan) }}"
-                                        class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2 rounded-xl font-bold transition">
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2 rounded-xl font-bold transition shadow-sm shadow-indigo-600/10">
                                         Tinjau Detail
                                     </a>
                                 </div>

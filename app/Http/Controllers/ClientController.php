@@ -141,6 +141,10 @@ class ClientController extends Controller
             abort(403);
         }
 
+        if ($client->approval_status === 'disetujui') {
+            return redirect()->route('clients.index')->with('error', 'Klien yang telah disetujui tidak dapat diubah kembali.');
+        }
+
         $auditors = User::query()->where('role', 'auditor')->get();
 
         return view('clients.edit', compact(
@@ -157,6 +161,10 @@ class ClientController extends Controller
             Auth::user()->role !== 'admin'
         ) {
             abort(403);
+        }
+
+        if ($client->approval_status === 'disetujui') {
+            return redirect()->route('clients.index')->with('error', 'Klien yang telah disetujui tidak dapat diubah kembali.');
         }
 
         $validated = $request->validate([

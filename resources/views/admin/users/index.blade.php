@@ -15,7 +15,7 @@
                 <div class="relative w-full md:w-72">
                     <input type="text" id="searchInput" name="search" value="{{ $search }}"
                         placeholder="Cari nama atau email..."
-                        class="w-full bg-slate-50/50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-xs placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all">
+                        class="w-full bg-slate-50/50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-md placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all">
                     <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -25,7 +25,7 @@
 
                 <!-- Role Filter -->
                 <select name="role" onchange="this.form.submit()"
-                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    class="bg-slate-50/50 border border-gray-200 rounded-lg px-8 py-1.5 text-md font-semibold text-gray-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="">Semua Role</option>
                     <option value="admin" {{ $role === 'admin' ? 'selected' : '' }}>Admin</option>
                     <option value="auditor" {{ $role === 'auditor' ? 'selected' : '' }}>Auditor</option>
@@ -35,7 +35,7 @@
                 <!-- Reset -->
                 @if($search || $role)
                 <a href="{{ route('admin.users.index') }}"
-                    class="text-xs font-bold text-gray-400 hover:text-gray-600 px-1 py-1.5 transition">
+                    class="text-sm font-bold text-gray-400 hover:text-gray-600 px-1 py-1.5 transition">
                     Reset
                 </a>
                 @endif
@@ -43,7 +43,7 @@
 
             <!-- Action Button -->
             <a href="{{ route('admin.users.create') }}"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1 whitespace-nowrap">
+                class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-md font-bold shadow-sm transition flex items-center justify-center gap-1 whitespace-nowrap">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -54,7 +54,7 @@
         {{-- TABLE SECTION --}}
         <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto relative">
-                <table class="w-full text-xs text-left">
+                <table class="w-full text-sm text-left">
                     <thead class="bg-slate-50/60 text-gray-400 font-bold uppercase tracking-wider sticky top-0 z-10 border-b border-gray-100">
                         <tr>
                             <th class="px-4 py-3 text-left">Nama</th>
@@ -70,23 +70,23 @@
                             {{-- Nama --}}
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="w-7 h-7 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg flex items-center justify-center text-xs font-bold">
+                                    <div class="w-7 h-7 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg flex items-center justify-center text-sm font-bold">
                                         {{ strtoupper(substr($user->name, 0, 1)) }}
                                     </div>
                                     <div class="ml-2.5">
-                                        <p class="font-bold text-gray-800 text-[13px]">{{ $user->name }}</p>
+                                        <p class="font-bold text-gray-800 text-md">{{ $user->name }}</p>
                                     </div>
                                 </div>
                             </td>
 
                             {{-- Email --}}
-                            <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">
+                            <td class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">
                                 {{ $user->email }}
                             </td>
 
                             {{-- Role --}}
                             <td class="px-4 py-3 whitespace-nowrap">
-                                <span class="text-[11px] px-2 py-0.5 rounded font-bold border 
+                                <span class="text-sm px-2 py-0.5 rounded font-bold border 
                                     {{ $user->role === 'admin' ? 'bg-rose-50 text-rose-700 border-rose-200/50' : 
                                        ($user->role === 'auditor' ? 'bg-blue-50 text-blue-700 border-blue-200/50' : 
                                         ($user->role === 'pimpinan' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : 

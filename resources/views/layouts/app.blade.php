@@ -50,7 +50,7 @@
             :class="sidebarOpen ? 'md:ml-64' : 'md:ml-20'">
 
             <!-- Header -->
-            <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700 px-6 py-4">
+            <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-sm border-b border-gray-200 dark:border-slate-700 px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <button @click="sidebarOpen = !sidebarOpen" class="mr-3 md:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 focus:outline-none">

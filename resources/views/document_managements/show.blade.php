@@ -11,7 +11,7 @@
                         {{ $client->institution_name }}
                     </h2>
 
-                    <p class="text-gray-500 mt-2">
+                    <p class="text-md text-gray-550 mt-2">
                         Arsip dokumen audit klien
                     </p>
                 </div>
@@ -66,7 +66,7 @@
 
                     <table class="w-full text-sm">
 
-                        <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                        <thead class="bg-gray-50 text-gray-500 uppercase text-sm">
 
                             <tr>
                                 <th class="px-4 py-4 text-left">Dokumen</th>
@@ -85,13 +85,13 @@
 
                             <tr class="hover:bg-gray-50 transition">
 
-                                <td class="px-4 py-4 font-medium text-gray-800">
+                                <td class="px-4 py-4 font-medium text-gray-800 text-md">
                                     {{ $doc->document_name }}
                                 </td>
 
                                 <td class="px-4 py-4">
 
-                                    <span class="bg-indigo-50 text-indigo-700 text-xs px-3 py-1 rounded-full">
+                                    <span class="text-sm text-gray-500">
 
                                         {{ $documentTypeLabels[$doc->document_type] ?? $doc->document_type }}
 
@@ -107,7 +107,7 @@
                                     {{ $doc->approved_at?->format('d M Y H:i') }}
                                 </td>
 
-                                <td class="px-4 py-4 text-gray-500">
+                                <td class="px-4 py-4 text-gray-550">
                                     {{ $doc->approvedBy?->name }}
                                 </td>
 
@@ -117,7 +117,7 @@
 
                                         {{-- PREVIEW --}}
                                         <button type="button"
-                                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold"
+                                            class="bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-sm font-semibold"
                                             data-url="{{ route('document_managements.preview', $doc->id) }}"
                                             data-name="{{ $doc->document_name }}"
                                             onclick="openModalPreview(this.dataset.url, this.dataset.name)">
@@ -128,7 +128,7 @@
 
                                         {{-- DOWNLOAD --}}
                                         <a href="{{ route('document_managements.download', $doc) }}"
-                                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold">
+                                            class="bg-blue-300 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">
 
                                             Download
 
@@ -173,7 +173,7 @@
     <div id="modalPreview" class="fixed inset-0 z-50 hidden bg-black/70 flex items-center justify-center p-4 lg:p-10 transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full h-full flex flex-col overflow-hidden relative">
             <div class="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-800" id="previewTitle">Preview Dokumen</h3>
+                <h3 class="text-md font-bold text-gray-800" id="previewTitle">Preview Dokumen</h3>
                 <button type="button" onclick="closeModalPreview()" class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-200 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

@@ -158,7 +158,7 @@
         ────────────────────────────────────────────────────────── --}}
         <div class="w-full md:w-60 bg-white rounded-xl border border-gray-200/80 flex flex-col overflow-hidden flex-shrink-0 h-48 md:h-full shadow-sm">
             <div class="p-3 border-b border-gray-100 bg-gray-50/50">
-                <a href="{{ route('chatbot.index') }}" class="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition text-xs">
+                <a href="{{ route('chatbot.index') }}" class="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition text-sm">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -174,17 +174,17 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                         </svg>
                     </div>
-                    <p class="text-[10px] text-gray-400 font-semibold">Belum ada riwayat</p>
+                    <p class="text-sm text-gray-400 font-semibold">Belum ada riwayat</p>
                 </div>
                 <div id="session-list-container" class="space-y-0.5 hidden">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-1.5 px-2" id="history-header">Riwayat Anda</p>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 mt-1.5 px-2" id="history-header">Riwayat Anda</p>
                 </div>
                 @else
                 <div id="session-list-container" class="space-y-0.5">
-                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-1.5 px-2" id="history-header">Riwayat Anda</p>
+                    <p class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 mt-1.5 px-2" id="history-header">Riwayat Anda</p>
                     @foreach($sessions as $s)
                     <div class="group relative flex items-center justify-between {{ ($currentSession && $currentSession->id == $s->id) ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-600' : 'text-slate-600 hover:bg-slate-50' }} rounded-lg transition-colors">
-                        <a href="{{ route('chatbot.index', ['session_id' => $s->id]) }}" class="flex-1 truncate px-2.5 py-2 text-xs font-semibold">
+                        <a href="{{ route('chatbot.index', ['session_id' => $s->id]) }}" class="flex-1 truncate px-2.5 py-2 text-sm font-semibold">
                             {{ $s->title }}
                         </a>
 
@@ -228,28 +228,12 @@
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                             </span>
-                            <span class="text-gray-400 text-[10px] font-semibold">Groq Engine (<span id="model-badge">llama-3.3-70b</span>)</span>
+                            <span class="text-gray-400 text-sm font-semibold">Groq Engine (<span id="model-badge">llama-3.3-70b</span>)</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Panel Pengaturan API --}}
-            @if(auth()->user()->role === 'admin')
-            <div id="api-settings-panel" class="hidden bg-blue-50 border-b border-blue-100 px-5 py-3 absolute w-full z-30 shadow-md top-14">
-                <h3 class="text-xs font-bold text-blue-800 mb-1">Konfigurasi API Groq</h3>
-                <p class="text-[10px] text-blue-600 mb-2">Atur API Key untuk mengubah model AI. Buka file <code class="bg-white px-1 py-0.5 rounded border border-blue-200">.env</code> Anda dan pastikan nilai <code class="bg-white px-1 py-0.5 rounded border border-blue-200">GROQ_API_KEY</code> telah diset.</p>
-                <div class="flex gap-2 items-center">
-                    <input type="password" value="{{ env('GROQ_API_KEY') ? '************************' : '' }}" disabled class="bg-white border border-blue-200 text-gray-500 text-xs rounded-lg block w-full p-2 max-w-md" placeholder="API Key tidak diset di .env">
-                    <a href="https://console.groq.com/keys" target="_blank" class="text-[10px] bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition font-bold">Dapatkan API Key</a>
-                </div>
-                <button onclick="toggleSettings()" class="absolute top-4 right-4 text-blue-400 hover:text-blue-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            @endif
 
             {{-- Pola Latar Belakang --}}
             <div class="absolute inset-0 opacity-[0.015] pointer-events-none z-0" style="background-image: radial-gradient(#3b82f6 1px, transparent 1px); background-size: 16px 16px;"></div>
@@ -266,11 +250,11 @@
                         </svg>
                     </div>
                     <div class="message-bubble bg-white border border-gray-200/80 text-gray-700 rounded-xl rounded-tl-none px-4 py-3 shadow-sm">
-                        <p class="font-bold text-blue-700 text-xs mb-1">AURA AI (Audit Reporting Asisten)</p>
-                        <p class="text-xs leading-relaxed text-gray-800">
+                        <p class="font-bold text-blue-700 text-sm mb-1">AURA AI (Audit Reporting Asisten)</p>
+                        <p class="text-sm leading-relaxed text-gray-800">
                             Halo, <strong class="text-gray-900">{{ Auth::user()->name }}</strong>! 👋
                         </p>
-                        <p class="text-xs leading-relaxed mt-1 text-gray-600">
+                        <p class="text-sm leading-relaxed mt-1 text-gray-600">
                             Saya adalah <strong>AURA AI (Audit Reporting Asisten)</strong>, asisten cerdas yang siap membantu Anda dalam memantau, menganalisis, dan melaporkan kegiatan audit, status klien, serta data operasional KAP secara cepat dan akurat langsung dari database sistem.
                         </p>
                     </div>
@@ -281,10 +265,10 @@
                 {{-- Balon Pesan Pengguna --}}
                 <div class="flex items-start justify-end gap-3 msg-enter mb-4">
                     <div class="text-right">
-                        <div class="message-bubble inline-block bg-blue-600 text-white rounded-xl rounded-br-none px-4 py-2.5 shadow-sm text-xs leading-relaxed text-left">{{ $msg->message }}</div>
-                        <p class="text-[10px] text-gray-400 mt-0.5 pr-0.5 font-semibold">{{ $msg->created_at->format('H:i') }}</p>
+                        <div class="message-bubble inline-block bg-blue-600 text-white rounded-xl rounded-br-none px-4 py-2.5 shadow-sm text-sm leading-relaxed text-left">{{ $msg->message }}</div>
+                        <p class="text-sm text-gray-400 mt-0.5 pr-0.5 font-semibold">{{ $msg->created_at->format('H:i') }}</p>
                     </div>
-                    <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-sm">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 font-bold text-sm shadow-sm">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                     </div>
                 </div>
@@ -300,7 +284,7 @@
                         <div class="message-bubble bg-white border border-gray-200/80 text-gray-700 rounded-xl rounded-tl-none px-4 py-3 shadow-sm text-xs leading-relaxed prose-ai">
                             {!! Str::markdown($msg->reply) !!}
                         </div>
-                        <p class="text-[10px] text-gray-400 mt-0.5 pl-0.5 font-semibold">{{ $msg->created_at->format('H:i') }}</p>
+                        <p class="text-sm text-gray-400 mt-0.5 pl-0.5 font-semibold">{{ $msg->created_at->format('H:i') }}</p>
                     </div>
                 </div>
                 @endforeach
@@ -330,7 +314,7 @@
             {{-- Topik Cepat (Hanya tampil jika tidak ada riwayat pada sesi aktif) --}}
             @if(!$currentSession || count($messages) === 0)
             <div id="quick-prompts" class="px-4 pb-3 bg-white relative z-10 pt-1.5">
-                <p class="text-[10px] text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Topik Cepat</p>
+                <p class="text-sm text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Topik Cepat</p>
                 <div class="flex flex-wrap gap-1.5">
                     @foreach([
                     '📊 Berapa total laporan audit saat ini?',
@@ -349,28 +333,28 @@
 
             {{-- Area Input Pesan --}}
             <div class="px-4 py-3 bg-gray-50 border-t border-gray-200/80 relative z-20">
-                <div class="flex items-end gap-2.5">
+                <div class="flex items-end gap-3">
                     <div class="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 flex items-end gap-2 shadow-sm transition-colors relative focus-within:border-blue-400">
                         <textarea id="message-input" rows="1"
                             placeholder="Ketik pesan Anda di sini..."
-                            class="flex-1 bg-transparent text-gray-800 placeholder-gray-400 text-xs resize-none border-none p-0 focus:ring-0 max-h-32"
+                            class="flex-1 bg-transparent text-gray-800 placeholder-gray-400 text-sm resize-none border-none p-0 focus:ring-0 max-h-32"
                             style="min-height: 20px; overflow-y: hidden;"></textarea>
-                        <div class="text-[9px] text-gray-400 whitespace-nowrap self-end pb-0.5 font-medium" id="char-count">0/2000</div>
+                        <div class="text-sm text-gray-400 whitespace-nowrap self-end pb-0.5 font-medium" id="char-count">0/2000</div>
                     </div>
                     <button id="send-btn"
-                        class="w-9 h-9 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-lg flex items-center justify-center transition-all send-btn flex-shrink-0"
+                        class="w-10 h-10 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-lg flex items-center justify-center transition-all send-btn flex-shrink-0"
                         onclick="sendMessage()">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
                     </button>
                 </div>
                 <div class="flex justify-between items-center mt-2 px-1">
-                    <p class="text-[10px] text-gray-400">
-                        <kbd class="px-1.5 py-0.5 bg-gray-200 rounded border border-gray-300 text-gray-600 font-sans text-[9px]">Enter</kbd> kirim ·
-                        <kbd class="px-1.5 py-0.5 bg-gray-200 rounded border border-gray-300 text-gray-600 font-sans text-[9px]">Shift+Enter</kbd> baris baru
+                    <p class="text-sm text-gray-400">
+                        <kbd class="px-1.5 py-0.5 bg-gray-200 rounded border border-gray-300 text-gray-600 font-sans text-xs">Enter</kbd> kirim ·
+                        <kbd class="px-1.5 py-0.5 bg-gray-200 rounded border border-gray-300 text-gray-600 font-sans text-xs">Shift+Enter</kbd> baris baru
                     </p>
-                    <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold">Max Output 2048 Tokens</p>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold">Max Output 2048 Tokens</p>
                 </div>
             </div>
 

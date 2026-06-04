@@ -9,11 +9,11 @@
             {{-- Header --}}
             <div class="mb-6">
 
-                <h2 class="text-lg font-bold text-gray-800">
+                <h2 class="text-xl font-bold text-gray-800">
                     Tambah Laporan Audit
                 </h2>
 
-                <p class="text-xs text-gray-400 mt-1">
+                <p class="text-lg text-gray-400 mt-1">
                     Pilih klien dan upload seluruh dokumen audit
                 </p>
 
@@ -50,9 +50,9 @@
                 @csrf
 
                 {{-- Informasi laporan --}}
-                <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm space-y-5">
+                <div class="bg-white border border-gray-200/80 rounded-md p-5 shadow-sm space-y-5">
 
-                    <h3 class="text-xs font-bold text-gray-600 border-b pb-2">
+                    <h3 class="text-md font-bold text-gray-600 border-b pb-2">
                         Informasi Laporan
                     </h3>
 
@@ -61,7 +61,7 @@
                         {{-- Client --}}
                         <div class="md:col-span-2">
 
-                            <label class="block text-xs font-bold text-gray-600 mb-1">
+                            <label class="block text-sm font-bold text-gray-600 mb-1">
 
                                 Klien
                                 <span class="text-red-500">*</span>
@@ -71,7 +71,7 @@
                             <select name="client_id"
                                 id="clientSelect"
                                 required
-                                class="w-full border border-gray-300 rounded-xl px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 text-xs focus:ring-blue-300 focus:outline-none text-sm">
+                                class="w-full border border-gray-300 rounded-xl px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 text-sm focus:ring-blue-300 focus:outline-none text-sm">
 
                                 <option value="">
                                     -- Pilih Klien --
@@ -114,7 +114,7 @@
                         <div id="clientInfo"
                             class="hidden md:col-span-2 bg-blue-50 border border-blue-200 rounded-xl p-5">
 
-                            <h4 class="text-sm font-bold text-blue-800 mb-4">
+                            <h4 class="text-md font-bold text-blue-800 mb-4">
                                 Informasi Klien
                             </h4>
 
@@ -188,12 +188,12 @@
                         <div id="clientTeam"
                             class="hidden md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-5">
 
-                            <h4 class="text-sm font-bold text-gray-800 mb-4">
+                            <h4 class="text-md font-bold text-gray-800 mb-4">
                                 Tim Audit
                             </h4>
 
                             <div id="teamMembers"
-                                class="space-y-2 text-sm text-gray-700">
+                                class="space-y-2 text-md text-gray-700">
 
                             </div>
 
@@ -202,7 +202,7 @@
                         {{-- No laporan --}}
                         <div>
 
-                            <label class="block text-xs font-bold text-gray-600 mb-1">
+                            <label class="block text-md font-bold text-gray-600 mb-1">
 
                                 No. Laporan
 
@@ -211,14 +211,14 @@
                             <input type="text"
                                 value="Otomatis dibuat sistem"
                                 readonly
-                                class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-500">
+                                class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-md text-gray-500">
 
                         </div>
 
                         {{-- Auditor --}}
                         <div>
 
-                            <label class="block text-xs font-bold text-gray-600 mb-1">
+                            <label class="block text-md font-bold text-gray-600 mb-1">
 
                                 Pembuat Laporan
 
@@ -227,7 +227,7 @@
                             <input type="text"
                                 value="{{ auth()->user()->name }}"
                                 readonly
-                                class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-500">
+                                class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-md text-gray-500">
 
                         </div>
 
@@ -236,7 +236,7 @@
                         {{-- Tanggal audit --}}
                         <div class="md:col-span-2">
 
-                            <label class="block text-xs font-bold text-gray-600 mb-1">
+                            <label class="block text-md font-bold text-gray-600 mb-1">
 
                                 Tanggal Pembuatan Laporan
                                 <span class="text-red-500">*</span>
@@ -247,7 +247,7 @@
                                 name="audit_date"
                                 value="{{ old('audit_date', now()->toDateString()) }}"
                                 required
-                                class="w-full border border-gray-300 rounded-xl px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 text-xs focus:ring-blue-300 focus:outline-none text-sm">
+                                class="w-full border border-gray-300 rounded-xl px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 text-md focus:ring-blue-300 focus:outline-none text-sm">
 
                         </div>
 
@@ -258,7 +258,7 @@
                 {{-- Upload dokumen --}}
                 <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
 
-                    <h3 class="text-xs font-bold text-gray-600 border-b pb-2 mb-5">
+                    <h3 class="text-md font-bold text-gray-600 border-b pb-2 mb-5">
 
                         Upload Dokumen Laporan
 
@@ -274,7 +274,7 @@
 
                         <div class="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition">
 
-                            <label class="block text-xs font-bold text-gray-600 mb-2">
+                            <label class="block text-sm font-bold text-gray-600 mb-2">
 
                                 {{ $loop->iteration }}.
                                 {{ $label }}
@@ -287,18 +287,18 @@
                                 name="files[{{ $type }}]"
 
                                 @if($type==='data_klien' )
-                                accept=".zip,.rar,.7z,.pdf,.doc,.docx,.xls,.xlsx"
+                                accept=".zip,.rar,.tar"
                                 @else
-                                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                                accept=".pdf,.doc,.docx,.xls,.xlsx"
                                 @endif
 
-                                class="w-full text-xs text-gray-700
+                                class="w-full text-sm text-gray-700
                                     file:mr-3
                                     file:py-1.5
                                     file:px-3
                                     file:rounded-lg
                                     file:border-0
-                                    file:text-xs
+                                    file:text-sm
                                     file:font-semibold
                                     file:bg-blue-50
                                     file:text-blue-700
@@ -310,13 +310,13 @@
                                 @if($type === 'data_klien')
 
                                 Format:
-                                ZIP, RAR, 7Z, PDF, DOC, XLS
+                                ZIP, RAR, TAR
                                 — maks. 100MB
 
                                 @else
 
                                 Format:
-                                PDF, DOC, DOCX, XLS, XLSX, JPG, PNG
+                                PDF, DOC, DOCX, XLS, XLSX
                                 — maks. 50MB
 
                                 @endif
@@ -343,14 +343,14 @@
                 <div class="flex gap-3">
 
                     <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-bold text-xs transition">
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-md transition">
 
                         Simpan & Kirim Laporan
 
                     </button>
 
                     <a href="{{ route('audit_reports.index') }}"
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded-lg font-bold text-xs transition">
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold text-md transition">
 
                         Kembali
 
