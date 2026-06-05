@@ -420,7 +420,10 @@
             iframe.src = '';
             previewImage.src = '';
         }
+    </script>
 
+    @if(in_array(auth()->user()->role, ['auditor', 'admin']))
+    <script>
         // Attendance Modal Toggle
         function toggleAttendanceModal(show) {
             const modal = document.getElementById('modalAttendance');
@@ -579,5 +582,6 @@
             toggleAttendanceModal(true);
         });
     </script>
+    @endif
     @endif
 </x-app-layout>
