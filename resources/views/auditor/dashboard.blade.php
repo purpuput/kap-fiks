@@ -1,9 +1,9 @@
 <x-app-layout title="Dashboard Auditor">
-    <div class="py-8">
+    <div class="py-8 animate-fade-in-up">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
             {{-- WELCOME HERO BANNER --}}
-            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-emerald-900/10 border border-emerald-700/20">
+            <div class="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-emerald-900/10 border border-emerald-700/20">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
                 <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
@@ -55,7 +55,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
                 {{-- Absensi Hari Ini --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-blue-600 dark:border-slate-800 rounded-2xl shadow-sm p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-3">
@@ -88,27 +88,27 @@
                     </div>
                     @if(!$absensiHariIni)
                         <div class="mt-4">
-                            <a href="{{ route('attendances.create') }}" class="w-full text-center block bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-blue-600/10">
+                            <a href="{{ route('attendances.create') }}" class="w-full text-center block bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-blue-600/10">
                                 Absen Sekarang
                             </a>
                         </div>
                     @elseif(!$absensiHariIni->check_out)
                         <div class="mt-4">
-                            <a href="{{ route('attendances.edit', $absensiHariIni) }}" class="w-full text-center block bg-amber-500 hover:bg-amber-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-amber-500/10">
+                            <a href="{{ route('attendances.edit', $absensiHariIni) }}" class="w-full text-center block bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-amber-500/10">
                                 Absen Pulang
                             </a>
                         </div>
                     @else
                         <div class="mt-4 text-center">
                             <span class="inline-flex items-center bg-emerald-50 text-emerald-700 text-xs px-3 py-1.5 rounded-full font-bold border border-emerald-200 w-full justify-center">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span> Kehadiran Terpenuhi
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></span> Kehadiran Terpenuhi
                             </span>
                         </div>
                     @endif
                 </div>
 
                 {{-- Logbook Hari Ini --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-orange-500 dark:border-slate-800 rounded-2xl shadow-sm p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-3">
@@ -147,13 +147,13 @@
                     </div>
                     @if(!$logbookHariIni)
                         <div class="mt-4">
-                            <a href="{{ route('logbooks.create') }}" class="w-full text-center block bg-orange-500 hover:bg-orange-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-orange-500/10">
+                            <a href="{{ route('logbooks.create') }}" class="w-full text-center block bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-orange-500/10">
                                 Isi Logbook Sekarang
                             </a>
                         </div>
                     @else
                         <div class="mt-4">
-                            <a href="{{ route('logbooks.index') }}" class="w-full text-center block bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300">
+                            <a href="{{ route('logbooks.index') }}" class="w-full text-center block bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs px-4 py-2.5 rounded-xl font-bold transition duration-305">
                                 Riwayat Logbook
                             </a>
                         </div>
@@ -161,7 +161,7 @@
                 </div>
 
                 {{-- Ringkasan Laporan --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-teal-600 dark:border-slate-800 rounded-2xl shadow-sm p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
@@ -175,28 +175,28 @@
 
                         <div class="grid grid-cols-3 gap-3 text-center mt-2">
                             <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-3.5">
-                                <p class="text-2xl font-extrabold text-amber-600">{{ $myPending }}</p>
+                                <p class="text-2xl font-black text-amber-650">{{ $myPending }}</p>
                                 <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider mt-1">Review</p>
                             </div>
                             <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3.5">
-                                <p class="text-2xl font-extrabold text-emerald-600">{{ $myApprove }}</p>
+                                <p class="text-2xl font-black text-emerald-650">{{ $myApprove }}</p>
                                 <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mt-1">Selesai</p>
                             </div>
                             <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-3.5">
-                                <p class="text-2xl font-extrabold text-rose-500">{{ $myRevisi }}</p>
+                                <p class="text-2xl font-black text-rose-550">{{ $myRevisi }}</p>
                                 <p class="text-[10px] text-rose-500 font-bold uppercase tracking-wider mt-1">Revisi</p>
                             </div>
                         </div>
                     </div>
                     <div class="mt-4">
-                        <a href="{{ route('audit_reports.index') }}" class="w-full text-center block bg-teal-600 hover:bg-teal-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-teal-600/10">
+                        <a href="{{ route('audit_reports.index') }}" class="w-full text-center block bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-teal-600/10">
                             Semua Laporan
                         </a>
                     </div>
                 </div>
 
                 {{-- Tugas Saya (Dokumen) --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 hover:shadow-md transition duration-300 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-indigo-650 dark:border-slate-800 rounded-2xl shadow-sm p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-650 flex items-center justify-center border border-indigo-100/50">
@@ -212,21 +212,21 @@
 
                         <div class="grid grid-cols-3 gap-2.5 text-center mt-2">
                             <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-2.5">
-                                <p class="text-lg font-extrabold text-rose-550">{{ $tugasRevisi }}</p>
+                                <p class="text-lg font-black text-rose-550">{{ $tugasRevisi }}</p>
                                 <p class="text-[9px] text-rose-600 font-bold uppercase tracking-wider mt-1">Revisi</p>
                             </div>
                             <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-2.5">
-                                <p class="text-lg font-extrabold text-amber-550">{{ $tugasDalamReview }}</p>
+                                <p class="text-lg font-black text-amber-550">{{ $tugasDalamReview }}</p>
                                 <p class="text-[9px] text-amber-600 font-bold uppercase tracking-wider mt-1">Review</p>
                             </div>
                             <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5">
-                                <p class="text-lg font-extrabold text-emerald-550">{{ $tugasDisetujui }}</p>
+                                <p class="text-lg font-black text-emerald-550">{{ $tugasDisetujui }}</p>
                                 <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-wider mt-1">Selesai</p>
                             </div>
                         </div>
                     </div>
                     <div class="mt-4">
-                        <a href="{{ route('audit_reports.index') }}" class="w-full text-center block bg-indigo-650 hover:bg-indigo-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-indigo-600/10">
+                        <a href="{{ route('audit_reports.index') }}" class="w-full text-center block bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition duration-300 shadow-sm shadow-indigo-600/10">
                             Kelola Dokumen
                         </a>
                     </div>

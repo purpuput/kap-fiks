@@ -42,8 +42,6 @@ class AttendanceSeeder extends Seeder
 
                     'status' => $status,
 
-                    'photo_check_in' => null,
-                    'photo_check_out' => null,
                     'attachment' => in_array($status, ['izin', 'sakit']) ? 'attachments/dummy_surat.pdf' : null,
                 ]);
             }

@@ -9,8 +9,9 @@
     <title>{{ ($attributes->get('title') ?? ($title ?? '')) ? ($attributes->get('title') ?? $title) . ' - ' : '' }}{{ config('app.name', 'KAP EKO PRASETYO') }}</title>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 
     <!-- Logo -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%232563eb' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>">
@@ -104,12 +105,11 @@
     @if(session('success'))
     <script>
         Swal.fire({
-            toast: true,
-            position: 'top-end',
             icon: 'success',
-            title: "{{ session('success') }}",
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
             showConfirmButton: false,
-            timer: 3000,
+            timer: 2000,
             timerProgressBar: true
         });
     </script>
@@ -118,12 +118,11 @@
     @if(session('error'))
     <script>
         Swal.fire({
-            toast: true,
-            position: 'top-end',
             icon: 'error',
-            title: "{{ session('error') }}",
+            title: 'Gagal!',
+            text: "{{ session('error') }}",
             showConfirmButton: false,
-            timer: 3000,
+            timer: 2500,
             timerProgressBar: true
         });
     </script>
@@ -132,13 +131,11 @@
     @if($errors->any())
     <script>
         Swal.fire({
-            toast: true,
-            position: 'top-end',
             icon: 'error',
-            title: "Ada kesalahan pada input form!",
+            title: 'Ada Kesalahan!',
             text: "{{ $errors->first() }}",
             showConfirmButton: false,
-            timer: 4000,
+            timer: 3000,
             timerProgressBar: true
         });
     </script>

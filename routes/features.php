@@ -19,6 +19,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendances/export/pdf', [AttendanceController::class, 'exportPdf'])->name('attendances.export.pdf');
     Route::get('/attendances/export/excel', [AttendanceController::class, 'exportExcel'])->name('attendances.export.excel');
     Route::get('/attendances/{attendance}/download', [AttendanceController::class, 'downloadAttachment'])->name('attendances.download');
+    Route::get('/attendances/{attendance}/preview', [AttendanceController::class, 'previewAttachment'])->name('attendances.preview');
 });
 
 // LOGBOOK - Admin, Auditor, Pimpinan

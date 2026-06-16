@@ -1,21 +1,21 @@
 <x-app-layout title="Tambah Klien">
 
-    <div class="py-6">
+    <div class="py-6 animate-fade-in-up">
 
-        <div class="max-w-4xl mx-auto px-4">
+        <div class="max-w-3xl mx-auto px-4">
 
-            <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
+            <div class="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm">
 
-                <h2 class="text-lg font-bold text-gray-800 mb-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-6">
                     Tambah Klien
                 </h2>
 
                 {{-- Error --}}
                 @if ($errors->any())
 
-                <div class="mb-5 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-xl">
+                <div class="mb-5 bg-rose-50 border border-rose-100 text-rose-700 px-5 py-4 rounded-2xl">
 
-                    <ul class="list-disc pl-5 text-sm space-y-1">
+                    <ul class="list-disc pl-5 text-xs font-semibold space-y-1">
 
                         @foreach ($errors->all() as $error)
 
@@ -38,13 +38,13 @@
                     {{-- Jenis instansi --}}
                     <div>
 
-                        <label class="block mb-2 font-semibold">
+                        <label class="block mb-2 font-bold text-slate-700 text-sm">
                             Jenis Instansi
                         </label>
 
                         <select name="institution_type"
                             required
-                            class="w-full border rounded-xl px-4 py-2">
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
 
                             <option value="">
                                 -- Pilih --
@@ -71,13 +71,13 @@
                     {{-- Jenis audit --}}
                     <div>
 
-                        <label class="block mb-2 font-semibold">
+                        <label class="block mb-2 font-bold text-slate-700 text-sm">
                             Jenis Audit
                         </label>
 
                         <select name="audit_type"
                             required
-                            class="w-full border rounded-xl px-4 py-2">
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
 
                             <option value="">
                                 -- Pilih --
@@ -104,7 +104,7 @@
                     {{-- Nama instansi --}}
                     <div>
 
-                        <label class="block mb-2 font-semibold">
+                        <label class="block mb-2 font-bold text-slate-700 text-sm">
                             Nama Instansi
                         </label>
 
@@ -112,14 +112,14 @@
                             name="institution_name"
                             value="{{ old('institution_name') }}"
                             required
-                            class="w-full border rounded-xl px-4 py-2">
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
 
                     </div>
 
                     {{-- Pimpinan --}}
                     <div>
 
-                        <label class="block mb-2 font-semibold">
+                        <label class="block mb-2 font-bold text-slate-700 text-sm">
                             Pimpinan Instansi
                         </label>
 
@@ -127,13 +127,13 @@
                             name="leader_name"
                             value="{{ old('leader_name') }}"
                             required
-                            class="w-full border rounded-xl px-4 py-2">
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
 
                     </div>
 
                     {{-- Telepon --}}
                     <div>
-                        <label class="block mb-2 font-semibold">
+                        <label class="block mb-2 font-bold text-slate-700 text-sm">
                             Telepon
                         </label>
                         <input type="text"
@@ -142,13 +142,13 @@
                             required
                             placeholder="Contoh: 081234567890"
                             pattern="08[0-9]{8,11}"
-                            class="w-full border rounded-xl px-4 py-2">
-                        <p class="text-xs text-gray-500 mt-1">Harus diawali 08, panjang 10-13 digit angka.</p>
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
+                        <p class="text-xs text-slate-400 mt-1.5 font-semibold">Harus diawali 08, panjang 10-13 digit angka.</p>
                     </div>
 
                     {{-- Email --}}
                     <div>
-                        <label class="block mb-2 font-semibold">
+                        <label class="block mb-2 font-bold text-slate-700 text-sm">
                             Email
                         </label>
                         <input type="email"
@@ -156,12 +156,12 @@
                             value="{{ old('email') }}"
                             required
                             placeholder="Contoh: info@klien.com"
-                            class="w-full border rounded-xl px-4 py-2">
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
                     </div>
 
                     {{-- NPWP --}}
                     <div>
-                        <label class="block mb-2 font-semibold">
+                        <label class="block mb-2 font-bold text-slate-700 text-sm">
                             NPWP
                         </label>
                         <input type="text"
@@ -170,49 +170,49 @@
                             required
                             placeholder="Contoh: 01.234.567.8-999.000"
                             pattern="(\d{15}|\d{16}|\d{2}\.\d{3}\.\d{3}\.\d{1}-\d{3}\.\d{3})"
-                            class="w-full border rounded-xl px-4 py-2">
-                        <p class="text-xs text-gray-500 mt-1">Format: 15/16 digit angka, atau format NPWP standar (XX.XXX.XXX.X-XXX.XXX).</p>
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
+                        <p class="text-xs text-slate-400 mt-1.5 font-semibold">Format: 15/16 digit angka, atau format NPWP standar (XX.XXX.XXX.X-XXX.XXX).</p>
                     </div>
 
                     {{-- Alamat --}}
                     <div>
-                        <label class="block mb-2 font-semibold">
+                        <label class="block mb-2 font-bold text-slate-700 text-sm">
                             Alamat
                         </label>
                         <textarea name="address"
                             rows="4"
                             required
-                            class="w-full border rounded-xl px-4 py-2">{{ old('address') }}</textarea>
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">{{ old('address') }}</textarea>
                     </div>
 
                     {{-- Lokasi --}}
                     <div class="grid md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block mb-2 font-semibold">
+                            <label class="block mb-2 font-bold text-slate-700 text-sm">
                                 Provinsi
                             </label>
                             <select name="province"
                                 id="province"
                                 required
-                                class="w-full border rounded-xl px-4 py-2">
+                                class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
                                 <option value="">-- Pilih Provinsi --</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block mb-2 font-semibold">
+                            <label class="block mb-2 font-bold text-slate-700 text-sm">
                                 Kota/Kabupaten
                             </label>
                             <select name="city"
                                 id="city"
                                 required
-                                class="w-full border rounded-xl px-4 py-2">
+                                class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
                                 <option value="">-- Pilih Kota/Kabupaten --</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block mb-2 font-semibold">
+                            <label class="block mb-2 font-bold text-slate-700 text-sm">
                                 Kode Pos
                             </label>
                             <input type="text"
@@ -221,60 +221,60 @@
                                 required
                                 pattern="[0-9]{5}"
                                 placeholder="Contoh: 36111"
-                                class="w-full border rounded-xl px-4 py-2">
-                            <p class="text-xs text-gray-500 mt-1">Harus 5 digit angka.</p>
+                                class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
+                            <p class="text-xs text-slate-400 mt-1.5 font-semibold">Harus 5 digit angka.</p>
                         </div>
                     </div>
 
                     {{-- Kontrak --}}
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block mb-2 font-semibold">
+                            <label class="block mb-2 font-bold text-slate-700 text-sm">
                                 Kontrak Mulai
                             </label>
                             <input type="date"
                                 name="contract_start"
                                 value="{{ old('contract_start') }}"
-                                class="w-full border rounded-xl px-4 py-2">
+                                class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
                         </div>
 
                         <div>
-                            <label class="block mb-2 font-semibold">
+                            <label class="block mb-2 font-bold text-slate-700 text-sm">
                                 Kontrak Selesai
                             </label>
                             <input type="date"
                                 name="contract_end"
                                 value="{{ old('contract_end') }}"
-                                class="w-full border rounded-xl px-4 py-2">
+                                class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">
                         </div>
                     </div>
 
                     {{-- Tim audit --}}
                     <div>
-                        <label class="block mb-3 font-semibold">
+                        <label class="block mb-3 font-bold text-slate-700 text-sm">
                             Tim Audit
                         </label>
                         <div class="space-y-3">
                             @foreach ($auditors as $auditor)
-                            <div class="border rounded-xl p-4">
+                            <div class="border border-slate-100 rounded-2xl p-4 hover:bg-slate-50/50 transition-colors">
                                 <div class="flex items-center justify-between gap-4">
                                     <div class="flex items-center gap-3">
                                         <input type="checkbox"
                                             name="auditors[]"
                                             value="{{ $auditor->id }}"
-                                            class="rounded">
+                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 w-4 h-4">
                                         <div>
-                                            <p class="font-medium">
+                                            <p class="font-bold text-slate-700 text-sm">
                                                 {{ $auditor->name }}
                                             </p>
-                                            <p class="text-sm text-gray-500">
+                                            <p class="text-xs text-slate-400 font-semibold mt-0.5">
                                                 {{ $auditor->email }}
                                             </p>
                                         </div>
                                     </div>
                                     <select
                                         name="team_role[{{ $auditor->id }}]"
-                                        class="border rounded-lg px-3 py-2">
+                                        class="bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all">
                                         <option value="anggota">
                                             Anggota
                                         </option>
@@ -289,14 +289,14 @@
                     </div>
 
                     {{-- Button --}}
-                    <div class="flex gap-3 pt-2">
+                    <div class="flex gap-4 pt-2">
                         <button
                             type="submit"
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl">
+                            class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm shadow-blue-500/10 hover:shadow-md transition">
                             Simpan
                         </button>
                         <a href="{{ route('clients.index') }}"
-                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-center px-4 py-2 rounded-xl">
+                            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-center px-5 py-2.5 rounded-xl font-bold text-sm transition">
                             Batal
                         </a>
                     </div>

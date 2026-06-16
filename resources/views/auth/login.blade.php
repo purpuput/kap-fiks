@@ -39,7 +39,7 @@
                 <button
                     type="button"
                     onclick="togglePassword()"
-                    class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700">
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
 
                     <!-- Eye Slash -->
                     <svg id="eyeSlash"
@@ -91,33 +91,33 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
+        <!-- Remember Me & Forgot Password Row -->
+        <div class="flex items-center justify-between mt-5 text-sm">
+            <label for="remember_me" class="inline-flex items-center cursor-pointer">
                 <input
                     id="remember_me"
                     type="checkbox"
-                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                    class="rounded-lg border-gray-300 dark:border-slate-700 text-blue-600 shadow-sm focus:ring-blue-500 bg-transparent"
                     name="remember">
 
-                <span class="ms-2 text-sm text-gray-600">
+                <span class="ms-2 text-xs font-semibold text-slate-500 dark:text-slate-400 select-none">
                     Remember me
                 </span>
             </label>
-        </div>
 
-        <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
             <a
-                class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline transition"
                 href="{{ route('password.request') }}">
-                Lupa kata sandi Anda?
+                Lupa kata sandi?
             </a>
             @endif
+        </div>
 
-            <x-primary-button class="ms-3 !bg-blue-600 hover:!bg-blue-700 focus:!bg-blue-700 active:!bg-blue-800 !text-white">
-                Login
-            </x-primary-button>
+        <div class="mt-6">
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-2xl transition duration-300 shadow-lg shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+                Masuk ke Aplikasi
+            </button>
         </div>
     </form>
 

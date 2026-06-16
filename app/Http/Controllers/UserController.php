@@ -38,7 +38,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = ['admin', 'kepala_kantor', 'auditor', 'karyawan', 'pimpinan'];
+        $roles = ['admin', 'auditor', 'pimpinan'];
+
         return view('admin.users.create', compact('roles'));
     }
 
@@ -60,7 +61,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = ['admin', 'kepala_kantor', 'auditor', 'karyawan', 'pimpinan'];
+        $roles = ['admin', 'auditor', 'pimpinan'];
+
         return view('admin.users.edit', compact('user', 'roles'));
     }
 
@@ -89,6 +91,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
+
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus');
     }
 }

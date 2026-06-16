@@ -1,9 +1,9 @@
 <x-app-layout title="Dashboard Admin">
-    <div class="py-8">
+    <div class="py-8 animate-fade-in-up">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
             {{-- WELCOME HERO BANNER --}}
-            <div class="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-indigo-900/10 border border-indigo-700/20">
+            <div class="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-indigo-900/10 border border-indigo-700/20">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
                 <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
@@ -26,76 +26,76 @@
             {{-- STAT CARDS --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
                 {{-- Total User --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-6 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-blue-600 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total User</span>
-                        <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                        <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100/50">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $totalUsers }}</p>
-                        <p class="text-xs text-slate-500 mt-2 flex items-center gap-1.5 font-medium">
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $totalUsers }}</p>
+                        <p class="text-xs text-slate-500 mt-2 flex items-center gap-1.5 font-semibold">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> {{ $totalAuditor }} Auditor Aktif
                         </p>
                     </div>
                 </div>
 
                 {{-- Total Klien --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-6 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-indigo-600 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Klien</span>
-                        <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                        <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100/50">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $totalKlien }}</p>
-                        <p class="text-xs text-slate-500 mt-2 font-medium">Klien KAP terdaftar</p>
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $totalKlien }}</p>
+                        <p class="text-xs text-slate-500 mt-2 font-semibold">Klien KAP terdaftar</p>
                     </div>
                 </div>
 
                 {{-- Laporan Audit --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-6 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-emerald-600 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Laporan Audit</span>
-                        <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/50">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $totalLaporan }}</p>
-                        <p class="text-xs text-slate-500 mt-2 font-medium">Berkas laporan dibuat</p>
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $totalLaporan }}</p>
+                        <p class="text-xs text-slate-500 mt-2 font-semibold">Berkas laporan dibuat</p>
                     </div>
                 </div>
 
                 {{-- Dokumen Terarsip --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-6 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-purple-600 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Dok. Terarsip</span>
-                        <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
+                        <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100/50">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $totalDokumen }}</p>
-                        <p class="text-xs text-slate-500 mt-2 font-medium">Dari laporan disetujui</p>
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $totalDokumen }}</p>
+                        <p class="text-xs text-slate-500 mt-2 font-semibold">Dari laporan disetujui</p>
                     </div>
                 </div>
 
                 {{-- Logbook Auditor --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-6 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-orange-500 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Logbook</span>
-                        <div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100">
+                        <div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100/50">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $logbookPending + $logbookApprove + $logbookRevisi }}</p>
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $logbookPending + $logbookApprove + $logbookRevisi }}</p>
                         <div class="flex gap-1.5 mt-2 flex-wrap">
-                            <span class="text-[9px] bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-md font-bold">{{ $logbookPending }} pending</span>
-                            <span class="text-[9px] bg-green-50 text-green-700 px-2 py-0.5 rounded-md font-bold">{{ $logbookApprove }} approve</span>
+                            <span class="text-[9px] bg-yellow-50 text-yellow-700 px-2.5 py-0.5 rounded-md font-extrabold">{{ $logbookPending }} pending</span>
+                            <span class="text-[9px] bg-green-50 text-green-700 px-2.5 py-0.5 rounded-md font-extrabold">{{ $logbookApprove }} approve</span>
                         </div>
                     </div>
                 </div>

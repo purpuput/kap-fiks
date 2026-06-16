@@ -1,16 +1,16 @@
 <x-app-layout title="Data Klien">
 
-    <div class="space-y-6">
+    <div class="space-y-6 animate-fade-in-up">
         {{-- SEARCH & ACTION ROW --}}
-        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white border border-gray-200/80 rounded-xl p-3 shadow-sm">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white border border-slate-100 rounded-3xl p-4 shadow-sm">
             <form id="clientFilterForm" method="GET" action="{{ route('clients.index') }}" class="flex-1">
                 <!-- Search -->
                 <div class="relative w-full">
                     <input type="text" id="searchInput" name="search" value="{{ request('search') }}"
                         placeholder="Cari nama instansi..."
-                        class="w-full bg-slate-50/50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-md placeholder-gray-400 focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all">
-                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        class="w-full bg-slate-50/50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
@@ -20,8 +20,8 @@
             <!-- Action Button -->
             @if(auth()->user()->role === 'admin')
             <a href="{{ route('clients.create') }}"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-md font-bold shadow-sm transition flex items-center justify-center gap-1 whitespace-nowrap">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                class="bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm shadow-blue-500/10 hover:shadow-md transition flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
                 Tambah Klien
@@ -30,59 +30,59 @@
         </div>
 
         {{-- TABLE SECTION --}}
-        <div class="bg-white border border-gray-200/80 rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto relative">
                 <table class="w-full text-sm text-left">
-                    <thead class="bg-slate-50/60 text-gray-400 font-bold uppercase tracking-wider sticky top-0 z-10 border-b border-gray-100">
+                    <thead class="bg-slate-50/80 text-slate-650 font-bold uppercase tracking-wider sticky top-0 z-10 border-b border-slate-100">
                         <tr>
-                            <th class="px-4 py-3 text-left w-12">No</th>
-                            <th class="px-4 py-3 text-left">Instansi</th>
-                            <th class="px-4 py-3 text-left">Jenis Audit</th>
-                            <th class="px-4 py-3 text-left">Tim Audit</th>
-                            <th class="px-4 py-3 text-left">Kontrak</th>
-                            <th class="px-4 py-3 text-left">Status</th>
-                            <th class="px-4 py-3 text-center w-36">Aksi</th>
+                            <th class="px-6 py-4 text-left w-12">No</th>
+                            <th class="px-6 py-4 text-left">Instansi</th>
+                            <th class="px-6 py-4 text-left">Jenis Audit</th>
+                            <th class="px-6 py-4 text-left">Tim Audit</th>
+                            <th class="px-6 py-4 text-left">Kontrak</th>
+                            <th class="px-6 py-4 text-left">Status</th>
+                            <th class="px-6 py-4 text-center w-36">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-slate-50">
                         @forelse ($clients as $client)
-                        <tr class="hover:bg-slate-50/30 transition group">
+                        <tr class="hover:bg-slate-50/50 transition group">
                             {{-- No --}}
-                            <td class="px-4 py-3 font-mono text-sm text-gray-500 whitespace-nowrap">
+                            <td class="px-6 py-4 font-mono text-sm text-slate-400 font-semibold whitespace-nowrap">
                                 {{ $loop->iteration + ($clients->firstItem() - 1) }}
                             </td>
 
                             {{-- Instansi --}}
-                            <td class="px-4 py-3">
-                                <div class="font-bold text-gray-800 text-md truncate max-w-xs" title="{{ $client->institution_name }}">
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-slate-700 text-md truncate max-w-xs" title="{{ $client->institution_name }}">
                                     {{ $client->institution_name }}
                                 </div>
-                                <div class="text-sm text-gray-400 mt-0.5">
+                                <div class="text-xs text-slate-400 mt-1 font-semibold">
                                     Pimpinan: {{ $client->leader_name }}
                                 </div>
                             </td>
 
                             {{-- Jenis Audit --}}
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 @if($client->audit_type === 'keuangan')
-                                <span class="bg-blue-50 text-blue-700 text-sm px-2 py-0.5 rounded font-bold border border-blue-100/50">
+                                <span class="bg-blue-50 text-blue-700 text-xs px-2.5 py-0.5 rounded-full font-bold border border-blue-250/20">
                                     Keuangan
                                 </span>
                                 @else
-                                <span class="bg-purple-50 text-purple-700 text-sm px-2 py-0.5 rounded font-bold border border-purple-100/50">
+                                <span class="bg-purple-50 text-purple-700 text-xs px-2.5 py-0.5 rounded-full font-bold border border-purple-250/20">
                                     Kepatuhan
                                 </span>
                                 @endif
                             </td>
 
                             {{-- Tim Audit --}}
-                            <td class="px-4 py-3">
+                            <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-1.5 max-w-[220px]">
                                     @foreach ($client->auditors as $auditor)
-                                    <span class="inline-flex items-center gap-1 {{ $auditor->pivot->team_role === 'ketua' ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-slate-50 text-slate-600 border border-slate-100' }} text-sm px-1.5 py-0.5 rounded font-semibold truncate" title="{{ $auditor->name }}">
+                                    <span class="inline-flex items-center gap-1 {{ $auditor->pivot->team_role === 'ketua' ? 'bg-blue-50 text-blue-700 border border-blue-250/20' : 'bg-slate-50 text-slate-600 border border-slate-100' }} text-xs px-2 py-0.5 rounded-full font-bold truncate" title="{{ $auditor->name }}">
                                         {{ $auditor->name }}
                                         @if($auditor->pivot->team_role === 'ketua')
-                                        <span class="text-sm opacity-75 font-normal">(Ketua)</span>
+                                        <span class="text-[10px] opacity-75 font-normal">(Ketua)</span>
                                         @endif
                                     </span>
                                     @endforeach
@@ -90,38 +90,38 @@
                             </td>
 
                             {{-- Kontrak --}}
-                            <td class="px-4 py-3 whitespace-nowrap">
-                                <div class="text-sm text-gray-600 space-y-0.5">
-                                    <div><span class="text-gray-400 font-medium">Mulai:</span> {{ optional($client->contract_start)->format('d/m/Y') ?? '-' }}</div>
-                                    <div><span class="text-gray-400 font-medium">Selesai:</span> {{ optional($client->contract_end)->format('d/m/Y') ?? '-' }}</div>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-xs text-slate-650 space-y-1 font-semibold">
+                                    <div><span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mr-1">Mulai:</span> {{ optional($client->contract_start)->format('d/m/Y') ?? '-' }}</div>
+                                    <div><span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mr-1">Selesai:</span> {{ optional($client->contract_end)->format('d/m/Y') ?? '-' }}</div>
                                 </div>
                             </td>
 
                             {{-- Status --}}
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-1.5">
                                     {{-- Approval --}}
                                     @if($client->approval_status === 'disetujui')
-                                    <span class="bg-emerald-50 text-emerald-700 text-sm px-2 py-0.5 rounded border border-emerald-200/50 font-bold">
+                                    <span class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-0.5 rounded-full border border-emerald-250/20 font-bold">
                                         Disetujui
                                     </span>
                                     @elseif($client->approval_status === 'revisi')
-                                    <span class="bg-rose-50 text-rose-700 text-sm px-2 py-0.5 rounded border border-rose-200/50 font-bold">
+                                    <span class="bg-rose-50 text-rose-700 text-xs px-2.5 py-0.5 rounded-full border border-rose-250/20 font-bold">
                                         Revisi
                                     </span>
                                     @else
-                                    <span class="bg-amber-50 text-amber-700 text-sm px-2 py-0.5 rounded border border-amber-200/50 font-bold">
+                                    <span class="bg-amber-50 text-amber-700 text-xs px-2.5 py-0.5 rounded-full border border-amber-250/20 font-bold">
                                         Pending
                                     </span>
                                     @endif
 
                                     {{-- Aktif/Nonaktif --}}
                                     @if($client->status === 'aktif')
-                                    <span class="bg-blue-50 text-blue-700 text-sm px-2 py-0.5 rounded border border-blue-200/50 font-bold">
+                                    <span class="bg-blue-50 text-blue-700 text-xs px-2.5 py-0.5 rounded-full border border-blue-250/20 font-bold">
                                         Aktif
                                     </span>
                                     @else
-                                    <span class="bg-gray-50 text-gray-600 text-sm px-2 py-0.5 rounded border border-gray-200/50 font-bold">
+                                    <span class="bg-slate-50 text-slate-600 text-xs px-2.5 py-0.5 rounded-full border border-slate-100 font-bold">
                                         Nonaktif
                                     </span>
                                     @endif
@@ -129,18 +129,18 @@
                             </td>
 
                             {{-- Aksi --}}
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-3">
                                     {{-- Detail --}}
                                     <a href="{{ route('clients.show', $client->id) }}"
-                                        class="text-slate-500 hover:text-slate-800 font-bold hover:underline transition">
+                                        class="text-slate-500 hover:text-slate-800 font-bold hover:underline transition text-sm">
                                         Detail
                                     </a>
 
                                     {{-- Edit --}}
                                     @if(auth()->user()->role === 'admin' && $client->approval_status !== 'disetujui')
                                     <a href="{{ route('clients.edit', $client->id) }}"
-                                        class="text-blue-600 hover:text-blue-700 font-bold hover:underline transition">
+                                        class="text-blue-600 hover:text-blue-700 font-bold hover:underline transition text-sm">
                                         Edit
                                     </a>
                                     @endif
@@ -152,7 +152,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                            class="text-rose-600 hover:text-rose-700 font-bold hover:underline transition">
+                                            class="text-rose-600 hover:text-rose-700 font-bold hover:underline transition text-sm">
                                             Hapus
                                         </button>
                                     </form>
@@ -162,10 +162,10 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-12 text-center">
+                            <td colspan="7" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
-                                    <h4 class="text-xs font-bold text-gray-800 mb-0.5">Data Klien Belum Tersedia</h4>
-                                    <p class="text-[11px] text-gray-400 text-center">Tambahkan data klien baru untuk memulai audit.</p>
+                                    <h4 class="text-sm font-bold text-slate-800 mb-1">Data Klien Belum Tersedia</h4>
+                                    <p class="text-xs text-slate-400 text-center font-semibold">Tambahkan data klien baru untuk memulai audit.</p>
                                 </div>
                             </td>
                         </tr>
@@ -176,7 +176,7 @@
 
             {{-- PAGINATION --}}
             @if($clients->hasPages())
-            <div class="px-4 py-3 border-t border-gray-100 bg-slate-50/30 flex items-center justify-between">
+            <div class="px-6 py-4 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between">
                 {{ $clients->links() }}
             </div>
             @endif

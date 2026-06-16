@@ -2,18 +2,18 @@
 
 <x-app-layout title="Tambah Laporan Audit">
 
-    <div class="py-6">
+    <div class="py-6 animate-fade-in-up">
 
         <div class="max-w-5xl mx-auto px-4">
 
             {{-- Header --}}
             <div class="mb-6">
 
-                <h2 class="text-xl font-bold text-gray-800">
+                <h2 class="text-xl font-bold text-slate-800">
                     Tambah Laporan Audit
                 </h2>
 
-                <p class="text-lg text-gray-400 mt-1">
+                <p class="text-sm text-slate-400 mt-1.5">
                     Pilih klien dan upload seluruh dokumen audit
                 </p>
 
@@ -22,13 +22,13 @@
             {{-- Error --}}
             @if ($errors->any())
 
-            <div class="mb-6 bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-xl">
+            <div class="mb-6 bg-rose-50 border border-rose-200/50 text-rose-700 px-4 py-3 rounded-2xl">
 
-                <p class="font-semibold mb-1">
+                <p class="font-semibold mb-1 text-sm">
                     Terdapat kesalahan:
                 </p>
 
-                <ul class="list-disc list-inside text-sm space-y-1">
+                <ul class="list-disc list-inside text-xs space-y-1">
 
                     @foreach ($errors->all() as $error)
 
@@ -50,9 +50,9 @@
                 @csrf
 
                 {{-- Informasi laporan --}}
-                <div class="bg-white border border-gray-200/80 rounded-md p-5 shadow-sm space-y-5">
+                <div class="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-6">
 
-                    <h3 class="text-md font-bold text-gray-600 border-b pb-2">
+                    <h3 class="text-md font-bold text-slate-700 border-b border-slate-100 pb-3">
                         Informasi Laporan
                     </h3>
 
@@ -61,17 +61,17 @@
                         {{-- Client --}}
                         <div class="md:col-span-2">
 
-                            <label class="block text-sm font-bold text-gray-600 mb-1">
+                            <label class="block text-sm font-semibold text-slate-650 mb-2">
 
                                 Klien
-                                <span class="text-red-500">*</span>
+                                <span class="text-rose-500">*</span>
 
                             </label>
 
                             <select name="client_id"
                                 id="clientSelect"
                                 required
-                                class="w-full border border-gray-300 rounded-xl px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 text-sm focus:ring-blue-300 focus:outline-none text-sm">
+                                class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all cursor-pointer">
 
                                 <option value="">
                                     -- Pilih Klien --
@@ -112,21 +112,21 @@
 
                         {{-- Informasi client --}}
                         <div id="clientInfo"
-                            class="hidden md:col-span-2 bg-blue-50 border border-blue-200 rounded-xl p-5">
+                            class="hidden md:col-span-2 bg-blue-50/40 border border-blue-100/50 rounded-2xl p-5">
 
-                            <h4 class="text-md font-bold text-blue-800 mb-4">
+                            <h4 class="text-sm font-bold text-blue-800 mb-4">
                                 Informasi Klien
                             </h4>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
 
                                 <div>
 
-                                    <p class="font-bold text-gray-500">
+                                    <p class="text-slate-400 mb-0.5">
                                         Nama Instansi
                                     </p>
 
-                                    <p id="clientName" class="text-gray-600">
+                                    <p id="clientName" class="text-slate-700 font-medium">
                                         -
                                     </p>
 
@@ -134,11 +134,11 @@
 
                                 <div>
 
-                                    <p class="font-bold text-gray-500">
+                                    <p class="text-slate-400 mb-0.5">
                                         Pimpinan
                                     </p>
 
-                                    <p id="clientPic" class="text-gray-600">
+                                    <p id="clientPic" class="text-slate-700 font-medium">
                                         -
                                     </p>
 
@@ -146,11 +146,11 @@
 
                                 <div>
 
-                                    <p class="font-bold text-gray-500">
+                                    <p class="text-slate-400 mb-0.5">
                                         Email
                                     </p>
 
-                                    <p id="clientEmail" class="text-gray-600">
+                                    <p id="clientEmail" class="text-slate-700 font-medium">
                                         -
                                     </p>
 
@@ -158,11 +158,11 @@
 
                                 <div>
 
-                                    <p class="font-bold text-gray-500">
+                                    <p class="text-slate-400 mb-0.5">
                                         No Telepon
                                     </p>
 
-                                    <p id="clientPhone" class="text-gray-600">
+                                    <p id="clientPhone" class="text-slate-700 font-medium">
                                         -
                                     </p>
 
@@ -170,11 +170,11 @@
 
                                 <div class="md:col-span-2">
 
-                                    <p class="font-bold text-gray-500">
+                                    <p class="text-slate-400 mb-0.5">
                                         Alamat
                                     </p>
 
-                                    <p id="clientAddress" class="text-gray-600">
+                                    <p id="clientAddress" class="text-slate-700 font-medium">
                                         -
                                     </p>
 
@@ -186,14 +186,14 @@
 
                         {{-- Tim audit --}}
                         <div id="clientTeam"
-                            class="hidden md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-5">
+                            class="hidden md:col-span-2 bg-slate-50 border border-slate-100 rounded-2xl p-5">
 
-                            <h4 class="text-md font-bold text-gray-800 mb-4">
+                            <h4 class="text-sm font-bold text-slate-800 mb-4">
                                 Tim Audit
                             </h4>
 
                             <div id="teamMembers"
-                                class="space-y-2 text-md text-gray-700">
+                                class="space-y-2 text-sm text-slate-650 font-medium leading-relaxed">
 
                             </div>
 
@@ -202,7 +202,7 @@
                         {{-- No laporan --}}
                         <div>
 
-                            <label class="block text-md font-bold text-gray-600 mb-1">
+                            <label class="block text-sm font-semibold text-slate-650 mb-2">
 
                                 No. Laporan
 
@@ -211,14 +211,14 @@
                             <input type="text"
                                 value="Otomatis dibuat sistem"
                                 readonly
-                                class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-md text-gray-500">
+                                class="w-full bg-slate-100/70 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-400 cursor-not-allowed">
 
                         </div>
 
                         {{-- Auditor --}}
                         <div>
 
-                            <label class="block text-md font-bold text-gray-600 mb-1">
+                            <label class="block text-sm font-semibold text-slate-650 mb-2">
 
                                 Pembuat Laporan
 
@@ -227,19 +227,17 @@
                             <input type="text"
                                 value="{{ auth()->user()->name }}"
                                 readonly
-                                class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-md text-gray-500">
+                                class="w-full bg-slate-100/70 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-400 cursor-not-allowed">
 
                         </div>
-
-
 
                         {{-- Tanggal audit --}}
                         <div class="md:col-span-2">
 
-                            <label class="block text-md font-bold text-gray-600 mb-1">
+                            <label class="block text-sm font-semibold text-slate-650 mb-2">
 
                                 Tanggal Pembuatan Laporan
-                                <span class="text-red-500">*</span>
+                                <span class="text-rose-500">*</span>
 
                             </label>
 
@@ -247,7 +245,7 @@
                                 name="audit_date"
                                 value="{{ old('audit_date', now()->toDateString()) }}"
                                 required
-                                class="w-full border border-gray-300 rounded-xl px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 text-md focus:ring-blue-300 focus:outline-none text-sm">
+                                class="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all cursor-pointer">
 
                         </div>
 
@@ -256,31 +254,25 @@
                 </div>
 
                 {{-- Upload dokumen --}}
-                <div class="bg-white border border-gray-200/80 rounded-xl p-5 shadow-sm">
+                <div class="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
 
-                    <h3 class="text-md font-bold text-gray-600 border-b pb-2 mb-5">
-
-                        Upload Dokumen Laporan
-
-                        <span class="text-sm font-normal text-red-500 ml-2">
+                    <h3 class="text-md font-bold text-slate-700 border-b border-slate-100 pb-3 mb-5 flex items-center justify-between">
+                        <span>Upload Dokumen Laporan</span>
+                        <span class="text-xs font-semibold text-rose-500">
                             * Semua dokumen wajib diisi
                         </span>
-
                     </h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         @foreach($documentTypes as $type => $label)
 
-                        <div class="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition">
+                        <div class="border border-slate-100 rounded-2xl p-4 hover:border-blue-300 transition-all hover:shadow-sm duration-150">
 
-                            <label class="block text-sm font-bold text-gray-600 mb-2">
-
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">
                                 {{ $loop->iteration }}.
                                 {{ $label }}
-
-                                <span class="text-red-500">*</span>
-
+                                <span class="text-rose-500">*</span>
                             </label>
 
                             <input type="file"
@@ -292,43 +284,33 @@
                                 accept=".pdf,.doc,.docx,.xls,.xlsx"
                                 @endif
 
-                                class="w-full text-sm text-gray-700
+                                class="w-full text-sm text-slate-650
                                     file:mr-3
-                                    file:py-1.5
-                                    file:px-3
-                                    file:rounded-lg
+                                    file:py-2
+                                    file:px-4
+                                    file:rounded-xl
                                     file:border-0
-                                    file:text-sm
-                                    file:font-semibold
+                                    file:text-xs
+                                    file:font-bold
                                     file:bg-blue-50
                                     file:text-blue-700
                                     hover:file:bg-blue-100
                                     cursor-pointer">
 
-                            <p class="text-xs text-gray-400 mt-1">
+                            <p class="text-[10px] text-slate-400 mt-1.5 font-medium">
 
                                 @if($type === 'data_klien')
-
-                                Format:
-                                ZIP, RAR, TAR
-                                — maks. 100MB
-
+                                Format: ZIP, RAR, TAR — maks. 100MB
                                 @else
-
-                                Format:
-                                PDF, DOC, DOCX, XLS, XLSX
-                                — maks. 50MB
-
+                                Format: PDF, DOC, DOCX, XLS, XLSX — maks. 50MB
                                 @endif
 
                             </p>
 
                             @error("files.$type")
-
-                            <p class="text-[11px] text-red-500 mt-1">
+                            <p class="text-[11px] text-rose-600 mt-1.5 font-semibold">
                                 {{ $message }}
                             </p>
-
                             @enderror
 
                         </div>
@@ -340,20 +322,16 @@
                 </div>
 
                 {{-- Button --}}
-                <div class="flex gap-3">
+                <div class="flex items-center gap-3">
 
                     <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-md transition">
-
+                        class="bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm shadow-blue-500/10 hover:shadow-md">
                         Simpan & Kirim Laporan
-
                     </button>
 
                     <a href="{{ route('audit_reports.index') }}"
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-bold text-md transition">
-
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-bold text-sm transition">
                         Kembali
-
                     </a>
 
                 </div>

@@ -14,164 +14,212 @@
         color: #f1f5f9; /* text-slate-100 */
     }
 
-    html.dark main .bg-white,
+    html.dark .bg-white,
     html.dark .w-full.sm\:max-w-md.bg-white {
         background-color: #1e293b !important; /* bg-slate-800 */
     }
 
-    html.dark main .bg-slate-50,
-    html.dark main .bg-gray-50,
-    html.dark main .bg-indigo-50\/50,
-    html.dark main .bg-blue-50\/50,
-    html.dark main .bg-teal-50\/50,
-    html.dark main .bg-purple-50\/50 {
+    html.dark .bg-slate-50,
+    html.dark .bg-gray-50,
+    html.dark .bg-indigo-50\/50,
+    html.dark .bg-blue-50\/50,
+    html.dark .bg-teal-50\/50,
+    html.dark .bg-purple-50\/50 {
         background-color: #0f172a !important; /* bg-slate-900 */
     }
 
-    html.dark main .border-slate-100,
-    html.dark main .border-gray-100,
-    html.dark main .border-gray-200,
-    html.dark main .border-slate-200,
+    html.dark .border-slate-100,
+    html.dark .border-gray-100,
+    html.dark .border-gray-200,
+    html.dark .border-slate-200,
     html.dark .w-full.sm\:max-w-md.border-gray-100 {
         border-color: #334155 !important; /* border-slate-700 */
     }
 
-    html.dark main .divide-slate-100 > * + *,
-    html.dark main .divide-gray-100 > * + * {
+    html.dark .divide-slate-100 > * + *,
+    html.dark .divide-gray-100 > * + * {
         border-color: #334155 !important;
     }
 
     /* Text Colors */
-    html.dark main .text-slate-800,
-    html.dark main .text-slate-700,
-    html.dark main .text-gray-800,
-    html.dark main .text-gray-700 {
+    html.dark .text-slate-800,
+    html.dark .text-slate-700,
+    html.dark .text-gray-800,
+    html.dark .text-gray-700 {
         color: #f1f5f9 !important;
     }
 
-    html.dark main .text-slate-600,
-    html.dark main .text-gray-600 {
+    html.dark .text-slate-600,
+    html.dark .text-gray-600 {
         color: #cbd5e1 !important; /* text-slate-300 */
     }
 
-    html.dark main .text-slate-500,
-    html.dark main .text-slate-400,
-    html.dark main .text-gray-500,
-    html.dark main .text-gray-400 {
+    html.dark .text-slate-500,
+    html.dark .text-slate-400,
+    html.dark .text-gray-500,
+    html.dark .text-gray-400 {
         color: #94a3b8 !important; /* text-slate-400 */
     }
 
     /* Table Headers & Dividers */
-    html.dark main thead.bg-slate-50\/60,
-    html.dark main thead.bg-slate-50,
-    html.dark main tr.bg-gray-100,
-    html.dark main tr.bg-gray-50,
-    html.dark main tr.bg-slate-50,
-    html.dark main tr.bg-slate-100 {
+    html.dark thead.bg-slate-50\/60,
+    html.dark thead.bg-slate-50,
+    html.dark tr.bg-gray-100,
+    html.dark tr.bg-gray-50,
+    html.dark tr.bg-slate-50,
+    html.dark tr.bg-slate-100 {
         background-color: #0f172a !important;
         color: #94a3b8 !important;
     }
 
-    html.dark main thead th,
-    html.dark main table th {
+    html.dark thead th,
+    html.dark table th {
         color: #94a3b8 !important;
         border-color: #334155 !important;
     }
 
     /* Dividers and borders */
-    html.dark main .divide-y.divide-gray-100 > * + *,
-    html.dark main .divide-y.divide-slate-100 > * + *,
-    html.dark main .divide-y.divide-slate-200 > * + * {
+    html.dark .divide-y.divide-gray-100 > * + *,
+    html.dark .divide-y.divide-slate-100 > * + *,
+    html.dark .divide-y.divide-slate-200 > * + * {
         border-color: #334155 !important;
     }
 
-    html.dark main table border,
-    html.dark main td {
+    html.dark table border,
+    html.dark td {
         border-color: #334155 !important;
     }
 
     /* Badges / Pill Styles */
     /* Blue / Keuangan */
-    html.dark main .bg-blue-50,
-    html.dark main .bg-blue-100 {
+    html.dark .bg-blue-50,
+    html.dark .bg-blue-100 {
         background-color: rgba(59, 130, 246, 0.15) !important;
         color: #60a5fa !important;
         border-color: rgba(59, 130, 246, 0.3) !important;
     }
     
     /* Purple / Kepatuhan */
-    html.dark main .bg-purple-50,
-    html.dark main .bg-purple-100 {
+    html.dark .bg-purple-50,
+    html.dark .bg-purple-100 {
         background-color: rgba(147, 51, 234, 0.15) !important;
         color: #c084fc !important;
         border-color: rgba(147, 51, 234, 0.3) !important;
     }
 
     /* Amber / Yellow / Review / Menunggu */
-    html.dark main .bg-amber-50,
-    html.dark main .bg-amber-100,
-    html.dark main .bg-yellow-100 {
+    html.dark .bg-amber-50,
+    html.dark .bg-amber-100,
+    html.dark .bg-yellow-100 {
         background-color: rgba(245, 158, 11, 0.15) !important;
         color: #fbbf24 !important;
         border-color: rgba(245, 158, 11, 0.3) !important;
     }
 
     /* Rose / Red / Revisi / Perlu Revisi */
-    html.dark main .bg-rose-50,
-    html.dark main .bg-rose-100,
-    html.dark main .bg-red-100 {
+    html.dark .bg-rose-50,
+    html.dark .bg-rose-100,
+    html.dark .bg-red-100 {
         background-color: rgba(244, 63, 94, 0.15) !important;
         color: #f43f5e !important;
         border-color: rgba(244, 63, 94, 0.3) !important;
     }
 
     /* Emerald / Green / Disetujui */
-    html.dark main .bg-emerald-50,
-    html.dark main .bg-emerald-100,
-    html.dark main .bg-green-100 {
+    html.dark .bg-emerald-50,
+    html.dark .bg-emerald-100,
+    html.dark .bg-green-100 {
         background-color: rgba(16, 185, 129, 0.15) !important;
         color: #34d399 !important;
         border-color: rgba(16, 185, 129, 0.3) !important;
     }
 
     /* Gray / Slate / Auditor / Belum Diupload / Draft */
-    html.dark main .bg-slate-50,
-    html.dark main .bg-gray-100,
-    html.dark main .bg-gray-50 {
+    html.dark .bg-slate-50,
+    html.dark .bg-gray-100,
+    html.dark .bg-gray-50 {
         background-color: rgba(148, 163, 184, 0.12) !important;
         color: #cbd5e1 !important;
         border-color: rgba(148, 163, 184, 0.25) !important;
     }
 
     /* Progress bar background */
-    html.dark main .bg-slate-100,
-    html.dark main .bg-gray-100 {
+    html.dark .bg-slate-100,
+    html.dark .bg-gray-100 {
         background-color: #0f172a !important;
         border-color: #334155 !important;
     }
 
     /* Hover State for table rows */
-    html.dark main tr.hover\:bg-slate-50\/30:hover,
-    html.dark main tr.hover\:bg-slate-50\/50:hover,
-    html.dark main tr:hover {
+    html.dark tr.hover\:bg-slate-50\/30:hover,
+    html.dark tr.hover\:bg-slate-50\/50:hover,
+    html.dark tr:hover {
         background-color: rgba(30, 41, 59, 0.4) !important;
     }
 
     /* Inputs, Textareas, Selects */
-    html.dark main input,
-    html.dark main textarea,
-    html.dark main select {
+    html.dark input,
+    html.dark textarea,
+    html.dark select {
         background-color: #0f172a !important;
         border-color: #334155 !important;
         color: #f1f5f9 !important;
     }
 
-    html.dark main input::placeholder,
-    html.dark main textarea::placeholder {
+    html.dark input::placeholder,
+    html.dark textarea::placeholder {
         color: #64748b !important;
     }
 
-    html.dark main label {
+    html.dark label {
         color: #cbd5e1 !important;
+    }
+
+    /* Modern Scrollbars */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.3);
+        border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 163, 184, 0.5);
+    }
+    html.dark ::-webkit-scrollbar-thumb {
+        background: rgba(51, 65, 85, 0.6);
+    }
+    html.dark ::-webkit-scrollbar-thumb:hover {
+        background: rgba(71, 85, 105, 0.8);
+    }
+
+    /* Custom Keyframes and Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Glassmorphism helpers */
+    .glass-card {
+        background-color: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+    }
+    html.dark .glass-card {
+        background-color: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
     }
 }

@@ -53,10 +53,6 @@ return new class extends Migration
             $table->longText('recommendations')
                 ->nullable();
 
-            // Upload laporan
-            $table->string('report_file')
-                ->nullable();
-
             // Status workflow
             $table->enum('status', [
 

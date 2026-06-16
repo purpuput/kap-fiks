@@ -1,9 +1,9 @@
 <x-app-layout title="Dashboard Pimpinan">
-    <div class="py-8">
+    <div class="py-8 animate-fade-in-up">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
             {{-- WELCOME HERO BANNER --}}
-            <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-955 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-indigo-950/10 border border-indigo-900/35">
+            <div class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-indigo-950/10 border border-indigo-900/35">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
                 <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
@@ -79,7 +79,7 @@
             {{-- STAT CARDS --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
                 {{-- Total Laporan --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-5 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-blue-600 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Laporan</span>
                         <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
@@ -87,16 +87,16 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $totalLaporan }}</p>
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $totalLaporan }}</p>
                         <div class="flex gap-1.5 mt-2 flex-wrap text-[9px] font-bold">
-                            <span class="bg-yellow-50 text-yellow-700 px-1.5 py-0.5 rounded">{{ $laporanPending }} review</span>
-                            <span class="bg-green-50 text-green-700 px-1.5 py-0.5 rounded">{{ $laporanApprove }} disetujui</span>
+                            <span class="bg-yellow-50 text-yellow-700 px-1.5 py-0.5 rounded">Review: {{ $laporanPending }}</span>
+                            <span class="bg-green-50 text-green-700 px-1.5 py-0.5 rounded">Disetujui: {{ $laporanApprove }}</span>
                         </div>
                     </div>
                 </div>
 
                 {{-- Dokumen Terarsip --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-5 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-purple-650 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Dok. Terarsip</span>
                         <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
@@ -104,13 +104,13 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $totalDokumen }}</p>
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $totalDokumen }}</p>
                         <p class="text-[10px] text-slate-400 mt-2 font-medium">Dari {{ $laporanApprove }} laporan selesai</p>
                     </div>
                 </div>
 
                 {{-- Data Klien --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-5 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-indigo-650 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Data Klien</span>
                         <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
@@ -118,13 +118,13 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $totalKlien }}</p>
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $totalKlien }}</p>
                         <p class="text-[10px] text-slate-400 mt-2 font-medium">Klien aktif terdaftar</p>
                     </div>
                 </div>
 
                 {{-- Logbook Auditor --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-5 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-orange-500 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Logbook</span>
                         <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100">
@@ -132,16 +132,16 @@
                         </div>
                     </div>
                     <div class="mt-4 flex flex-col justify-between h-full">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $logbookPending + $logbookApprove + $logbookRevisi }}</p>
-                        <a href="{{ route('logbooks.index') }}" class="text-[10px] text-indigo-600 hover:underline mt-2 font-bold flex items-center justify-between">
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $logbookPending + $logbookApprove + $logbookRevisi }}</p>
+                        <a href="{{ route('logbooks.index') }}" class="text-[10px] text-indigo-650 hover:text-indigo-850 mt-2 font-bold flex items-center justify-between transition group">
                             Tinjau Logbook 
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     </div>
                 </div>
 
                 {{-- Absensi Hari Ini --}}
-                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100 transition-all duration-300 p-5 flex flex-col justify-between">
+                <div class="bg-white border border-slate-100 border-b-4 border-b-teal-600 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Absensi Hari Ini</span>
                         <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-100">
@@ -149,7 +149,7 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <p class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $absensiHariIni }}</p>
+                        <p class="text-3xl font-black text-slate-800 tracking-tight">{{ $absensiHariIni }}</p>
                         <p class="text-[10px] text-slate-400 mt-2 font-medium">Auditor telah absen</p>
                     </div>
                 </div>

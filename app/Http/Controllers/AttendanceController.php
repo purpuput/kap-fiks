@@ -400,4 +400,22 @@ class AttendanceController extends Controller
 
         return \Illuminate\Support\Facades\Storage::disk('local')->download($attendance->attachment, $cleanName);
     }
+
+    /**
+     * Preview lampiran absensi secara aman
+     */
+    public function previewAttachment(Attendance $attendance)
+    {
+        // Otorisasi: Hanya admin, pimpinan, atau pemilik absensi yang boleh melihat
+        if (Auth::user()->role !== 'admin' && Auth::user()->role !== 'pimpinan' && Auth::id() !== $attendance->user_id) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat lampiran ini.');
+        }
+
+        if (empty($attendance->attachment) || !\Illuminate\Support\Facades\Storage::disk('local')->exists($attendance->attachment)) {
+            return response('<div style="text-align:center; padding: 50px; font-family: sans-serif; color: #666;"><h3>File Tidak Ditemukan</h3><p>File fisik tidak ada di server.</p></div>', 404);
+        }
+
+        $path = \Illuminate\Support\Facades\Storage::disk('local')->path($attendance->attachment);
+        return response()->file($path);
+    }
 }
