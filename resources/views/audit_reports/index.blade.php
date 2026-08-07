@@ -52,7 +52,8 @@
                 </div>
                 <div>
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none">Disetujui</span>
-                    <h3 class="text-2xl font-black text-emerald-600 mt-1.5 leading-none">{{ $disetujuiCount }}</h3>
+                    <h3 class="text-2xl font-black text-emerald-600 mt-1 leading-none">{{ $disetujuiCount }}</h3>
+                    <p class="text-[10px] text-slate-400 mt-1">Lolos review & final</p>
                 </div>
             </div>
 
@@ -65,11 +66,12 @@
                 </div>
                 <div>
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none">Dalam Review</span>
-                    <h3 class="text-2xl font-black text-amber-500 mt-1.5 leading-none">{{ $reviewCount }}</h3>
+                    <h3 class="text-2xl font-black text-amber-500 mt-1 leading-none">{{ $reviewCount }}</h3>
+                    <p class="text-[10px] text-slate-400 mt-1">Sedang diperiksa</p>
                 </div>
             </div>
 
-            <!-- Revisi -->
+            <!-- Perlu Revisi -->
             <div class="px-2 flex items-center gap-3 border-r border-slate-100 last:border-none text-sm">
                 <div class="p-3 bg-rose-50 text-rose-500 rounded-2xl">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -77,8 +79,9 @@
                     </svg>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none">Revisi</span>
-                    <h3 class="text-2xl font-black text-rose-500 mt-1.5 leading-none">{{ $revisiCount }}</h3>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none">Perlu Revisi</span>
+                    <h3 class="text-2xl font-black text-rose-500 mt-1 leading-none">{{ $revisiCount }}</h3>
+                    <p class="text-[10px] text-slate-400 mt-1">Ada catatan perbaikan</p>
                 </div>
             </div>
         </div>
@@ -101,7 +104,7 @@
                 <!-- Jenis Audit -->
                 <select name="audit_type" onchange="showSkeleton(); this.form.submit()"
                     class="bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-650 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
-                    <option value="">Semua Jenis</option>
+                    <option value="">Semua Jenis Audit</option>
                     <option value="keuangan" {{ $audit_type === 'keuangan' ? 'selected' : '' }}>Keuangan</option>
                     <option value="kepatuhan" {{ $audit_type === 'kepatuhan' ? 'selected' : '' }}>Kepatuhan</option>
                 </select>
@@ -110,9 +113,10 @@
                 <select name="status" onchange="showSkeleton(); this.form.submit()"
                     class="bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-650 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
                     <option value="">Semua Status</option>
-                    <option value="review" {{ $status === 'review' ? 'selected' : '' }}>Review</option>
-                    <option value="disetujui" {{ $status === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                    <option value="revisi" {{ $status === 'revisi' ? 'selected' : '' }}>Revisi</option>
+                    <option value="draft" {{ $status === 'draft' ? 'selected' : '' }}>Draft (Belum diajukan)</option>
+                    <option value="review" {{ $status === 'review' ? 'selected' : '' }}>Dalam Review (Sedang diperiksa)</option>
+                    <option value="revisi" {{ $status === 'revisi' ? 'selected' : '' }}>Perlu Revisi (Ada catatan)</option>
+                    <option value="disetujui" {{ $status === 'disetujui' ? 'selected' : '' }}>Disetujui (Lolos review & final)</option>
                 </select>
 
                 <!-- Reset -->
@@ -240,20 +244,24 @@
                             {{-- Status --}}
                             <td class="px-5 py-4 whitespace-nowrap">
                                 @if($report->status === 'review')
-                                <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs px-2.5 py-0.5 rounded-full border border-amber-200/50 font-bold">
-                                    Review
+                                <span class="inline-flex flex-col items-start bg-amber-50 text-amber-800 text-xs px-2.5 py-1 rounded-lg border border-amber-200/60 font-bold" title="Sedang diperiksa auditor/reviewer">
+                                    <span>Dalam Review</span>
+                                    <span class="text-[9px] font-normal text-amber-700/80">Sedang diperiksa</span>
                                 </span>
                                 @elseif($report->status === 'revisi')
-                                <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-700 text-xs px-2.5 py-0.5 rounded-full border border-rose-200/50 font-bold">
-                                    Revisi
+                                <span class="inline-flex flex-col items-start bg-rose-50 text-rose-800 text-xs px-2.5 py-1 rounded-lg border border-rose-200/60 font-bold" title="Ada temuan/catatan yang harus diperbaiki">
+                                    <span>Perlu Revisi</span>
+                                    <span class="text-[9px] font-normal text-rose-700/80">Ada temuan perbaikan</span>
                                 </span>
                                 @elseif($report->status === 'disetujui')
-                                <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-xs px-2.5 py-0.5 rounded-full border border-emerald-200/50 font-bold">
-                                    Disetujui
+                                <span class="inline-flex flex-col items-start bg-emerald-50 text-emerald-800 text-xs px-2.5 py-1 rounded-lg border border-emerald-200/60 font-bold" title="Sudah lolos review dan final">
+                                    <span>Disetujui</span>
+                                    <span class="text-[9px] font-normal text-emerald-700/80">Lolos review & final</span>
                                 </span>
                                 @else
-                                <span class="inline-flex items-center gap-1 bg-slate-50 text-slate-600 text-xs px-2.5 py-0.5 rounded-full border border-slate-200/50 font-bold">
-                                    Draft
+                                <span class="inline-flex flex-col items-start bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-lg border border-slate-200 font-bold" title="Belum diajukan">
+                                    <span>Draft</span>
+                                    <span class="text-[9px] font-normal text-slate-500">Belum diajukan</span>
                                 </span>
                                 @endif
                             </td>

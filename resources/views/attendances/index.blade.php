@@ -184,47 +184,144 @@
 
         {{-- SEARCH, FILTER & EXPORT BAR --}}
         <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-            <form id="filterForm" method="GET" action="{{ route('attendances.index') }}" class="flex flex-wrap items-center gap-2.5 flex-1">
-                <!-- Date Filter -->
-                <input type="date" name="date" value="{{ $date ?? '' }}"
-                    onchange="document.getElementById('filterForm').submit()"
-                    class="bg-slate-50/50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
-
-                <!-- User Filter (Admin & Pimpinan) -->
+            <form id="filterForm" method="GET" action="{{ route('attendances.index') }}" class="flex flex-wrap items-center gap-3 flex-1">
+                <!-- User Multi-Select Filter (Admin & Pimpinan) -->
                 @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
-                <select name="user_id" onchange="document.getElementById('filterForm').submit()"
-                    class="bg-slate-50/50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
-                    <option value="">Semua Pegawai</option>
-                    @foreach($users as $user)
-                    <option value="{{ $user->id }}" {{ (string) $user_id === (string) $user->id ? 'selected' : '' }}>
-                        {{ $user->name }}
-                    </option>
-                    @endforeach
-                </select>
+                <div class="flex items-center gap-1.5 relative">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">Pegawai:</span>
+                    <div class="relative inline-block text-left">
+                        <button type="button" onclick="toggleUserDropdown('filterUserDropdownMenu')" id="filterUserDropdownBtn"
+                            class="bg-slate-50/50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100/70 focus:outline-none transition-all flex items-center justify-between gap-2 min-w-[170px] cursor-pointer">
+                            <span id="filterUserDropdownLabel" class="truncate max-w-[140px]">
+                                @if(empty($user_ids))
+                                    Semua Pegawai
+                                @elseif(count($user_ids) === 1)
+                                    {{ $users->where('id', $user_ids[0])->first()->name ?? '1 Pegawai' }}
+                                @else
+                                    {{ count($user_ids) }} Pegawai Dipilih
+                                @endif
+                            </span>
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <div id="filterUserDropdownMenu" class="absolute left-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 hidden p-3 space-y-2">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-100 text-xs font-bold text-slate-500">
+                                <span>Pilih Pegawai</span>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="toggleCheckAllUsers('filterUserDropdownMenu', true)" class="text-blue-600 hover:underline">Semua</button>
+                                    <span class="text-slate-300">|</span>
+                                    <button type="button" onclick="toggleCheckAllUsers('filterUserDropdownMenu', false)" class="text-rose-600 hover:underline">Reset</button>
+                                </div>
+                            </div>
+                            <div class="max-h-48 overflow-y-auto space-y-1 scrollbar-thin pr-1">
+                                @foreach($users as $u)
+                                <label class="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-slate-50 cursor-pointer text-sm font-medium text-slate-700">
+                                    <input type="checkbox" name="user_ids[]" value="{{ $u->id }}" 
+                                        {{ in_array($u->id, $user_ids ?? []) ? 'checked' : '' }}
+                                        onchange="updateUserDropdownText('filterUserDropdownMenu', 'filterUserDropdownLabel')"
+                                        class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 user-cb">
+                                    <span>{{ $u->name }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 @endif
 
+                <!-- Periode Tanggal Filter -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">Periode:</span>
+                    <input type="date" name="start_date" value="{{ $start_date ?? '' }}" placeholder="Tanggal Mulai" title="Tanggal Mulai"
+                        class="bg-slate-50/50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
+                    <span class="text-xs font-bold text-slate-400">s/d</span>
+                    <input type="date" name="end_date" value="{{ $end_date ?? '' }}" placeholder="Tanggal Selesai" title="Tanggal Selesai"
+                        class="bg-slate-50/50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
+                </div>
+
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    Filter
+                </button>
+
                 <!-- Reset -->
-                @if($date || $user_id)
+                @if($date || $start_date || $end_date || !empty($user_ids))
                 <a href="{{ route('attendances.index') }}"
-                    class="text-sm font-bold text-slate-400 hover:text-slate-650 px-2 py-2 transition">
+                    class="text-sm font-bold text-slate-400 hover:text-rose-600 px-2 py-2 transition flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     Reset
                 </a>
                 @endif
             </form>
 
-            {{-- Export Buttons (Admin) --}}
-            @if(auth()->user()->role === 'admin')
-            <div class="flex items-center gap-2">
-                <a href="{{ route('attendances.export.pdf', request()->query()) }}"
-                    class="bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-bold border border-red-200/30 transition shadow-sm flex items-center gap-1.5 hover:shadow-md">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            {{-- Export Action Buttons --}}
+            <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="toggleExportModal(true)"
+                    class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-bold transition shadow-sm flex items-center gap-2 hover:shadow">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Export PDF
-                </a>
+                    Export Evaluasi
+                </button>
             </div>
-            @endif
         </div>
+
+        {{-- SUMMARY PER PEGAWAI CARD (Hanya tampil saat filter sedang aktif) --}}
+        @if((!empty($user_ids) || $start_date || $end_date || $date) && isset($userSummary) && $userSummary->count() > 0 && in_array(auth()->user()->role, ['admin', 'pimpinan']))
+        <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+                        📊
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Ringkasan Evaluasi Kehadiran Per Pegawai</h3>
+                        <p class="text-xs text-slate-400">Total kehadiran, sakit, izin, dan alpha berdasarkan filter aktif</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+                    {{ $userSummary->count() }} Pegawai
+                </span>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-100 rounded-xl">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100 text-[10px]">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-10">No</th>
+                            <th class="px-4 py-3">Nama Pegawai</th>
+                            <th class="px-4 py-3 text-center">Role</th>
+                            <th class="px-4 py-3 text-center">Total Hari</th>
+                            <th class="px-4 py-3 text-center text-emerald-600">Hadir</th>
+                            <th class="px-4 py-3 text-center text-amber-600">Sakit</th>
+                            <th class="px-4 py-3 text-center text-blue-600">Izin</th>
+                            <th class="px-4 py-3 text-center text-rose-600">Alpha</th>
+                            <th class="px-4 py-3 text-center">% Kehadiran</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($userSummary as $idx => $sum)
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="px-4 py-2.5 text-center text-slate-400 font-mono">{{ $idx + 1 }}</td>
+                            <td class="px-4 py-2.5 font-bold text-slate-800">{{ $sum->name }}</td>
+                            <td class="px-4 py-2.5 text-center text-slate-500">{{ ucfirst($sum->role) }}</td>
+                            <td class="px-4 py-2.5 text-center font-semibold text-slate-700">{{ $sum->total }} Hari</td>
+                            <td class="px-4 py-2.5 text-center font-bold text-emerald-600 bg-emerald-50/40">{{ $sum->hadir }}</td>
+                            <td class="px-4 py-2.5 text-center font-bold text-amber-600 bg-amber-50/40">{{ $sum->sakit }}</td>
+                            <td class="px-4 py-2.5 text-center font-bold text-blue-600 bg-blue-50/40">{{ $sum->izin }}</td>
+                            <td class="px-4 py-2.5 text-center font-bold text-rose-600 bg-rose-50/40">{{ $sum->alpha }}</td>
+                            <td class="px-4 py-2.5 text-center">
+                                <span class="px-2 py-0.5 rounded-md font-bold text-[11px] {{ $sum->percentage >= 85 ? 'bg-emerald-100 text-emerald-700' : ($sum->percentage >= 70 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700') }}">
+                                    {{ $sum->percentage }}%
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
 
         {{-- TABLE SECTION --}}
         <div class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
@@ -596,4 +693,211 @@
     </script>
     @endif
     @endif
+
+    {{-- MODAL EXPORT EVALUASI ABSENSI --}}
+    <div id="modalExport" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white border border-slate-100 rounded-3xl shadow-xl w-full max-w-md overflow-hidden transform transition-all flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-md font-bold text-slate-800">
+                        Export Evaluasi Absensi
+                    </h3>
+                </div>
+                <button type="button" onclick="toggleExportModal(false)" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="exportModalForm" method="GET" action="{{ route('attendances.export.pdf') }}" class="p-6 space-y-4">
+                @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
+                <div class="relative">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+                        Pilih Pegawai (Bisa Lebih Dari Satu)
+                    </label>
+                    <div class="relative">
+                        <button type="button" onclick="toggleUserDropdown('exportUserDropdownMenu')" id="exportUserDropdownBtn"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100/70 focus:outline-none transition-all flex items-center justify-between gap-2 cursor-pointer">
+                            <span id="exportUserDropdownLabel" class="truncate max-w-[280px]">
+                                @if(empty($user_ids))
+                                    Semua Pegawai
+                                @elseif(count($user_ids) === 1)
+                                    {{ $users->where('id', $user_ids[0])->first()->name ?? '1 Pegawai' }}
+                                @else
+                                    {{ count($user_ids) }} Pegawai Dipilih
+                                @endif
+                            </span>
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <div id="exportUserDropdownMenu" class="absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 hidden p-3 space-y-2">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-100 text-xs font-bold text-slate-500">
+                                <span>Pilih Pegawai</span>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="toggleCheckAllUsers('exportUserDropdownMenu', true)" class="text-blue-600 hover:underline">Semua</button>
+                                    <span class="text-slate-300">|</span>
+                                    <button type="button" onclick="toggleCheckAllUsers('exportUserDropdownMenu', false)" class="text-rose-600 hover:underline">Reset</button>
+                                </div>
+                            </div>
+                            <div class="max-h-48 overflow-y-auto space-y-1 scrollbar-thin pr-1">
+                                @foreach($users as $u)
+                                <label class="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-slate-50 cursor-pointer text-sm font-medium text-slate-700">
+                                    <input type="checkbox" name="user_ids[]" value="{{ $u->id }}" 
+                                        {{ in_array($u->id, $user_ids ?? []) ? 'checked' : '' }}
+                                        onchange="updateUserDropdownText('exportUserDropdownMenu', 'exportUserDropdownLabel')"
+                                        class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 user-cb">
+                                    <span>{{ $u->name }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+                            Tanggal Mulai
+                        </label>
+                        <input type="date" name="start_date" id="exportStartDate" value="{{ $start_date ?? '' }}"
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm focus:outline-none transition-all cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+                            Tanggal Selesai
+                        </label>
+                        <input type="date" name="end_date" id="exportEndDate" value="{{ $end_date ?? '' }}"
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm focus:outline-none transition-all cursor-pointer">
+                    </div>
+                </div>
+
+                {{-- Preset Periode Cepat --}}
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                        Pilih Cepat Periode
+                    </label>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <button type="button" onclick="setExportPeriod('this_month')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition text-center">
+                            Bulan Ini
+                        </button>
+                        <button type="button" onclick="setExportPeriod('last_30')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition text-center">
+                            30 Hari Terakhir
+                        </button>
+                        <button type="button" onclick="setExportPeriod('clear')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-lg transition text-center">
+                            Reset Periode
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" onclick="submitExportForm('{{ route('attendances.export.pdf') }}')"
+                        class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition shadow-sm flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export PDF
+                    </button>
+
+                    <button type="button" onclick="submitExportForm('{{ route('attendances.export.excel') }}')"
+                        class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition shadow-sm flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleExportModal(show) {
+            const modal = document.getElementById('modalExport');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        function setExportPeriod(type) {
+            const startInput = document.getElementById('exportStartDate');
+            const endInput = document.getElementById('exportEndDate');
+            const today = new Date();
+
+            if (type === 'this_month') {
+                const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                startInput.value = firstDay.toISOString().split('T')[0];
+                endInput.value = today.toISOString().split('T')[0];
+            } else if (type === 'last_30') {
+                const pastDate = new Date();
+                pastDate.setDate(today.getDate() - 30);
+                startInput.value = pastDate.toISOString().split('T')[0];
+                endInput.value = today.toISOString().split('T')[0];
+            } else if (type === 'clear') {
+                startInput.value = '';
+                endInput.value = '';
+            }
+        }
+
+        function submitExportForm(actionUrl) {
+            const form = document.getElementById('exportModalForm');
+            form.action = actionUrl;
+            form.submit();
+            toggleExportModal(false);
+        }
+
+        function toggleUserDropdown(menuId) {
+            const menu = document.getElementById(menuId);
+            if (!menu) return;
+            menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', function(e) {
+            ['filterUserDropdownMenu', 'exportUserDropdownMenu'].forEach(menuId => {
+                const menu = document.getElementById(menuId);
+                const btnId = menuId === 'filterUserDropdownMenu' ? 'filterUserDropdownBtn' : 'exportUserDropdownBtn';
+                const btn = document.getElementById(btnId);
+                if (menu && !menu.classList.contains('hidden')) {
+                    if (!menu.contains(e.target) && btn && !btn.contains(e.target)) {
+                        menu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+
+        function toggleCheckAllUsers(menuId, check) {
+            const menu = document.getElementById(menuId);
+            if (!menu) return;
+            const checkboxes = menu.querySelectorAll('.user-cb');
+            checkboxes.forEach(cb => cb.checked = check);
+            
+            const labelId = menuId === 'filterUserDropdownMenu' ? 'filterUserDropdownLabel' : 'exportUserDropdownLabel';
+            updateUserDropdownText(menuId, labelId);
+        }
+
+        function updateUserDropdownText(menuId, labelId) {
+            const menu = document.getElementById(menuId);
+            const label = document.getElementById(labelId);
+            if (!menu || !label) return;
+
+            const checked = menu.querySelectorAll('.user-cb:checked');
+            if (checked.length === 0) {
+                label.innerText = 'Semua Pegawai';
+            } else if (checked.length === 1) {
+                const parentLabel = checked[0].closest('label');
+                label.innerText = parentLabel ? parentLabel.textContent.trim() : '1 Pegawai';
+            } else {
+                label.innerText = checked.length + ' Pegawai Dipilih';
+            }
+        }
+    </script>
 </x-app-layout>

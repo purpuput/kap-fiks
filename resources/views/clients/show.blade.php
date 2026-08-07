@@ -23,14 +23,26 @@
 
                 <div class="flex items-center gap-2">
 
-                    {{-- Admin --}}
-                    @if(auth()->user()->role === 'admin' && $client->approval_status !== 'disetujui')
+                    {{-- Approve (Pimpinan) --}}
+                    @if(auth()->user()->role === 'pimpinan' && $client->approval_status !== 'disetujui')
+                    <form action="{{ route('clients.approve', $client) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit"
+                            class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-sm font-bold shadow-sm transition inline-flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Approve Klien
+                        </button>
+                    </form>
+                    @endif
 
+                    {{-- Edit Data --}}
+                    @if((auth()->user()->role === 'admin' && $client->approval_status !== 'disetujui') || auth()->user()->role === 'pimpinan')
                     <a href="{{ route('clients.edit', $client) }}"
                         class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold shadow-sm transition">
-                        Edit Data
+                        Edit Data / Tim Auditor
                     </a>
-
                     @endif
 
                     {{-- Back --}}
@@ -380,12 +392,19 @@
                     {{-- Tim audit --}}
                     <div class="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
 
-                        <div class="px-6 py-5 border-b border-slate-50 bg-slate-50/50">
-
+                        <div class="px-6 py-5 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
                             <h2 class="text-md font-bold text-slate-800">
                                 Tim Audit
                             </h2>
-
+                            @if(in_array(auth()->user()->role, ['admin', 'pimpinan']))
+                            <a href="{{ route('clients.edit', $client) }}"
+                                class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                Edit Tim Auditor
+                            </a>
+                            @endif
                         </div>
 
                         <div class="p-6 space-y-3">
@@ -475,267 +494,7 @@
 
                             </div>
 
-                            <div>
-
-                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                                    Disetujui Oleh
-                                </p>
-
-                                <h3 class="font-bold text-slate-700 text-xs">
-
-                                    {{ optional($client->approver)->name ?? '-' }}
-
-                                </h3>
-
-                            </div>
-
-                            <div>
-
-                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                                    Tanggal Approval
-                                </p>
-
-                                <h3 class="font-bold text-slate-700 text-xs">
-
-                                    @if($client->approved_at)
-
-                                    {{ \Carbon\Carbon::parse($client->approved_at)->format('d M Y H:i') }}
-
-                                    @else
-
-                                    -
-
-                                    @endif
-
-                                </h3>
-
-                            </div>
-
                         </div>
-
-                    </div>
-
-                    @endif
-
-                    {{-- Review pimpinan --}}
-                    @if(auth()->user()->role === 'pimpinan')
-
-                    <div class="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
-
-                        {{-- Header --}}
-                        <div class="px-6 py-5 border-b border-slate-50 bg-slate-50/50">
-
-                            <h2 class="font-bold text-slate-800 text-md">
-                                Review Pimpinan
-                            </h2>
-
-                            <p class="text-xs text-slate-400 mt-1 font-semibold">
-                                Persetujuan data klien audit
-                            </p>
-
-                        </div>
-
-                        <div class="p-6">
-
-                            {{-- Pending --}}
-                            @if($client->approval_status === 'pending')
-
-                            <div class="space-y-4">
-
-                                <div class="bg-amber-50 border border-amber-100 rounded-2xl p-4">
-
-                                    <p class="text-xs font-bold text-amber-700">
-                                        Menunggu Review
-                                    </p>
-
-                                    <p class="text-[10px] text-amber-600 mt-1 font-semibold">
-                                        Silakan tinjau data klien sebelum approval.
-                                    </p>
-
-                                </div>
-
-                                {{-- Action --}}
-                                <div class="flex items-center gap-3">
-
-                                    {{-- Approve --}}
-                                    <form action="{{ route('clients.approve', $client) }}"
-                                        method="POST">
-
-                                        @csrf
-
-                                        <button
-                                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
-
-                                            Approve
-
-                                        </button>
-
-                                    </form>
-
-                                    {{-- Revisi --}}
-                                    <button type="button"
-                                        onclick="toggleRevision('{{ $client->id }}')"
-                                        class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition shadow-sm">
-
-                                        Revisi
-
-                                    </button>
-
-                                </div>
-
-                                {{-- Form revisi --}}
-                                <div id="revision-form-{{ $client->id }}"
-                                    class="hidden">
-
-                                    <form action="{{ route('clients.revision', $client) }}"
-                                        method="POST"
-                                        class="space-y-3">
-
-                                        @csrf
-
-                                        <textarea
-                                            name="revision_note"
-                                            rows="3"
-                                            required
-                                            placeholder="Masukkan catatan revisi..."
-                                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-xs resize-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700"></textarea>
-
-                                        <button type="submit"
-                                            class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl text-xs font-bold transition">
-
-                                            Kirim Revisi
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </div>
-
-                            {{-- Revisi --}}
-                            @elseif($client->approval_status === 'revisi')
-
-                            <div class="space-y-4">
-
-                                {{-- Status --}}
-                                <div class="bg-amber-50 border border-amber-100 rounded-2xl p-4">
-
-                                    <p class="text-xs font-bold text-amber-700">
-                                        Menunggu Perbaikan Admin
-                                    </p>
-
-                                    <p class="text-[10px] text-amber-600 mt-1 font-semibold">
-                                        Data klien telah dikembalikan untuk diperbaiki.
-                                    </p>
-
-                                </div>
-
-                                {{-- Catatan revisi --}}
-                                <div class="bg-rose-50 border border-rose-100 rounded-2xl p-4">
-
-                                    <p class="text-xs font-bold text-rose-700 mb-2">
-                                        Catatan Revisi
-                                    </p>
-
-                                    <p class="text-[10px] text-rose-600 leading-relaxed font-semibold">
-
-                                        {{ $client->revision_note }}
-
-                                    </p>
-
-                                </div>
-
-                                {{-- Button edit --}}
-                                <button type="button"
-                                    onclick="toggleRevision('{{ $client->id }}')"
-                                    class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
-
-                                    Edit Catatan Revisi
-
-                                </button>
-
-                                {{-- Form edit --}}
-                                <div id="revision-form-{{ $client->id }}"
-                                    class="hidden">
-
-                                    <form action="{{ route('clients.revision', $client) }}"
-                                        method="POST"
-                                        class="space-y-3">
-
-                                        @csrf
-
-                                        <textarea
-                                            name="revision_note"
-                                            rows="3"
-                                            required
-                                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-xs resize-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all text-slate-700">{{ $client->revision_note }}</textarea>
-
-                                        <button type="submit"
-                                            class="w-full bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition">
-
-                                            Update Revisi
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </div>
-
-                            {{-- Approved --}}
-                            @elseif($client->approval_status === 'disetujui')
-
-                            <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
-
-                                <div class="flex items-center gap-2">
-
-                                    <span class="text-emerald-600 text-lg font-bold">
-                                        ✓
-                                    </span>
-
-                                    <div>
-
-                                        <p class="font-bold text-emerald-700 text-xs">
-                                            Data Klien Disetujui
-                                        </p>
-
-                                        <p class="text-[10px] text-emerald-600 mt-1 font-semibold">
-                                            Klien sudah dapat diakses auditor.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            @endif
-
-                        </div>
-
-                    </div>
-
-                    @endif
-
-                    {{-- Catatan revisi admin --}}
-                    @if(
-                    auth()->user()->role === 'admin'
-                    && $client->revision_note
-                    )
-
-                    <div class="bg-rose-50 border border-rose-100 rounded-2xl p-6">
-
-                        <h2 class="text-sm font-bold text-rose-700 mb-2">
-                            Catatan Revisi
-                        </h2>
-
-                        <p class="text-xs text-rose-600 leading-relaxed font-semibold">
-
-                            {{ $client->revision_note }}
-
-                        </p>
 
                     </div>
 
@@ -748,15 +507,5 @@
         </div>
 
     </div>
-
-    {{-- Toggle revisi --}}
-    <script>
-        function toggleRevision(id) {
-            document
-                .getElementById('revision-form-' + id)
-                .classList
-                .toggle('hidden');
-        }
-    </script>
 
 </x-app-layout>

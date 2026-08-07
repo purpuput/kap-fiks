@@ -14,8 +14,8 @@ class AttendanceSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ambil semua user auditor
-        $users = User::where('role', 'auditor')->get();
+        // Ambil semua user admin dan auditor
+        $users = User::whereIn('role', ['admin', 'auditor'])->get();
 
         // Generate 30 hari terakhir
         foreach ($users as $user) {

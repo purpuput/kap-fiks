@@ -89,5 +89,45 @@
                 }
             });
         </script>
+
+        <!-- SweetAlert -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        @if(session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: {!! json_encode(session('success')) !!},
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        </script>
+        @endif
+
+        @if(session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: {!! json_encode(session('error')) !!},
+                showConfirmButton: true,
+                confirmButtonColor: '#3085d6'
+            });
+        </script>
+        @endif
+
+        @if($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Ada Kesalahan!',
+                html: {!! json_encode('<ul class="text-left list-disc list-inside">' . implode('', array_map(fn($err) => '<li>' . e($err) . '</li>', $errors->all())) . '</ul>') !!},
+                showConfirmButton: true,
+                confirmButtonColor: '#3085d6'
+            });
+        </script>
+        @endif
     </body>
 </html>

@@ -1,4 +1,5 @@
-<x-app-layout title="AURA AI (Audit Reporting Asisten)">
+<x-app-layout title="AURA AI - Asisten Audit">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         .chat-container {
@@ -100,9 +101,9 @@
             background: #1e293b;
         }
 
-        /* Pengaturan Gaya Markdown */
+        /* Pengaturan Gaya Markdown & Tampilan Data */
         .prose-ai p {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
             line-height: 1.6;
         }
 
@@ -111,15 +112,26 @@
         }
 
         .prose-ai ul {
-            list-style: disc;
+            list-style-type: disc;
             padding-left: 1.25rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            margin-top: 0.35rem;
         }
 
         .prose-ai ol {
-            list-style: decimal;
+            list-style-type: decimal;
             padding-left: 1.25rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            margin-top: 0.35rem;
+        }
+
+        .prose-ai li {
+            margin-bottom: 0.25rem;
+            color: #334155;
+        }
+
+        html.dark .prose-ai li {
+            color: #cbd5e1;
         }
 
         .prose-ai strong {
@@ -131,76 +143,201 @@
             color: #93c5fd;
         }
 
+        .prose-ai h1, .prose-ai h2, .prose-ai h3, .prose-ai h4 {
+            font-weight: 750;
+            color: #1e3a8a;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        html.dark .prose-ai h1, html.dark .prose-ai h2, html.dark .prose-ai h3, html.dark .prose-ai h4 {
+            color: #93c5fd;
+        }
+
+        .prose-ai h1 { font-size: 1.15rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.3rem; }
+        .prose-ai h2 { font-size: 1.05rem; }
+        .prose-ai h3 { font-size: 0.95rem; }
+        html.dark .prose-ai h1 { border-color: #334155; }
+
+        .prose-ai hr {
+            border: 0;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 0.85rem 0;
+        }
+
+        html.dark .prose-ai hr {
+            background: #334155;
+        }
+
+        /* Container Tabel Responsif & Formating */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+        }
+
+        html.dark .table-responsive {
+            border-color: #334155;
+        }
+
+        .prose-ai table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.75rem;
+            line-height: 1.45;
+        }
+
+        .prose-ai th {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-weight: 750;
+            padding: 0.6rem 0.75rem;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        html.dark .prose-ai th {
+            background-color: #1e293b;
+            color: #f1f5f9;
+            border-bottom-color: #334155;
+        }
+
+        .prose-ai td {
+            padding: 0.55rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+            vertical-align: middle;
+        }
+
+        html.dark .prose-ai td {
+            border-bottom-color: #1e293b;
+            color: #cbd5e1;
+        }
+
+        .prose-ai tr:last-child td {
+            border-bottom: none;
+        }
+
+        .prose-ai tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+
+        html.dark .prose-ai tr:nth-child(even) td {
+            background-color: rgba(30, 41, 59, 0.25);
+        }
+
+        .prose-ai tr:hover td {
+            background-color: #eff6ff !important;
+        }
+
+        html.dark .prose-ai tr:hover td {
+            background-color: rgba(30, 58, 138, 0.3) !important;
+        }
+
+        /* Status Pills / Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.15rem 0.55rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.025em;
+            white-space: nowrap;
+        }
+
+        .status-disetujui, .status-hadir, .status-aktif, .status-selesai {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        html.dark .status-disetujui, html.dark .status-hadir, html.dark .status-aktif, html.dark .status-selesai {
+            background-color: rgba(20, 83, 45, 0.4);
+            color: #86efac;
+            border-color: #166534;
+        }
+
+        .status-review, .status-pending, .status-izin, .status-proses {
+            background-color: #fef9c3;
+            color: #a16207;
+            border: 1px solid #fef08a;
+        }
+
+        html.dark .status-review, html.dark .status-pending, html.dark .status-izin, html.dark .status-proses {
+            background-color: rgba(113, 63, 18, 0.4);
+            color: #fde047;
+            border-color: #854d0e;
+        }
+
+        .status-revisi, .status-tidakhadir, .status-nonaktif, .status-sakit, .status-kendala {
+            background-color: #ffe4e6;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+        }
+
+        html.dark .status-revisi, html.dark .status-tidakhadir, html.dark .status-nonaktif, html.dark .status-sakit, html.dark .status-kendala {
+            background-color: rgba(136, 19, 55, 0.4);
+            color: #fda4af;
+            border-color: #9f1239;
+        }
+
+        /* Inline Code & Code Block */
         .prose-ai code {
             background: #f1f5f9;
-            padding: 0.15rem 0.35rem;
-            border-radius: 6px;
-            font-size: 0.85em;
-            color: #0f172a;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.375rem;
+            font-size: 0.8em;
+            color: #2563eb;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             border: 1px solid #e2e8f0;
         }
 
         html.dark .prose-ai code {
             background: #1e293b;
-            color: #cbd5e1;
-            border: 1px solid #334155;
+            color: #60a5fa;
+            border-color: #334155;
         }
 
-        .prose-ai h1 {
-            font-weight: 800;
-            font-size: 1.1rem;
-            margin-top: 0.75rem;
-            margin-bottom: 0.35rem;
-            color: #1e3a8a;
+        .prose-ai pre {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+            font-size: 0.8rem;
         }
 
-        html.dark .prose-ai h1 {
-            color: #93c5fd;
-        }
-
-        .prose-ai h2 {
-            font-weight: 750;
-            font-size: 1rem;
-            margin-top: 0.75rem;
-            margin-bottom: 0.35rem;
-            color: #1e3a8a;
-        }
-
-        html.dark .prose-ai h2 {
-            color: #93c5fd;
-        }
-
-        .prose-ai h3 {
-            font-weight: 700;
-            font-size: 0.95rem;
-            margin-top: 0.75rem;
-            margin-bottom: 0.35rem;
-            color: #1e3a8a;
-        }
-
-        html.dark .prose-ai h3 {
-            color: #93c5fd;
-        }
-
-        .prose-ai li {
-            color: #4b5563;
-        }
-
-        html.dark .prose-ai li {
-            color: #cbd5e1;
+        .prose-ai pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
         }
 
         .prose-ai blockquote {
-            border-left: 3px solid #3b82f6;
-            padding-left: 0.75rem;
-            color: #4b5563;
-            margin: 0.5rem 0;
+            border-left: 3px solid #2563eb;
+            padding: 0.4rem 0.8rem;
+            color: #475569;
+            background: #f8fafc;
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            margin: 0.75rem 0;
             font-style: italic;
         }
 
         html.dark .prose-ai blockquote {
-            border-left: 3px solid #60a5fa;
+            border-left-color: #60a5fa;
             color: #94a3b8;
+            background: rgba(30, 41, 59, 0.4);
         }
 
         .msg-enter {
@@ -391,8 +528,9 @@
                     '📊 Berapa total laporan audit saat ini?',
                     '🏢 Berapa jumlah klien yang terdaftar?',
                     '📋 Tampilkan daftar laporan audit terbaru',
+                    '📅 Bagaimana rekap absensi kehadiran hari ini?',
+                    '📅 Tampilkan riwayat absensi terbaru tim',
                     '⚠️ Apakah ada kendala yang dilaporkan oleh tim?',
-                    '📅 Bagaimana ringkasan absensi kehadiran hari ini?',
                     ] as $prompt)
                     <button class="quick-prompt text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-850/50 border border-slate-200/60 dark:border-slate-800 px-3.5 py-2 rounded-xl shadow-sm transition-all duration-200" onclick="setQuickPrompt(this)">
                         {{ $prompt }}
@@ -441,12 +579,47 @@
         let currentSessionId = sessionIdStr !== '' ? parseInt(sessionIdStr) : null;
         let isNewSession = "{{ $currentSession ? 'false' : 'true' }}" === 'true';
 
-        // Gulir ke bagian bawah saat halaman dimuat
+        // Gulir ke bagian bawah saat halaman dimuat & tingkatkan format elemen
         function scrollToBottom() {
             const chatMessages = document.getElementById('chat-messages');
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
         }
-        window.onload = scrollToBottom;
+
+        // Post-processing untuk pesan yang di-render dari server (database) atau AJAX
+        function enhanceServerRenderedMessages() {
+            document.querySelectorAll('.prose-ai').forEach(el => {
+                // Bungkus tabel yang belum terbungkus container responsif
+                el.querySelectorAll('table').forEach(table => {
+                    if (!table.parentElement || !table.parentElement.classList.contains('table-responsive')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'table-responsive';
+                        table.parentNode.insertBefore(wrapper, table);
+                        wrapper.appendChild(table);
+                    }
+                });
+
+                // Format status di sel tabel, paragraf, atau li menjadi status badges
+                el.querySelectorAll('td, p, li').forEach(node => {
+                    const text = node.textContent.trim();
+                    if (['Disetujui', 'Hadir', 'Aktif', 'Selesai'].includes(text)) {
+                        node.innerHTML = `<span class="status-badge status-disetujui">${escapeHtml(text)}</span>`;
+                    } else if (['Review', 'Pending', 'Izin', 'Proses'].includes(text)) {
+                        node.innerHTML = `<span class="status-badge status-review">${escapeHtml(text)}</span>`;
+                    } else if (['Revisi', 'Tidak Hadir', 'Nonaktif', 'Sakit', 'Kendala'].includes(text)) {
+                        node.innerHTML = `<span class="status-badge status-revisi">${escapeHtml(text)}</span>`;
+                    } else if (node.children.length === 0 && node.innerHTML.includes('[')) {
+                        node.innerHTML = formatStatusBadges(node.innerHTML);
+                    }
+                });
+            });
+        }
+
+        window.onload = function() {
+            scrollToBottom();
+            enhanceServerRenderedMessages();
+        };
 
         function toggleSettings() {
             const panel = document.getElementById('api-settings-panel');
@@ -479,21 +652,106 @@
             textarea.focus();
         }
 
-        // Markdown formatter for JS (dynamic output)
+        // Opsi marked parser
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                gfm: true,
+                breaks: true
+            });
+        }
+
+        // Ubah teks kurung status menjadi status badge
+        function formatStatusBadges(htmlStr) {
+            if (!htmlStr) return '';
+            return htmlStr
+                .replace(/\[(Disetujui|Hadir|Aktif|Selesai)\]/gi, '<span class="status-badge status-disetujui">$1</span>')
+                .replace(/\[(Review|Pending|Izin|Proses)\]/gi, '<span class="status-badge status-review">$1</span>')
+                .replace(/\[(Revisi|Tidak Hadir|Nonaktif|Sakit|Kendala)\]/gi, '<span class="status-badge status-revisi">$1</span>');
+        }
+
+        // Markdown formatter JS tingkat lanjut dengan dukungan Tabel, Badges & Code Blocks
         function formatText(text) {
-            return text
+            if (!text) return '';
+            let parsedHtml = '';
+
+            if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+                parsedHtml = marked.parse(text);
+            } else {
+                parsedHtml = fallbackFormatMarkdown(text);
+            }
+
+            // Otomatis bungkus tabel dalam container .table-responsive
+            parsedHtml = parsedHtml.replace(/<table>/gi, '<div class="table-responsive"><table>')
+                                   .replace(/<\/table>/gi, '</table></div>');
+
+            return formatStatusBadges(parsedHtml);
+        }
+
+        // Fallback markdown parsing jika marked library tidak dapat dimuat
+        function fallbackFormatMarkdown(text) {
+            let lines = text.split('\n');
+            let inTable = false;
+            let tableHtml = '';
+            let result = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+
+                if (line.startsWith('|') && line.endsWith('|')) {
+                    if (line.replace(/[\s|:-]/g, '') === '') {
+                        continue; // skip separator row
+                    }
+                    let cells = line.split('|').slice(1, -1);
+                    if (!inTable) {
+                        inTable = true;
+                        tableHtml = '<div class="table-responsive"><table><thead><tr>';
+                        cells.forEach(c => tableHtml += `<th>${escapeHtml(c.trim())}</th>`);
+                        tableHtml += '</tr></thead><tbody>';
+                    } else {
+                        tableHtml += '<tr>';
+                        cells.forEach(c => tableHtml += `<td>${c.trim()}</td>`);
+                        tableHtml += '</tr>';
+                    }
+                    continue;
+                } else {
+                    if (inTable) {
+                        inTable = false;
+                        tableHtml += '</tbody></table></div>';
+                        result.push(tableHtml);
+                        tableHtml = '';
+                    }
+                }
+
+                if (line.startsWith('### ')) {
+                    result.push(`<h3>${line.substring(4)}</h3>`);
+                } else if (line.startsWith('## ')) {
+                    result.push(`<h2>${line.substring(3)}</h2>`);
+                } else if (line.startsWith('# ')) {
+                    result.push(`<h1>${line.substring(2)}</h1>`);
+                } else if (line.startsWith('---') || line.startsWith('***')) {
+                    result.push('<hr>');
+                } else if (line.startsWith('- ') || line.startsWith('* ')) {
+                    result.push(`<li class="ml-4 list-disc">${line.substring(2)}</li>`);
+                } else if (/^\d+\.\s+/.test(line)) {
+                    result.push(`<li class="ml-4 list-decimal">${line.replace(/^\d+\.\s+/, '')}</li>`);
+                } else if (line.startsWith('> ')) {
+                    result.push(`<blockquote>${line.substring(2)}</blockquote>`);
+                } else if (line === '') {
+                    result.push('<br>');
+                } else {
+                    result.push(`<p>${line}</p>`);
+                }
+            }
+
+            if (inTable) {
+                tableHtml += '</tbody></table></div>';
+                result.push(tableHtml);
+            }
+
+            return result.join('')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code>$1</code>')
-                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                .replace(/^\s*[-*]\s+(.*)/gim, '<li class="ml-4 list-disc text-xs">$1</li>')
-                .replace(/(<li class="ml-4 list-disc.*<\/li>\n?)+/g, '<ul class="my-1.5 space-y-1">$&</ul>')
-                .replace(/^\d+\.\s+(.*)/gim, '<li class="ml-4 list-decimal text-xs">$1</li>')
-                .replace(/(<li class="ml-4 list-decimal.*<\/li>\n?)+/g, '<ol class="my-1.5 space-y-1">$&</ol>')
-                .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-                .replace(/\n/g, '<br>');
+                .replace(/`(.*?)`/g, '<code>$1</code>');
         }
 
         function escapeHtml(str) {
@@ -531,6 +789,7 @@
                     </div>`;
             }
             scrollToBottom();
+            enhanceServerRenderedMessages();
         }
 
         function appendError(msg) {

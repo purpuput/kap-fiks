@@ -69,7 +69,12 @@ class ClientController extends Controller
             abort(403);
         }
 
-        $auditors = User::query()->where('role', 'auditor')->get();
+        $auditors = User::query()
+            ->where('role', 'auditor')
+            ->withCount(['clients' => function ($q) {
+                $q->where('status', 'aktif');
+            }])
+            ->get();
 
         return view('clients.create', compact('auditors'));
     }
@@ -103,21 +108,65 @@ class ClientController extends Controller
             'team_role' => 'required|array',
         ]);
 
-        // Admin pembuat
+        // Validasi Kuota Maksimal Auditor (3 Klien Aktif)
+        $maxQuota = 3;
+        foreach ($request->auditors as $auditorId) {
+            $auditorUser = User::withCount(['clients' => function ($q) {
+                $q->where('status', 'aktif');
+            }])->find($auditorId);
+
+            if ($auditorUser && $auditorUser->clients_count >= $maxQuota) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['auditors' => "Auditor {$auditorUser->name} telah mencapai batas kuota maksimal ({$maxQuota} klien aktif). Silakan pilih auditor lain."]);
+            }
+        }
+
+        // Pembuat data (Admin) -> status pending untuk persetujuan Pimpinan
         $validated['created_by'] = Auth::id();
+        $validated['approval_status'] = 'pending';
+        $validated['approved_by'] = null;
+        $validated['approved_at'] = null;
 
         // Create client
         $client = Client::create($validated);
 
         // Assign auditor
         foreach ($request->auditors as $auditorId) {
-
+            $teamRole = $request->team_role[$auditorId] ?? 'anggota';
             $client->auditors()->attach($auditorId, [
-
-                'team_role' =>
-                $request->team_role[$auditorId] ?? 'anggota'
-
+                'team_role' => $teamRole
             ]);
+        }
+
+        // Kirim notifikasi penugasan ke auditor & notifikasi pengajuan baru ke pimpinan
+        try {
+            foreach ($request->auditors as $auditorId) {
+                $teamRole = $request->team_role[$auditorId] ?? 'anggota';
+                $auditorUser = User::find($auditorId);
+                if ($auditorUser) {
+                    $auditorUser->notify(new \App\Notifications\TeamAssignmentNotification(
+                        $client,
+                        $teamRole,
+                        Auth::user()->name
+                    ));
+                }
+            }
+
+            // Notifikasi ke seluruh pimpinan bahwa ada penambahan data klien baru
+            $pimpinanUsers = User::where('role', 'pimpinan')->get();
+            foreach ($pimpinanUsers as $pimpinan) {
+                if ($pimpinan->id !== Auth::id()) {
+                    $pimpinan->notify(new \App\Notifications\ClientApprovalNotification(
+                        $client,
+                        'pending',
+                        null,
+                        Auth::user()->name
+                    ));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi pembuatan klien: ' . $e->getMessage());
         }
 
         return redirect()
@@ -136,16 +185,17 @@ class ClientController extends Controller
     {
         if (
             Auth::guest() ||
-            Auth::user()->role !== 'admin'
+            !in_array(Auth::user()->role, ['admin', 'pimpinan'])
         ) {
             abort(403);
         }
 
-        if ($client->approval_status === 'disetujui') {
-            return redirect()->route('clients.index')->with('error', 'Klien yang telah disetujui tidak dapat diubah kembali.');
-        }
-
-        $auditors = User::query()->where('role', 'auditor')->get();
+        $auditors = User::query()
+            ->where('role', 'auditor')
+            ->withCount(['clients' => function ($q) {
+                $q->where('status', 'aktif');
+            }])
+            ->get();
 
         return view('clients.edit', compact(
             'client',
@@ -158,13 +208,9 @@ class ClientController extends Controller
     {
         if (
             Auth::guest() ||
-            Auth::user()->role !== 'admin'
+            !in_array(Auth::user()->role, ['admin', 'pimpinan'])
         ) {
             abort(403);
-        }
-
-        if ($client->approval_status === 'disetujui') {
-            return redirect()->route('clients.index')->with('error', 'Klien yang telah disetujui tidak dapat diubah kembali.');
         }
 
         $validated = $request->validate([
@@ -187,13 +233,24 @@ class ClientController extends Controller
             'team_role' => 'required|array',
         ]);
 
-        // Reset approval
-        $validated['approval_status'] = 'pending';
+        // Validasi Kuota Maksimal Auditor (3 Klien Aktif, mengabaikan klien ini sendiri)
+        $maxQuota = 3;
+        foreach ($request->auditors as $auditorId) {
+            $auditorUser = User::withCount(['clients' => function ($q) use ($client) {
+                $q->where('status', 'aktif')->where('clients.id', '!=', $client->id);
+            }])->find($auditorId);
 
-        $validated['approved_by'] = null;
+            if ($auditorUser && $auditorUser->clients_count >= $maxQuota) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['auditors' => "Auditor {$auditorUser->name} telah mencapai batas kuota maksimal ({$maxQuota} klien aktif). Silakan pilih auditor lain."]);
+            }
+        }
 
-        $validated['approved_at'] = null;
-
+        // Otomatis langsung disetujui saat di-update oleh Pimpinan/Admin
+        $validated['approval_status'] = 'disetujui';
+        $validated['approved_by'] = Auth::id();
+        $validated['approved_at'] = now();
         $validated['revision_note'] = null;
 
         // Update client
@@ -202,15 +259,46 @@ class ClientController extends Controller
         // Reset auditor
         $client->auditors()->detach();
 
-        // Assign ulang auditor
-        foreach ($request->auditors as $auditorId) {
+        // Assign ulang auditor & kirim notifikasi
+        try {
+            foreach ($request->auditors as $auditorId) {
+                $teamRole = $request->team_role[$auditorId] ?? 'anggota';
+                $client->auditors()->attach($auditorId, [
+                    'team_role' => $teamRole
+                ]);
 
-            $client->auditors()->attach($auditorId, [
+                $auditorUser = User::find($auditorId);
+                if ($auditorUser) {
+                    $auditorUser->notify(new \App\Notifications\TeamAssignmentNotification(
+                        $client,
+                        $teamRole,
+                        Auth::user()->name
+                    ));
+                }
+            }
 
-                'team_role' =>
-                $request->team_role[$auditorId] ?? 'anggota'
+            // Notifikasi ke Pimpinan (jika di-update Admin) atau Admin Pembuat (jika di-update Pimpinan)
+            $recipients = collect();
+            if (Auth::user()->role === 'admin') {
+                $recipients = User::where('role', 'pimpinan')->get();
+            } else {
+                if ($client->creator && $client->creator->id !== Auth::id()) {
+                    $recipients->push($client->creator);
+                }
+            }
 
-            ]);
+            foreach ($recipients as $recipient) {
+                if ($recipient->id !== Auth::id()) {
+                    $recipient->notify(new \App\Notifications\ClientApprovalNotification(
+                        $client,
+                        'updated',
+                        null,
+                        Auth::user()->name
+                    ));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi update klien: ' . $e->getMessage());
         }
 
         return redirect()
@@ -239,16 +327,36 @@ class ClientController extends Controller
     public function approve(Client $client)
     {
         $client->update([
-
             'approval_status' => 'disetujui',
-
             'approved_by' => Auth::user()->id,
-
             'approved_at' => now(),
-
-            // hapus revisi lama
             'revision_note' => null,
         ]);
+
+        // Kirim notifikasi ke auditor tim dan admin pembuat
+        try {
+            $recipients = collect();
+            if ($client->creator) {
+                $recipients->push($client->creator);
+            }
+            if ($client->auditors) {
+                $recipients = $recipients->merge($client->auditors);
+            }
+            $recipients = $recipients->unique('id');
+
+            foreach ($recipients as $recipient) {
+                if ($recipient->id !== Auth::id()) {
+                    $recipient->notify(new \App\Notifications\ClientApprovalNotification(
+                        $client,
+                        'disetujui',
+                        null,
+                        Auth::user()->name
+                    ));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi approve klien: ' . $e->getMessage());
+        }
 
         return redirect()
             ->back()
@@ -265,16 +373,36 @@ class ClientController extends Controller
 
         // Update revisi
         $client->update([
-
             'approval_status' => 'revisi',
-
             'revision_note' => $request->revision_note,
-
-            // reset approval
             'approved_by' => null,
-
             'approved_at' => null,
         ]);
+
+        // Kirim notifikasi ke admin pembuat & auditor tim
+        try {
+            $recipients = collect();
+            if ($client->creator) {
+                $recipients->push($client->creator);
+            }
+            if ($client->auditors) {
+                $recipients = $recipients->merge($client->auditors);
+            }
+            $recipients = $recipients->unique('id');
+
+            foreach ($recipients as $recipient) {
+                if ($recipient->id !== Auth::id()) {
+                    $recipient->notify(new \App\Notifications\ClientApprovalNotification(
+                        $client,
+                        'revisi',
+                        $request->revision_note,
+                        Auth::user()->name
+                    ));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi revisi klien: ' . $e->getMessage());
+        }
 
         return redirect()
             ->back()

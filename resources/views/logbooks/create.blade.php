@@ -15,7 +15,7 @@
 
                     <!-- Nama Pegawai -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Pegawai</label>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama {{ Auth::user()->role }}</label>
                         <input type="text" value="{{ Auth::user()->name }}" disabled class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-100 text-slate-400 cursor-not-allowed text-sm">
                     </div>
 

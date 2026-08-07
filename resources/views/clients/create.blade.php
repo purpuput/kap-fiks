@@ -251,22 +251,42 @@
 
                     {{-- Tim audit --}}
                     <div>
-                        <label class="block mb-3 font-bold text-slate-700 text-sm">
-                            Tim Audit
-                        </label>
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="font-bold text-slate-700 text-sm">
+                                Tim Audit
+                            </label>
+                            <span class="text-xs text-slate-400 font-semibold">
+                                Batas Maksimal: 3 Klien Aktif Per Auditor
+                            </span>
+                        </div>
                         <div class="space-y-3">
                             @foreach ($auditors as $auditor)
-                            <div class="border border-slate-100 rounded-2xl p-4 hover:bg-slate-50/50 transition-colors">
+                            @php
+                                $isFull = ($auditor->clients_count ?? 0) >= 3;
+                            @endphp
+                            <div class="border rounded-2xl p-4 transition-colors {{ $isFull ? 'border-rose-100 bg-rose-50/30 opacity-75' : 'border-slate-100 hover:bg-slate-50/50' }}">
                                 <div class="flex items-center justify-between gap-4">
                                     <div class="flex items-center gap-3">
                                         <input type="checkbox"
                                             name="auditors[]"
                                             value="{{ $auditor->id }}"
-                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 w-4 h-4">
+                                            {{ $isFull ? 'disabled' : '' }}
+                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 w-4 h-4 {{ $isFull ? 'cursor-not-allowed' : '' }}">
                                         <div>
-                                            <p class="font-bold text-slate-700 text-sm">
-                                                {{ $auditor->name }}
-                                            </p>
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <p class="font-bold text-slate-700 text-sm">
+                                                    {{ $auditor->name }}
+                                                </p>
+                                                @if($isFull)
+                                                <span class="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-md font-bold">
+                                                    Beban Penuh (3/3 Klien)
+                                                </span>
+                                                @else
+                                                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-md font-semibold">
+                                                    {{ $auditor->clients_count ?? 0 }}/3 Klien Aktif
+                                                </span>
+                                                @endif
+                                            </div>
                                             <p class="text-xs text-slate-400 font-semibold mt-0.5">
                                                 {{ $auditor->email }}
                                             </p>
@@ -274,7 +294,8 @@
                                     </div>
                                     <select
                                         name="team_role[{{ $auditor->id }}]"
-                                        class="bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all">
+                                        {{ $isFull ? 'disabled' : '' }}
+                                        class="bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all {{ $isFull ? 'cursor-not-allowed opacity-60' : '' }}">
                                         <option value="anggota">
                                             Anggota
                                         </option>

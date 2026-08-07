@@ -107,6 +107,8 @@ class AuditReport extends Model
             AuditReportFile::class
         )->whereHas('review', function ($q) {
             $q->where('status', 'approved');
+        })->whereHas('auditReport', function ($q) {
+            $q->where('status', 'disetujui');
         });
     }
 
@@ -125,9 +127,7 @@ class AuditReport extends Model
                 $this->reviewed_at = now();
             }
         } else {
-            if ($isResubmit || $this->status !== 'revisi') {
-                $this->status = 'review';
-            }
+            $this->status = 'review';
         }
 
         $this->save();
@@ -155,5 +155,35 @@ class AuditReport extends Model
     public function isApproved(): bool
     {
         return $this->status === 'disetujui';
+    }
+
+    public static function statusLabels(): array
+    {
+        return [
+            'draft' => 'Draft',
+            'review' => 'Dalam Review',
+            'revisi' => 'Perlu Revisi',
+            'disetujui' => 'Disetujui',
+        ];
+    }
+
+    public static function statusDescriptions(): array
+    {
+        return [
+            'draft' => 'Belum diajukan',
+            'review' => 'Sedang diperiksa auditor/reviewer',
+            'revisi' => 'Ada temuan/catatan yang harus diperbaiki',
+            'disetujui' => 'Sudah lolos review dan final',
+        ];
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return self::statusLabels()[$this->status] ?? ucfirst($this->status);
+    }
+
+    public function getStatusDescriptionAttribute(): string
+    {
+        return self::statusDescriptions()[$this->status] ?? '';
     }
 }

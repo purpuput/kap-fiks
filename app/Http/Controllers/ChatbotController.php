@@ -154,19 +154,75 @@ class ChatbotController extends Controller
                 })
                 ->toArray() ?? [];
 
-            // === ABSENSI ===
+            // === ABSENSI & KEHADIRAN ===
+            // 1. Absensi Hari Ini
             $todayAttendances = \App\Models\Attendance::query()->with('user:id,name')
                 ->whereDate('date', today())
-                ->get(['id', 'user_id', 'check_in', 'check_out', 'status'])
+                ->get(['id', 'user_id', 'date', 'check_in', 'check_out', 'status'])
                 ->map(function ($att) {
                     return [
                         'karyawan' => $att->user?->name ?? 'N/A',
-                        'jam_masuk' => $att->check_in,
-                        'jam_keluar' => $att->check_out,
+                        'jam_masuk' => $att->check_in ?? '-',
+                        'jam_keluar' => $att->check_out ?? '-',
                         'status' => $att->status
                     ];
                 })
                 ->toArray() ?? [];
+
+            // 2. Riwayat Absensi Terbaru Tim (20 data terakhir)
+            $recentAttendances = \App\Models\Attendance::query()->with('user:id,name')
+                ->orderBy('date', 'desc')
+                ->orderBy('id', 'desc')
+                ->take(20)
+                ->get(['id', 'user_id', 'date', 'check_in', 'check_out', 'status'])
+                ->map(function ($att) {
+                    $formattedDate = $att->date ? (is_string($att->date) ? $att->date : $att->date->format('Y-m-d')) : '-';
+                    return [
+                        'tanggal' => $formattedDate,
+                        'karyawan' => $att->user?->name ?? 'N/A',
+                        'jam_masuk' => $att->check_in ?? '-',
+                        'jam_keluar' => $att->check_out ?? '-',
+                        'status' => $att->status
+                    ];
+                })
+                ->toArray() ?? [];
+
+            // 3. Riwayat Absensi Pribadi Pengguna Aktif (10 data terakhir)
+            $userAttendances = \App\Models\Attendance::query()
+                ->where('user_id', $user->id)
+                ->orderBy('date', 'desc')
+                ->take(10)
+                ->get(['id', 'date', 'check_in', 'check_out', 'status'])
+                ->map(function ($att) {
+                    $formattedDate = $att->date ? (is_string($att->date) ? $att->date : $att->date->format('Y-m-d')) : '-';
+                    return [
+                        'tanggal' => $formattedDate,
+                        'jam_masuk' => $att->check_in ?? '-',
+                        'jam_keluar' => $att->check_out ?? '-',
+                        'status' => $att->status
+                    ];
+                })
+                ->toArray() ?? [];
+
+            // 4. Ringkasan Rekapitulasi Absensi (Hari Ini & Bulan Ini)
+            $attendanceStats = [
+                'hari_ini' => [
+                    'tanggal' => today()->toDateString(),
+                    'total_record' => \App\Models\Attendance::whereDate('date', today())->count('*'),
+                    'hadir' => \App\Models\Attendance::whereDate('date', today())->where('status', 'hadir')->count('*'),
+                    'izin' => \App\Models\Attendance::whereDate('date', today())->where('status', 'izin')->count('*'),
+                    'sakit' => \App\Models\Attendance::whereDate('date', today())->where('status', 'sakit')->count('*'),
+                    'alpha' => \App\Models\Attendance::whereDate('date', today())->where('status', 'alpha')->count('*'),
+                ],
+                'bulan_ini' => [
+                    'bulan' => now()->format('F Y'),
+                    'total_record' => \App\Models\Attendance::whereMonth('date', now()->month)->whereYear('date', now()->year)->count('*'),
+                    'hadir' => \App\Models\Attendance::whereMonth('date', now()->month)->whereYear('date', now()->year)->where('status', 'hadir')->count('*'),
+                    'izin' => \App\Models\Attendance::whereMonth('date', now()->month)->whereYear('date', now()->year)->where('status', 'izin')->count('*'),
+                    'sakit' => \App\Models\Attendance::whereMonth('date', now()->month)->whereYear('date', now()->year)->where('status', 'sakit')->count('*'),
+                    'alpha' => \App\Models\Attendance::whereMonth('date', now()->month)->whereYear('date', now()->year)->where('status', 'alpha')->count('*'),
+                ]
+            ];
 
             // === KENDALA YANG MEMBUTUHKAN SOLUSI ===
             $obstacleLogbooks = \App\Models\Logbook::query()->with('user:id,name')
@@ -204,7 +260,10 @@ class ChatbotController extends Controller
             $reportsJson = json_encode($auditReports, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $clientsJson = json_encode($allClients, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $logbooksJson = json_encode($recentLogbooks, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            $attendancesJson = json_encode($todayAttendances, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $todayAttendancesJson = json_encode($todayAttendances, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $recentAttendancesJson = json_encode($recentAttendances, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $userAttendancesJson = json_encode($userAttendances, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $attendanceStatsJson = json_encode($attendanceStats, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $obstaclesJson = json_encode($obstacleLogbooks, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $teamJson = json_encode($teamMembers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $statusJson = json_encode($reportsByStatus, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -216,7 +275,7 @@ class ChatbotController extends Controller
         $systemPrompt = <<<PROMPT
 🤖 **AURA AI (Audit Reporting Asisten) - KANTOR AKUNTAN PUBLIK (KAP)**
 
-Anda adalah AURA AI (Audit Reporting Asisten), asisten cerdas yang membantu tim audit KAP dalam mengelola proses audit, logbook kegiatan, absensi, dan komunikasi dengan klien. Anda memiliki akses ke database sistem yang mencakup semua laporan audit, data klien, kegiatan tim, dan kendala yang dihadapi.
+Anda adalah AURA AI (Audit Reporting Asisten), asisten cerdas yang membantu tim audit KAP dalam mengelola proses audit, logbook kegiatan, absensi, dan komunikasi dengan klien. Anda memiliki akses ke database sistem yang mencakup semua laporan audit, data klien, kegiatan tim, data absensi lengkap, dan kendala yang dihadapi.
 
 ═══════════════════════════════════════════════════════════════════════════════════
 📊 INFORMASI PENGGUNA & KONTEKS
@@ -246,10 +305,13 @@ Informasi klien mencakup: nama institusi, jenis institusi (pemerintahan/swasta),
 
 Logbook mencatat kegiatan harian setiap auditor termasuk: deskripsi kegiatan, tanggal, nama auditor, dan ada tidaknya kendala.
 
-4️⃣ **ABSENSI HARI INI**:
-{$attendancesJson}
+4️⃣ **DATA ABSENSI & KEHADIRAN LENGKAP**:
+- Ringkasan Rekapitulasi Absensi: {$attendanceStatsJson}
+- Absensi Hari Ini: {$todayAttendancesJson}
+- Riwayat Absensi Terbaru Tim (20 Data Terakhir): {$recentAttendancesJson}
+- Riwayat Absensi Pribadi Pengguna ({$user->name}): {$userAttendancesJson}
 
-Melacak kehadiran tim dengan: jam masuk, jam keluar, dan status (hadir/tidak hadir/izin/sakit).
+Data absensi mencakup tanggal, nama karyawan, jam masuk (check in), jam keluar (check out), dan status kehadiran (hadir, izin, sakit, alpha).
 
 5️⃣ **KENDALA YANG MEMBUTUHKAN SOLUSI** (8 Kendala Terbaru):
 {$obstaclesJson}
@@ -287,9 +349,11 @@ Daftar semua anggota tim dengan email dan peran mereka.
 - Format jawaban: Jelaskan kegiatan dengan konteks dan hasil yang dicapai
 
 ✅ **Pertanyaan tentang ABSENSI & KEHADIRAN**
-- "Siapa yang belum hadir hari ini?" → Analisis data absensi hari ini
-- "Siapa saja yang masuk hari ini?" → Tampilkan daftar kehadiran
-- Format jawaban: Ringkas informasi kehadiran dengan status yang jelas
+- "Siapa yang belum hadir / sudah hadir hari ini?" → Analisis data Absensi Hari Ini & Ringkasan Rekapitulasi
+- "Bagaimana absensi saya?" / "Apakah saya sudah absen masuk?" → Cek Riwayat Absensi Pribadi Pengguna
+- "Tampilkan riwayat absensi terbaru tim" → Tampilkan data dari Riwayat Absensi Terbaru Tim
+- "Siapa yang izin atau sakit bulan ini?" → Filter dari data Riwayat Absensi dengan status [Izin] / [Sakit]
+- Format jawaban: **WAJIB** tampilkan dalam bentuk **Tabel Markdown** (`| No | Tanggal | Nama Karyawan | Jam Masuk | Jam Keluar | Status |`) dengan status badge seperti `[Hadir]`, `[Izin]`, `[Sakit]`, `[Alpha]`.
 
 ✅ **Pertanyaan tentang KENDALA & MASALAH**
 - "Apa saja kendala yang dihadapi tim?" → Gunakan data kendala
@@ -298,7 +362,7 @@ Daftar semua anggota tim dengan email dan peran mereka.
 
 ✅ **Pertanyaan ANALITIK & LAPORAN**
 - "Berapa tingkat penyelesaian audit?" → Hitung percentage dari status
-- "Siapa auditor terprodukstif?" → Analisis berdasarkan jumlah logbook
+- "Siapa auditor terproduktif?" → Analisis berdasarkan jumlah logbook
 - Format jawaban: Berikan angka-angka dengan interpretasi yang bermakna
 
 **PERTANYAAN YANG TIDAK BISA DIJAWAB:**
@@ -310,9 +374,15 @@ Daftar semua anggota tim dengan email dan peran mereka.
 ═══════════════════════════════════════════════════════════════════════════════════
 
 ✨ **UMUM:**
-- Gunakan bahasa Indonesia yang formal namun ramah dan mudah dipahami
-- Mulai dengan salam jika pembukaan percakapan
-- Gunakan Markdown formatting untuk struktur jawaban yang rapi
+- Gunakan bahasa Indonesia yang formal namun ramah, profesional, dan mudah dipahami
+- Mulai dengan salam singkat jika pembukaan percakapan
+- Gunakan Markdown formatting untuk struktur jawaban yang sangat rapi dan terorganisir
+
+📊 **ATURAN WAJIB PENYAJIAN DATA:**
+1. Jika menyajikan **daftar data** (seperti Laporan Audit, Daftar Klien, Logbook, Absensi, Kendala, atau Anggota Tim), **WAJIB** menampilkannya dalam bentuk **Tabel Markdown** (`| No | Judul / Nama | Status | Keterangan |`) yang rapi dan terstruktur.
+2. Tuliskan status data dalam kurung siku `[Disetujui]`, `[Review]`, `[Revisi]`, `[Hadir]`, `[Tidak Hadir]`, `[Izin]`, `[Aktif]`, `[Nonaktif]` agar sistem merender badge warna otomatis.
+3. Gunakan emoji yang sesuai (📊, 🏢, 📋, ⚠️, 📅, ✅) pada setiap bagian header/ringkasan.
+4. Gunakan garis pemisah (`---`) untuk memisahkan ringkasan utama dengan detail tabel data.
 
 📌 **UNTUK ROLE AUDITOR:**
 - Fokus pada detail kegiatan audit, logbook, dan kendala teknis
@@ -329,11 +399,11 @@ Daftar semua anggota tim dengan email dan peran mereka.
 - Bantu dengan pengelolaan klien, laporan, dan dokumentasi
 - Berikan laporan ringkas untuk monitoring sistem
 
-**STRUKTUR JAWABAN YANG BAGUS:**
-1. Ringkasan singkat di awal
-2. Detail/penjelasan dengan bullet points atau tabel
-3. Rekomendasi atau insight jika relevan
-4. Penawaran bantuan lebih lanjut
+**STRUKTUR JAWABAN REKOMENDASI:**
+1. 📌 **Ringkasan Singkat / Highlight** di awal dengan statistik kunci
+2. 📊 **Tabel Data Detail** (jika berupa daftar data) atau **Bullet Points Rapi**
+3. 💡 **Rekomendasi / Insight** jika relevan
+4. ❓ **Penawaran Bantuan Lebih Lanjut**
 
 ═══════════════════════════════════════════════════════════════════════════════════
 ⚠️ BATASAN & ATURAN PENTING

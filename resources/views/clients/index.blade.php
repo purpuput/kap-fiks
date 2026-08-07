@@ -40,7 +40,7 @@
                             <th class="px-6 py-4 text-left">Jenis Audit</th>
                             <th class="px-6 py-4 text-left">Tim Audit</th>
                             <th class="px-6 py-4 text-left">Kontrak</th>
-                            <th class="px-6 py-4 text-left">Status</th>
+                            <th class="px-6 py-4 text-left">Status Persetujuan</th>
                             <th class="px-6 py-4 text-center w-36">Aksi</th>
                         </tr>
                     </thead>
@@ -99,30 +99,22 @@
 
                             {{-- Status --}}
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center gap-1.5">
+                                <div class="flex flex-col items-start gap-1">
                                     {{-- Approval --}}
                                     @if($client->approval_status === 'disetujui')
-                                    <span class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-0.5 rounded-full border border-emerald-250/20 font-bold">
-                                        Disetujui
+                                    <span class="inline-flex flex-col items-start bg-emerald-50 text-emerald-800 text-xs px-2.5 py-1 rounded-lg border border-emerald-200/60 font-bold" title="Sudah disetujui pimpinan">
+                                        <span>Disetujui</span>
+                                        <span class="text-[9px] font-normal text-emerald-700/80">Sudah disetujui pimpinan</span>
                                     </span>
                                     @elseif($client->approval_status === 'revisi')
-                                    <span class="bg-rose-50 text-rose-700 text-xs px-2.5 py-0.5 rounded-full border border-rose-250/20 font-bold">
-                                        Revisi
+                                    <span class="inline-flex flex-col items-start bg-rose-50 text-rose-800 text-xs px-2.5 py-1 rounded-lg border border-rose-200/60 font-bold" title="Ada catatan perbaikan dari pimpinan">
+                                        <span>Perlu Revisi</span>
+                                        <span class="text-[9px] font-normal text-rose-700/80">Ada catatan perbaikan</span>
                                     </span>
                                     @else
-                                    <span class="bg-amber-50 text-amber-700 text-xs px-2.5 py-0.5 rounded-full border border-amber-250/20 font-bold">
-                                        Pending
-                                    </span>
-                                    @endif
-
-                                    {{-- Aktif/Nonaktif --}}
-                                    @if($client->status === 'aktif')
-                                    <span class="bg-blue-50 text-blue-700 text-xs px-2.5 py-0.5 rounded-full border border-blue-250/20 font-bold">
-                                        Aktif
-                                    </span>
-                                    @else
-                                    <span class="bg-slate-50 text-slate-600 text-xs px-2.5 py-0.5 rounded-full border border-slate-100 font-bold">
-                                        Nonaktif
+                                    <span class="inline-flex flex-col items-start bg-amber-50 text-amber-800 text-xs px-2.5 py-1 rounded-lg border border-amber-200/60 font-bold" title="Belum disetujui pimpinan">
+                                        <span>Pending</span>
+                                        <span class="text-[9px] font-normal text-amber-700/80">Belum disetujui pimpinan</span>
                                     </span>
                                     @endif
                                 </div>
@@ -136,14 +128,6 @@
                                         class="text-slate-500 hover:text-slate-800 font-bold hover:underline transition text-sm">
                                         Detail
                                     </a>
-
-                                    {{-- Edit --}}
-                                    @if(auth()->user()->role === 'admin' && $client->approval_status !== 'disetujui')
-                                    <a href="{{ route('clients.edit', $client->id) }}"
-                                        class="text-blue-600 hover:text-blue-700 font-bold hover:underline transition text-sm">
-                                        Edit
-                                    </a>
-                                    @endif
 
                                     {{-- Hapus --}}
                                     @if(auth()->user()->role === 'admin')

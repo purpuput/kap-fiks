@@ -10,6 +10,7 @@ Route::get('/', function () {
 });
 
 Route::middleware('auth')->get('/dashboard', function () {
+    session()->reflash();
     return match (Auth::user()->role) {
         'admin'    => redirect()->route('admin.dashboard'),
         'auditor'  => redirect()->route('auditor.dashboard'),
@@ -22,6 +23,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read_all');
+    Route::get('/notifications/unread-data', [\App\Http\Controllers\NotificationController::class, 'unreadData'])->name('notifications.unread_data');
 });
 
 require __DIR__ . '/auth.php';

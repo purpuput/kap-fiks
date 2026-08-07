@@ -89,6 +89,71 @@ class Client extends Model
             'id'
         )->whereHas('review', function ($q) {
             $q->where('status', 'approved');
+        })->whereHas('auditReport', function ($q) {
+            $q->where('status', 'disetujui');
         });
+    }
+
+    /*
+    | Status Helpers & Descriptions
+    */
+    public static function approvalStatusLabels(): array
+    {
+        return [
+            'pending' => 'Pending',
+            'menunggu_persetujuan' => 'Pending',
+            'disetujui' => 'Disetujui',
+            'revisi' => 'Perlu Revisi',
+            'ditolak' => 'Ditolak',
+        ];
+    }
+
+    public static function approvalStatusDescriptions(): array
+    {
+        return [
+            'pending' => 'Belum disetujui pimpinan',
+            'menunggu_persetujuan' => 'Belum disetujui pimpinan',
+            'disetujui' => 'Sudah disetujui pimpinan',
+            'revisi' => 'Ada catatan perbaikan dari pimpinan',
+            'ditolak' => 'Pengajuan ditolak pimpinan',
+        ];
+    }
+
+    public static function contractStatusLabels(): array
+    {
+        return [
+            'aktif' => 'Kontrak Aktif',
+            'hampir_habis' => 'Hampir Habis',
+            'selesai' => 'Kontrak Selesai',
+        ];
+    }
+
+    public static function contractStatusDescriptions(): array
+    {
+        return [
+            'aktif' => 'Kontrak audit masih berlangsung',
+            'hampir_habis' => 'Masa kontrak audit segera berakhir',
+            'selesai' => 'Masa kontrak audit telah berakhir',
+        ];
+    }
+
+    public function getApprovalStatusLabelAttribute(): string
+    {
+        return self::approvalStatusLabels()[$this->approval_status] ?? ucfirst($this->approval_status);
+    }
+
+    public function getApprovalStatusDescriptionAttribute(): string
+    {
+        return self::approvalStatusDescriptions()[$this->approval_status] ?? '';
+    }
+
+    public function getContractStatusLabelAttribute(): string
+    {
+        return self::contractStatusLabels()[$this->contract_status] ?? ucfirst($this->contract_status);
+    }
+
+    public function getContractStatusDescriptionAttribute(): string
+    {
+        return self::contractStatusDescriptions()[$this->contract_status] ?? '';
     }
 }

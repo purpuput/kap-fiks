@@ -1,4 +1,4 @@
-<x-app-layout title="Logbook Pegawai">
+<x-app-layout title="Logbook Harian">
 
     <div class="py-6 animate-fade-in-up">
 
@@ -10,7 +10,7 @@
                 <div>
 
                     <h1 class="text-xl font-bold text-slate-800">
-                        Logbook Pegawai
+                        Logbook Harian
                     </h1>
 
                     <p class="text-xs text-slate-400 mt-1 font-semibold">
@@ -246,7 +246,7 @@
 
                                 {{-- Pekerjaan Utama --}}
                                 <td class="px-6 py-4 text-slate-500 text-xs max-w-xs">
-                                    <div class="flex items-center gap-1.5">
+                                    <div class="flex items-center gap-1.5 min-w-0">
                                         <p class="truncate" title="{{ $logbook->main_task }}">{{ $logbook->main_task }}</p>
                                         @if($logbook->has_obstacle)
                                         <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-250/20 text-[10px] font-bold cursor-help" 

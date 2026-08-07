@@ -63,7 +63,8 @@ class DocumentManagementController extends Controller
                 $q->where('status', 'approved');
             })
             ->whereHas('auditReport', function ($q) use ($client) {
-                $q->where('client_id', $client->id);
+                $q->where('client_id', $client->id)
+                  ->where('status', 'disetujui');
             });
 
         if ($documentType) {
@@ -89,6 +90,11 @@ class DocumentManagementController extends Controller
      */
     public function download(AuditReportFile $documentManagement)
     {
+        // Pastikan laporan audit sudah disetujui pimpinan
+        if ($documentManagement->auditReport->status !== 'disetujui') {
+            abort(403, 'Laporan untuk dokumen ini belum disetujui oleh pimpinan.');
+        }
+
         // Pengecekan otorisasi auditor
         if (Auth::user()->role === 'auditor') {
             $hasAccess = $documentManagement->auditReport->client->auditors()->where('users.id', Auth::id())->exists();
@@ -112,6 +118,11 @@ class DocumentManagementController extends Controller
      */
     public function preview(AuditReportFile $documentManagement)
     {
+        // Pastikan laporan audit sudah disetujui pimpinan
+        if ($documentManagement->auditReport->status !== 'disetujui') {
+            abort(403, 'Laporan untuk dokumen ini belum disetujui oleh pimpinan.');
+        }
+
         // Pengecekan otorisasi auditor
         if (Auth::user()->role === 'auditor') {
             $hasAccess = $documentManagement->auditReport->client->auditors()->where('users.id', Auth::id())->exists();

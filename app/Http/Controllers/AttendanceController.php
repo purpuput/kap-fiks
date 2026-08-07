@@ -17,11 +17,20 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        // Mengambil filter tanggal dari request
+        // Mengambil filter dari request
         $date = $request->input('date');
-
-        // Mengambil filter user dari request
-        $user_id = $request->input('user_id');
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+        
+        // Memproses multiple user_ids
+        $user_ids = $request->input('user_ids');
+        if (is_string($user_ids)) {
+            $user_ids = array_filter(explode(',', $user_ids));
+        }
+        if (empty($user_ids) && $request->filled('user_id')) {
+            $user_ids = [$request->input('user_id')];
+        }
+        $user_ids = is_array($user_ids) ? array_values(array_filter($user_ids)) : [];
 
         // Mengambil data user yang sedang login
         $user = Auth::user();
@@ -31,30 +40,58 @@ class AttendanceController extends Controller
 
         /**
          * Filter berdasarkan role
-         * - Admin dan pimpinan dapat melihat semua data
+         * - Admin dan pimpinan dapat melihat semua data atau memfilter 1 / lebih user
          * - Auditor hanya dapat melihat data dirinya sendiri
          */
-        if (in_array($user->role, ['admin', 'pimpinan']) && $user_id) {
-
-            $query->where('user_id', $user_id);
+        if (in_array($user->role, ['admin', 'pimpinan']) && !empty($user_ids)) {
+            $query->whereIn('user_id', $user_ids);
         } elseif ($user->role === 'auditor') {
-
             $query->where('user_id', Auth::id());
         }
 
         /**
-         * Filter berdasarkan tanggal
+         * Filter berdasarkan tanggal / rentang periode
          */
-        if ($date) {
+        if ($start_date && $end_date) {
+            $query->whereBetween('date', [$start_date, $end_date]);
+        } elseif ($start_date) {
+            $query->whereDate('date', '>=', $start_date);
+        } elseif ($end_date) {
+            $query->whereDate('date', '<=', $end_date);
+        } elseif ($date) {
             $query->whereDate('date', $date);
         }
+
+        // Unpaginated query untuk rekapitulasi statistik evaluasi per pegawai
+        $allAttendancesForSummary = (clone $query)->get();
+        $userSummary = $allAttendancesForSummary->groupBy('user_id')->map(function ($items) {
+            $userItem = $items->first()->user;
+            $totalDays = $items->count();
+            $hadir = $items->where('status', 'hadir')->count();
+            $sakit = $items->where('status', 'sakit')->count();
+            $izin  = $items->where('status', 'izin')->count();
+            $alpha = $items->where('status', 'alpha')->count();
+            $percentage = $totalDays > 0 ? round(($hadir / $totalDays) * 100, 1) : 0;
+
+            return (object) [
+                'user_id' => $items->first()->user_id,
+                'name' => $userItem->name ?? 'Pegawai',
+                'role' => $userItem->role ?? '-',
+                'total' => $totalDays,
+                'hadir' => $hadir,
+                'sakit' => $sakit,
+                'izin' => $izin,
+                'alpha' => $alpha,
+                'percentage' => $percentage,
+            ];
+        })->values();
 
         // Mengambil data absensi dengan pagination
         $attendances = $query
             ->orderBy('date', 'desc')
             ->paginate(15);
 
-        // Mengambil daftar auditor dan admin
+        // Mengambil daftar auditor dan admin untuk dropdown filter
         $users = User::whereIn('role', ['admin', 'auditor'])
             ->orderBy('name')
             ->get();
@@ -63,8 +100,11 @@ class AttendanceController extends Controller
         return view('attendances.index', compact(
             'attendances',
             'date',
+            'start_date',
+            'end_date',
             'users',
-            'user_id'
+            'user_ids',
+            'userSummary'
         ));
     }
 
@@ -73,20 +113,44 @@ class AttendanceController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        // Hanya admin yang boleh export PDF
-        abort_unless(Auth::user()->role === 'admin', 403);
+        $currentUser = Auth::user();
 
         // Query data attendance
         $query = Attendance::with('user');
 
-        // Filter tanggal
-        if ($request->date) {
-            $query->whereDate('date', $request->date);
+        // Filter user berdasarkan role
+        if ($currentUser->role === 'auditor') {
+            $userIds = [$currentUser->id];
+        } else {
+            $userIds = $request->input('user_ids');
+            if (is_string($userIds)) {
+                $userIds = array_filter(explode(',', $userIds));
+            }
+            if (empty($userIds) && $request->filled('user_id')) {
+                $userIds = [$request->input('user_id')];
+            }
+            $userIds = is_array($userIds) ? array_values(array_filter($userIds)) : [];
         }
 
-        // Filter user
-        if ($request->user_id) {
-            $query->where('user_id', $request->user_id);
+        if (!empty($userIds)) {
+            $query->whereIn('user_id', $userIds);
+        }
+
+        // Filter rentang tanggal / periode
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $date = $request->input('date');
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->whereDate('date', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->whereDate('date', '<=', $endDate);
+        } elseif ($date) {
+            $query->whereDate('date', $date);
+            $startDate = $date;
+            $endDate = $date;
         }
 
         // Mengambil data absensi
@@ -94,14 +158,63 @@ class AttendanceController extends Controller
             ->orderBy('date', 'desc')
             ->get();
 
-        // Load view PDF
+        // Pengguna yang difilter
+        $selectedUsers = !empty($userIds) ? User::whereIn('id', $userIds)->get() : collect();
+
+        // Rekapitulasi Per Pegawai untuk PDF
+        $userSummary = $attendances->groupBy('user_id')->map(function ($items) {
+            $userItem = $items->first()->user;
+            $totalDays = $items->count();
+            $hadir = $items->where('status', 'hadir')->count();
+            $sakit = $items->where('status', 'sakit')->count();
+            $izin  = $items->where('status', 'izin')->count();
+            $alpha = $items->where('status', 'alpha')->count();
+            $percentage = $totalDays > 0 ? round(($hadir / $totalDays) * 100, 1) : 0;
+
+            return (object) [
+                'user_id' => $items->first()->user_id,
+                'name' => $userItem->name ?? 'Pegawai',
+                'role' => $userItem->role ?? '-',
+                'total' => $totalDays,
+                'hadir' => $hadir,
+                'sakit' => $sakit,
+                'izin' => $izin,
+                'alpha' => $alpha,
+                'percentage' => $percentage,
+            ];
+        })->values();
+
+        // Statistik Evaluasi Total
+        $totalDays = $attendances->count();
+        $totalHadir = $attendances->where('status', 'hadir')->count();
+        $totalSakit = $attendances->where('status', 'sakit')->count();
+        $totalIzin  = $attendances->where('status', 'izin')->count();
+        $totalAlpha = $attendances->where('status', 'alpha')->count();
+        $attendancePercentage = $totalDays > 0 ? round(($totalHadir / $totalDays) * 100, 1) : 0;
+
+        $stats = [
+            'total' => $totalDays,
+            'hadir' => $totalHadir,
+            'sakit' => $totalSakit,
+            'izin' => $totalIzin,
+            'alpha' => $totalAlpha,
+            'percentage' => $attendancePercentage,
+        ];
+
+        // Load view PDF Laporan Evaluasi
         $pdf = Pdf::loadView(
             'attendances.pdf.pdf',
-            compact('attendances')
+            compact('attendances', 'selectedUsers', 'startDate', 'endDate', 'stats', 'userSummary')
         );
 
+        $nameSuffix = $selectedUsers->count() === 1 
+            ? str_replace(' ', '_', $selectedUsers->first()->name) 
+            : ($selectedUsers->count() > 1 ? $selectedUsers->count() . '_Pegawai' : 'Semua_Pegawai');
+
+        $fileName = 'Laporan_Evaluasi_Absensi_' . $nameSuffix . '_' . date('Ymd_His') . '.pdf';
+
         // Download PDF
-        return $pdf->download('laporan-absensi.pdf');
+        return $pdf->download($fileName);
     }
 
     /**
@@ -109,43 +222,99 @@ class AttendanceController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        // Hanya admin yang boleh export Excel
-        abort_unless(Auth::user()->role === 'admin', 403);
+        $currentUser = Auth::user();
 
         // Query data attendance
         $query = Attendance::with('user');
 
-        // Filter tanggal
-        if ($request->date) {
-            $query->whereDate('date', $request->date);
+        // Filter user berdasarkan role
+        if ($currentUser->role === 'auditor') {
+            $userIds = [$currentUser->id];
+        } else {
+            $userIds = $request->input('user_ids');
+            if (is_string($userIds)) {
+                $userIds = array_filter(explode(',', $userIds));
+            }
+            if (empty($userIds) && $request->filled('user_id')) {
+                $userIds = [$request->input('user_id')];
+            }
+            $userIds = is_array($userIds) ? array_values(array_filter($userIds)) : [];
         }
 
-        // Filter user
-        if ($request->user_id) {
-            $query->where('user_id', $request->user_id);
+        if (!empty($userIds)) {
+            $query->whereIn('user_id', $userIds);
         }
 
-        /**
-         * Mapping data agar format Excel lebih rapi
-         */
-        $attendances = collect(
-            $query->get()->map(function ($item) {
+        // Filter rentang tanggal / periode
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $date = $request->input('date');
 
-                return [
-                    'Auditor' => $item->user->name ?? '-',
-                    'Tanggal' => $item->date,
-                    'Check In' => $item->check_in,
-                    'Check Out' => $item->check_out,
-                    'Status' => ucfirst($item->status),
-                    'Keterangan' => $item->notes,
-                ];
-            })
-        );
+        if ($startDate && $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->whereDate('date', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->whereDate('date', '<=', $endDate);
+        } elseif ($date) {
+            $query->whereDate('date', $date);
+            $startDate = $date;
+            $endDate = $date;
+        }
+
+        $selectedUsers = !empty($userIds) ? User::whereIn('id', $userIds)->get() : collect();
+        $attendances = $query->orderBy('date', 'desc')->get();
+
+        // Rekapitulasi Per Pegawai untuk Excel
+        $userSummary = $attendances->groupBy('user_id')->map(function ($items) {
+            $userItem = $items->first()->user;
+            $totalDays = $items->count();
+            $hadir = $items->where('status', 'hadir')->count();
+            $sakit = $items->where('status', 'sakit')->count();
+            $izin  = $items->where('status', 'izin')->count();
+            $alpha = $items->where('status', 'alpha')->count();
+            $percentage = $totalDays > 0 ? round(($hadir / $totalDays) * 100, 1) : 0;
+
+            return (object) [
+                'user_id' => $items->first()->user_id,
+                'name' => $userItem->name ?? 'Pegawai',
+                'role' => $userItem->role ?? '-',
+                'total' => $totalDays,
+                'hadir' => $hadir,
+                'sakit' => $sakit,
+                'izin' => $izin,
+                'alpha' => $alpha,
+                'percentage' => $percentage,
+            ];
+        })->values();
+
+        // Statistik Evaluasi untuk Excel
+        $totalDays = $attendances->count();
+        $totalHadir = $attendances->where('status', 'hadir')->count();
+        $totalSakit = $attendances->where('status', 'sakit')->count();
+        $totalIzin  = $attendances->where('status', 'izin')->count();
+        $totalAlpha = $attendances->where('status', 'alpha')->count();
+        $attendancePercentage = $totalDays > 0 ? round(($totalHadir / $totalDays) * 100, 1) : 0;
+
+        $stats = [
+            'total' => $totalDays,
+            'hadir' => $totalHadir,
+            'sakit' => $totalSakit,
+            'izin' => $totalIzin,
+            'alpha' => $totalAlpha,
+            'percentage' => $attendancePercentage,
+        ];
+
+        $nameSuffix = $selectedUsers->count() === 1 
+            ? str_replace(' ', '_', $selectedUsers->first()->name) 
+            : ($selectedUsers->count() > 1 ? $selectedUsers->count() . '_Pegawai' : 'Semua_Pegawai');
 
         // Download file Excel
+        $fileName = 'Laporan_Evaluasi_Absensi_' . $nameSuffix . '_' . date('Ymd_His') . '.xlsx';
+
         return Excel::download(
-            new AttendanceExport($attendances),
-            'laporan-absensi.xlsx'
+            new AttendanceExport($attendances, $selectedUsers, $startDate, $endDate, $stats, $userSummary),
+            $fileName
         );
     }
 

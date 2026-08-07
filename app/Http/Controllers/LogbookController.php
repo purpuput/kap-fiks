@@ -388,6 +388,21 @@ class LogbookController extends Controller
             'note' => null,
         ]);
 
+        /**
+         * Kirim notifikasi ke auditor pemilik logbook
+         */
+        try {
+            if ($logbook->user) {
+                $logbook->user->notify(new \App\Notifications\LogbookReviewedNotification(
+                    $logbook->fresh(),
+                    'approved',
+                    Auth::user()->name
+                ));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi logbook approve: ' . $e->getMessage());
+        }
+
         return back()->with(
             'success',
             'Logbook berhasil disetujui'
@@ -422,6 +437,21 @@ class LogbookController extends Controller
             'status' => 'revision',
             'note' => $request->note,
         ]);
+
+        /**
+         * Kirim notifikasi ke auditor pemilik logbook
+         */
+        try {
+            if ($logbook->user) {
+                $logbook->user->notify(new \App\Notifications\LogbookReviewedNotification(
+                    $logbook->fresh(),
+                    'revision',
+                    Auth::user()->name
+                ));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi logbook revision: ' . $e->getMessage());
+        }
 
         return back()->with(
             'success',

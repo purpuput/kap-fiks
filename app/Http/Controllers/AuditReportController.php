@@ -235,19 +235,38 @@ class AuditReportController extends Controller
 
             $mimes = ($type === 'data_klien')
 
-                ? 'mimes:pdf,zip,tar|max:102400'
+                ? 'mimes:zip,rar,tar,pdf|max:102400'
 
-                : 'mimes:pdf,zip,tar|max:51200';
+                : 'mimes:pdf,doc,docx,xls,xlsx|max:51200';
 
             $fileRules["files.{$type}"] =
                 "required|file|{$mimes}";
+        }
+
+        $messages = [
+            'client_id.required' => 'Klien wajib dipilih.',
+            'client_id.exists' => 'Klien yang Anda pilih tidak valid.',
+            'audit_date.required' => 'Tanggal Pembuatan Laporan wajib diisi.',
+            'audit_date.date' => 'Format Tanggal Pembuatan Laporan tidak valid.',
+        ];
+
+        foreach (array_keys($allowedTypes) as $type) {
+            $label = $allowedTypes[$type] ?? $type;
+            $messages["files.{$type}.required"] = "Dokumen {$label} wajib diunggah.";
+            $messages["files.{$type}.file"] = "Dokumen {$label} harus berupa berkas/file yang valid.";
+            $messages["files.{$type}.mimes"] = ($type === 'data_klien')
+                ? "Format dokumen {$label} harus berupa ZIP, RAR, TAR, atau PDF."
+                : "Format dokumen {$label} harus berupa PDF, DOC, DOCX, XLS, atau XLSX.";
+            $messages["files.{$type}.max"] = ($type === 'data_klien')
+                ? "Ukuran dokumen {$label} tidak boleh melebihi 100MB."
+                : "Ukuran dokumen {$label} tidak boleh melebihi 50MB.";
         }
 
         // Validasi form
         $request->validate(array_merge([
             'client_id' => 'required|exists:clients,id',
             'audit_date' => 'required|date',
-        ], $fileRules));
+        ], $fileRules), $messages);
 
         // Client (pastikan disetujui pimpinan dan belum memiliki laporan audit)
         $client = Client::where('id', $request->client_id)
@@ -261,7 +280,7 @@ class AuditReportController extends Controller
         }
 
         // Generate nomor laporan
-        $lastReport = AuditReport::latest()->first();
+        $lastReport = AuditReport::latest('id')->first();
 
         $number = $lastReport
             ? ((int) explode('/', $lastReport->report_number)[0]) + 1
@@ -336,6 +355,32 @@ class AuditReportController extends Controller
                     'uploaded_by' => Auth::id(),
                 ]);
             }
+        }
+
+        // Kirim notifikasi pembuatan laporan audit ke Pimpinan & Auditor tim
+        try {
+            $recipients = collect();
+            $pimpinans = \App\Models\User::where('role', 'pimpinan')->get();
+            $recipients = $recipients->merge($pimpinans);
+
+            if ($client->auditors) {
+                $recipients = $recipients->merge($client->auditors);
+            }
+            $recipients = $recipients->unique('id');
+
+            foreach ($recipients as $recipient) {
+                if ($recipient->id !== Auth::id()) {
+                    $recipient->notify(new \App\Notifications\AuditReportReviewedNotification(
+                        $report,
+                        'created',
+                        null,
+                        null,
+                        Auth::user()->name
+                    ));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi pembuatan laporan audit: ' . $e->getMessage());
         }
 
         return redirect()
@@ -460,11 +505,30 @@ class AuditReportController extends Controller
                 : 'required';
 
             $mimes = ($type === 'data_klien')
-                ? 'mimes:pdf,zip,tar|max:102400'
-                : 'mimes:pdf,zip,tar|max:51200';
+                ? 'mimes:zip,rar,7z,tar,pdf,doc,docx,xls,xlsx|max:102400'
+                : 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:51200';
 
             $fileRules["files.{$type}"] =
                 "{$required}|file|{$mimes}";
+        }
+
+        $messages = [
+            'client_id.required' => 'Klien wajib dipilih.',
+            'client_id.exists' => 'Klien yang Anda pilih tidak valid.',
+            'audit_date.required' => 'Tanggal Pembuatan Laporan wajib diisi.',
+            'audit_date.date' => 'Format Tanggal Pembuatan Laporan tidak valid.',
+        ];
+
+        foreach (array_keys($allowedTypes) as $type) {
+            $label = $this->documentTypes[$type] ?? $type;
+            $messages["files.{$type}.required"] = "Dokumen {$label} wajib diunggah.";
+            $messages["files.{$type}.file"] = "Dokumen {$label} harus berupa berkas/file yang valid.";
+            $messages["files.{$type}.mimes"] = ($type === 'data_klien')
+                ? "Format dokumen {$label} harus berupa ZIP, RAR, 7Z, TAR, PDF, Word, atau Excel."
+                : "Format dokumen {$label} harus berupa PDF, Word (DOC/DOCX), Excel (XLS/XLSX), atau Gambar (JPG/JPEG/PNG).";
+            $messages["files.{$type}.max"] = ($type === 'data_klien')
+                ? "Ukuran dokumen {$label} tidak boleh melebihi 100MB."
+                : "Ukuran dokumen {$label} tidak boleh melebihi 50MB.";
         }
 
         // Validasi form (Client id dan audit date hanya bisa diubah admin)
@@ -474,7 +538,7 @@ class AuditReportController extends Controller
         if (Auth::user()->role === 'admin') {
             $validationRules['client_id'] = 'required|exists:clients,id';
         }
-        $request->validate(array_merge($validationRules, $fileRules));
+        $request->validate(array_merge($validationRules, $fileRules), $messages);
 
         // Update laporan
         $updateData = ['audit_date' => $request->audit_date];
@@ -553,6 +617,38 @@ class AuditReportController extends Controller
                     ]
                 );
             }
+        }
+
+        // Perbarui status laporan secara otomatis berdasarkan status review berkas (kembali ke 'review' jika file revisi diperbarui)
+        $auditReport->updateStatusFromReviews();
+
+        // Kirim notifikasi pembaruan laporan ke Pimpinan & pihak terkait
+        try {
+            $recipients = collect();
+            $pimpinans = \App\Models\User::where('role', 'pimpinan')->get();
+            $recipients = $recipients->merge($pimpinans);
+
+            if ($auditReport->creator) {
+                $recipients->push($auditReport->creator);
+            }
+            if ($auditReport->client && $auditReport->client->auditors) {
+                $recipients = $recipients->merge($auditReport->client->auditors);
+            }
+            $recipients = $recipients->unique('id');
+
+            foreach ($recipients as $recipient) {
+                if ($recipient->id !== Auth::id()) {
+                    $recipient->notify(new \App\Notifications\AuditReportReviewedNotification(
+                        $auditReport,
+                        'updated',
+                        null,
+                        null,
+                        Auth::user()->name
+                    ));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi update laporan audit: ' . $e->getMessage());
         }
 
         return redirect()
@@ -655,6 +751,32 @@ class AuditReportController extends Controller
             'approved_at' => $request->status === 'approved' ? now() : null,
         ]);
 
+        // Kirim notifikasi ke auditor tim dan admin pembuat laporan
+        try {
+            $recipients = collect();
+            if ($auditReport->creator) {
+                $recipients->push($auditReport->creator);
+            }
+            if ($auditReport->client && $auditReport->client->auditors) {
+                $recipients = $recipients->merge($auditReport->client->auditors);
+            }
+            $recipients = $recipients->unique('id');
+
+            foreach ($recipients as $recipient) {
+                if ($recipient->id !== Auth::id()) {
+                    $recipient->notify(new \App\Notifications\AuditReportReviewedNotification(
+                        $auditReport,
+                        $request->status,
+                        $file,
+                        $request->status === 'revision' ? $request->note : null,
+                        Auth::user()->name
+                    ));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi review file: ' . $e->getMessage());
+        }
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
@@ -686,6 +808,22 @@ class AuditReportController extends Controller
 
         // Ubah status laporan ke review
         $auditReport->updateStatusFromReviews(true);
+
+        // Kirim notifikasi ke pimpinan
+        try {
+            $pimpinans = \App\Models\User::where('role', 'pimpinan')->get();
+            foreach ($pimpinans as $pimpinan) {
+                $pimpinan->notify(new \App\Notifications\AuditReportReviewedNotification(
+                    $auditReport,
+                    'resubmitted',
+                    null,
+                    null,
+                    Auth::user()->name
+                ));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim notifikasi resubmit: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Laporan berhasil dikirim ulang untuk direview.');
     }

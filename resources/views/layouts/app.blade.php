@@ -47,7 +47,7 @@
         @include('layouts.sidebar')
 
         <!-- Main Content -->
-        <div class="flex-1 min-h-screen transition-all duration-300"
+        <div class="flex-1 min-w-0 min-h-screen transition-all duration-300"
             :class="sidebarOpen ? 'md:ml-64' : 'md:ml-20'">
 
             <!-- Header -->
@@ -80,6 +80,86 @@
                             <div id="realtime-clock" class="text-xs font-semibold text-gray-600 dark:text-gray-300"></div>
                             <div id="realtime-date" class="text-[10px] text-gray-500 dark:text-gray-400"></div>
                         </div>
+
+                        <!-- Notification Bell Dropdown -->
+                        <div x-data="{
+                            open: false,
+                            unreadCount: 0,
+                            notifications: [],
+                            fetchNotifications() {
+                                fetch('{{ route('notifications.unread_data') }}')
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        this.unreadCount = data.unread_count;
+                                        this.notifications = data.recent;
+                                    })
+                                    .catch(err => console.error(err));
+                            }
+                        }" x-init="fetchNotifications(); setInterval(() => fetchNotifications(), 30000)" class="relative">
+                            <button @click="open = !open" type="button" class="relative text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none rounded-lg text-sm p-2.5 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span x-show="unreadCount > 0" x-text="unreadCount > 99 ? '99+' : unreadCount" class="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full animate-pulse"></span>
+                            </button>
+
+                            <!-- Dropdown menu -->
+                            <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 z-50 overflow-hidden" style="display: none;">
+                                <div class="p-3 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+                                    <span class="font-semibold text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                        📢 Notifikasi
+                                        <span x-show="unreadCount > 0" class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold px-2 py-0.5 rounded-full" x-text="unreadCount + ' Baru'"></span>
+                                    </span>
+                                    <template x-if="unreadCount > 0">
+                                        <form action="{{ route('notifications.read_all') }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Tandai Dibaca</button>
+                                        </form>
+                                    </template>
+                                </div>
+
+                                <div class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-slate-700">
+                                    <template x-if="notifications.length === 0">
+                                        <div class="p-6 text-center text-xs text-gray-500 dark:text-gray-400">
+                                            Tidak ada notifikasi.
+                                        </div>
+                                    </template>
+
+                                    <template x-for="item in notifications" :key="item.id">
+                                        <a :href="item.url" class="block p-3 hover:bg-gray-50 dark:hover:bg-slate-700/40 transition" :class="item.read ? 'opacity-70' : 'bg-blue-50/40 dark:bg-slate-700/20'">
+                                            <div class="flex items-start gap-3">
+                                                <div class="mt-0.5 shrink-0">
+                                                    <template x-if="item.icon === 'check-circle' || item.icon === 'check-badge'">
+                                                        <span class="p-1.5 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-lg inline-block">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                        </span>
+                                                    </template>
+                                                    <template x-if="item.icon === 'exclamation-circle' || item.icon === 'exclamation-triangle'">
+                                                        <span class="p-1.5 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg inline-block">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                        </span>
+                                                    </template>
+                                                    <template x-if="item.icon !== 'check-circle' && item.icon !== 'check-badge' && item.icon !== 'exclamation-circle' && item.icon !== 'exclamation-triangle'">
+                                                        <span class="p-1.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg inline-block">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate" x-text="item.title"></p>
+                                                    <p class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mt-0.5" x-text="item.message"></p>
+                                                    <span class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 block" x-text="item.created_at"></span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </template>
+                                </div>
+
+                                <div class="p-2 bg-gray-50 dark:bg-slate-700/50 border-t border-gray-200 dark:border-slate-700 text-center">
+                                    <a href="{{ route('notifications.index') }}" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">Lihat Semua Notifikasi &rarr;</a>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Dark Mode Toggle Button -->
                         <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-slate-700 rounded-lg text-sm p-2.5 transition-colors">
@@ -107,7 +187,7 @@
         Swal.fire({
             icon: 'success',
             title: 'Berhasil!',
-            text: "{{ session('success') }}",
+            text: {!! json_encode(session('success')) !!},
             showConfirmButton: false,
             timer: 2000,
             timerProgressBar: true
@@ -120,10 +200,9 @@
         Swal.fire({
             icon: 'error',
             title: 'Gagal!',
-            text: "{{ session('error') }}",
-            showConfirmButton: false,
-            timer: 2500,
-            timerProgressBar: true
+            text: {!! json_encode(session('error')) !!},
+            showConfirmButton: true,
+            confirmButtonColor: '#3085d6'
         });
     </script>
     @endif
@@ -133,10 +212,9 @@
         Swal.fire({
             icon: 'error',
             title: 'Ada Kesalahan!',
-            text: "{{ $errors->first() }}",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true
+            html: {!! json_encode('<ul class="text-left list-disc list-inside">' . implode('', array_map(fn($err) => '<li>' . e($err) . '</li>', $errors->all())) . '</ul>') !!},
+            showConfirmButton: true,
+            confirmButtonColor: '#3085d6'
         });
     </script>
     @endif

@@ -116,7 +116,7 @@
 
         <div class="mt-6">
             <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-650 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-2xl transition duration-300 shadow-lg shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
-                Masuk ke Aplikasi
+                Login
             </button>
         </div>
     </form>

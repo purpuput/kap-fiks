@@ -24,6 +24,7 @@ test('users can authenticate using the login screen', function () {
 
     assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertSessionHas('success', 'Login berhasil! Selamat datang kembali.');
 });
 
 test('users can not authenticate with invalid password', function () {

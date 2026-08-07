@@ -32,21 +32,51 @@
 
                 {{-- STATUS BADGE --}}
                 @if($auditReport->status === 'review')
-                <span id="report-status-badge" class="bg-amber-50 text-amber-700 px-3.5 py-1.5 rounded-full text-xs font-bold border border-amber-250/20 flex items-center gap-1.5 shadow-sm">
-                    <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
-                    Review
+                <span id="report-status-badge" class="bg-amber-50 text-amber-800 px-3.5 py-1.5 rounded-full text-xs font-bold border border-amber-250/30 flex items-center gap-1.5 shadow-sm" title="Sedang diperiksa auditor/reviewer">
+                    <span>Dalam Review</span>
+                    <span class="text-[10px] text-amber-600 font-normal border-l border-amber-200 pl-1.5">Sedang diperiksa</span>
                 </span>
                 @elseif($auditReport->status === 'disetujui')
-                <span id="report-status-badge" class="bg-emerald-50 text-emerald-700 px-3.5 py-1.5 rounded-full text-xs font-bold border border-emerald-250/20 flex items-center gap-1.5 shadow-sm">
-                    <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    Disetujui
+                <span id="report-status-badge" class="bg-emerald-50 text-emerald-800 px-3.5 py-1.5 rounded-full text-xs font-bold border border-emerald-250/30 flex items-center gap-1.5 shadow-sm" title="Sudah lolos review dan final">
+                    <span>Disetujui</span>
+                    <span class="text-[10px] text-emerald-600 font-normal border-l border-emerald-200 pl-1.5">Lolos review & final</span>
                 </span>
                 @elseif($auditReport->status === 'revisi')
-                <span id="report-status-badge" class="bg-rose-50 text-rose-700 px-3.5 py-1.5 rounded-full text-xs font-bold border border-rose-250/20 flex items-center gap-1.5 shadow-sm">
-                    <span class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
-                    Revisi
+                <span id="report-status-badge" class="bg-rose-50 text-rose-800 px-3.5 py-1.5 rounded-full text-xs font-bold border border-rose-250/30 flex items-center gap-1.5 shadow-sm" title="Ada temuan/catatan yang harus diperbaiki">
+                    <span>Perlu Revisi</span>
+                    <span class="text-[10px] text-rose-600 font-normal border-l border-rose-200 pl-1.5">Ada temuan perbaikan</span>
+                </span>
+                @else
+                <span id="report-status-badge" class="bg-slate-100 text-slate-700 px-3.5 py-1.5 rounded-full text-xs font-bold border border-slate-200 flex items-center gap-1.5 shadow-sm" title="Belum diajukan">
+                    <span>Draft</span>
+                    <span class="text-[10px] text-slate-500 font-normal border-l border-slate-300 pl-1.5">Belum diajukan</span>
                 </span>
                 @endif
+            </div>
+
+            {{-- KETERANGAN STATUS LAPORAN GUIDE --}}
+            <div class="bg-gradient-to-r from-slate-50 to-blue-50/40 border border-slate-200/80 rounded-2xl p-4 shadow-sm mb-6">
+                <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                    Panduan Status Laporan Audit
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div class="bg-white/80 p-2.5 rounded-xl border border-slate-100 flex flex-col gap-0.5">
+                        <span class="font-bold text-slate-700">Draft</span>
+                        <span class="text-[11px] text-slate-500">Belum diajukan</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-xl border border-slate-100 flex flex-col gap-0.5">
+                        <span class="font-bold text-amber-700">Dalam Review</span>
+                        <span class="text-[11px] text-slate-500">Sedang diperiksa auditor/reviewer</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-xl border border-slate-100 flex flex-col gap-0.5">
+                        <span class="font-bold text-rose-700">Perlu Revisi</span>
+                        <span class="text-[11px] text-slate-500">Ada temuan/catatan perbaikan</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-xl border border-slate-100 flex flex-col gap-0.5">
+                        <span class="font-bold text-emerald-700">Disetujui</span>
+                        <span class="text-[11px] text-slate-500">Sudah lolos review dan final</span>
+                    </div>
+                </div>
             </div>
 
             @php
@@ -650,14 +680,17 @@
                     const reportStatusBadge = document.getElementById('report-status-badge');
                     if (reportStatusBadge) {
                         if (res.report_status === 'review') {
-                            reportStatusBadge.className = 'bg-amber-50 text-amber-700 px-3.5 py-1.5 rounded-full text-xs font-bold border border-amber-250/20 flex items-center gap-1.5 shadow-sm';
-                            reportStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span> Review';
+                            reportStatusBadge.className = 'bg-amber-50 text-amber-800 px-3.5 py-1.5 rounded-full text-xs font-bold border border-amber-250/30 flex items-center gap-1.5 shadow-sm';
+                            reportStatusBadge.title = 'Sedang diperiksa auditor/reviewer';
+                            reportStatusBadge.innerHTML = '<span>Dalam Review</span> <span class="text-[10px] text-amber-600 font-normal border-l border-amber-200 pl-1.5">Sedang diperiksa</span>';
                         } else if (res.report_status === 'disetujui') {
-                            reportStatusBadge.className = 'bg-emerald-50 text-emerald-700 px-3.5 py-1.5 rounded-full text-xs font-bold border border-emerald-250/20 flex items-center gap-1.5 shadow-sm';
-                            reportStatusBadge.innerHTML = '<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Disetujui';
+                            reportStatusBadge.className = 'bg-emerald-50 text-emerald-800 px-3.5 py-1.5 rounded-full text-xs font-bold border border-emerald-250/30 flex items-center gap-1.5 shadow-sm';
+                            reportStatusBadge.title = 'Sudah lolos review dan final';
+                            reportStatusBadge.innerHTML = '<span>Disetujui</span> <span class="text-[10px] text-emerald-600 font-normal border-l border-emerald-200 pl-1.5">Lolos review & final</span>';
                         } else if (res.report_status === 'revisi') {
-                            reportStatusBadge.className = 'bg-rose-50 text-rose-700 px-3.5 py-1.5 rounded-full text-xs font-bold border border-rose-250/20 flex items-center gap-1.5 shadow-sm';
-                            reportStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span> Revisi';
+                            reportStatusBadge.className = 'bg-rose-50 text-rose-800 px-3.5 py-1.5 rounded-full text-xs font-bold border border-rose-250/30 flex items-center gap-1.5 shadow-sm';
+                            reportStatusBadge.title = 'Ada temuan/catatan yang harus diperbaiki';
+                            reportStatusBadge.innerHTML = '<span>Perlu Revisi</span> <span class="text-[10px] text-rose-600 font-normal border-l border-rose-200 pl-1.5">Ada temuan perbaikan</span>';
                         }
                     }
                     
